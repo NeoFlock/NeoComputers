@@ -5,7 +5,7 @@
   "name": "${name}",
   "description": "",
   "authors": [
-    "AuthorExample"
+    "NeoFlock Team"
   ],
   "contact": {
   },
@@ -14,18 +14,19 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.example.template.platforms.fabric.TempLateFabric"
+      "org.neoflock.neocomputers.platforms.fabric.NeoComputersFabric"
     ],
     "modmenu": [
-      "com.example.template.platforms.fabric.ModMenuIntegration"
+      "org.neoflock.neocomputers.platforms.fabric.ModMenuIntegration"
     ]
   },
   "mixins": [
-    "template-common.mixins.json",
-    "template-fabric.mixins.json"
+    "neocomputers-common.mixins.json",
+    "neocomputers-fabric.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.15",
-    "minecraft": "${minecraft}"
+    "minecraft": "${minecraft}",
+    "fabric-language-kotlin": ">=1.13.10+kotlin.2.3.20"
   }
 }

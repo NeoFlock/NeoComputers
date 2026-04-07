@@ -1,4 +1,4 @@
-package com.example.template;
+package org.neoflock.neocomputers;
 
 
 import net.minecraft.client.gui.GuiGraphics;

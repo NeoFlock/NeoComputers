@@ -1,17 +1,18 @@
 //? if forge {
-/*package com.example.template.platforms.forge;
+/*package org.neoflock.neocomputers.neocomputers.platforms.forge;
 
-import com.example.template.ConfigScreen;
-import com.example.template.TempLateInit;
-import com.example.template.ModPlatform;
+import org.neoflock.neocomputers.ConfigScreen;
+import org.neoflock.neocomputers.NeoComputersInit;
+import org.neoflock.neocomputers.ModPlatform;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
+import org.neoflock.neocomputers.NeoComputers;
 
-@Mod("template")
-public class TempLateForge {
-	public TempLateForge() {
-		TempLateInit.entrypoint(new ForgePlatform());
+@Mod("neocomputers")
+public class NeoComputersForge {
+	public NeoComputersForge() {
+		NeoComputers.INSTANCE.entrypoint(new ForgePlatform());
         MinecraftForge.registerConfigScreen(ConfigScreen::createConfigScreen);
 	}
 	public static class ForgePlatform implements ModPlatform {

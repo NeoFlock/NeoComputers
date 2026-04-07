@@ -1,15 +1,15 @@
 //? if fabric {
-/*package com.example.template.platforms.fabric;
+package org.neoflock.neocomputers.platforms.fabric;
 
-import com.example.template.ModPlatform;
+import org.neoflock.neocomputers.ModPlatform;
 import net.fabricmc.api.ModInitializer;
-import com.example.template.TempLateInit;
+import org.neoflock.neocomputers.NeoComputers;
 import net.fabricmc.loader.api.FabricLoader;
 
-public class TempLateFabric implements ModInitializer {
+public class NeoComputersFabric implements ModInitializer {
 	@Override
 	public void onInitialize() {
-		TempLateInit.entrypoint(new FabricPlatform());
+		NeoComputers.INSTANCE.entrypoint(new FabricPlatform());
 	}
 	public static class FabricPlatform implements ModPlatform{
 
@@ -24,4 +24,4 @@ public class TempLateFabric implements ModInitializer {
 		}
 	}
 }
-*///?}
+//?}

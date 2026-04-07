@@ -1,6 +1,6 @@
-package com.example.template.mixin;
+package org.neoflock.neocomputers.mixin;
 
-import com.example.template.TempLateInit;
+import org.neoflock.neocomputers.NeoComputers;
 import net.minecraft.client.gui.screens.TitleScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,7 +12,7 @@ public class ExampleMixin {
 
     @Inject(method = "init",at=@At("HEAD"))
     void init(CallbackInfo ci){
-        TempLateInit.LOGGER.info("Stonecutter example mixin init in %s".formatted(TempLateInit.PLATFORM.getModloader()));
+        NeoComputers.INSTANCE.getLOGGER().info("Stonecutter example mixin init in %s".formatted(NeoComputers.INSTANCE.getPLATFORM().getModloader()));
     }
 
 }

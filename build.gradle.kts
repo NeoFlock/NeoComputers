@@ -1,6 +1,7 @@
 import java.util.*
 
 plugins {
+    kotlin("jvm") version "2.3.20"
     id("dev.architectury.loom")
     id("architectury-plugin")
     id("me.modmuss50.mod-publish-plugin")
@@ -27,26 +28,33 @@ repositories {
     maven("https://maven.terraformersmc.com/")
     //placeholder api (modmenu depencency)
     maven("https://maven.nucleoid.xyz/")
+    maven {
+        name = "Kotlin for Forge"
+        setUrl("https://thedarkcolour.github.io/KotlinForForge/")
+    }
 }
 dependencies {
     minecraft("com.mojang:minecraft:$minecraft")
     mappings(loom.officialMojangMappings())
 
+    modApi("dev.architectury:architectury:${mod.dep("architectury_version")}")
     if (loader == "fabric") {
         modImplementation("net.fabricmc:fabric-loader:${mod.dep("fabric_loader")}")
 //        mappings("net.fabricmc:yarn:$minecraft+build.${mod.dep("yarn_build")}:v2")
         modImplementation("com.terraformersmc:modmenu:${mod.dep("modmenu_version")}")
-
         //some features (like automatic resource loading from non vanilla namespaces) work only with fabric API installed
         //for example translations from assets/modid/lang/en_us.json won't be working, same stuff with textures
         //but we keep runtime only to not accidentally depend on fabric's api, because it doesn't exist in neo/forge
         modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${mod.dep("fabric_version")}")
-
+        modImplementation("net.fabricmc:fabric-language-kotlin:1.13.10+kotlin.2.3.20")
+        modApi("dev.architectury:architectury-fabric:${mod.dep("architectury_version")}")
     }
     if (loader == "forge") {
         "forge"("net.minecraftforge:forge:${minecraft}-${mod.dep("forge_loader")}")
+        //implementation("thedarkcolour:kotlinforforge:1.16.0")
 //        mappings("net.fabricmc:yarn:$minecraft+build.${mod.dep("yarn_build")}:v2")
 
+        modApi("dev.architectury:architectury-forge:${mod.dep("architectury_version")}")
         "io.github.llamalad7:mixinextras-forge:${mod.dep("mixin_extras")}".let {
             implementation(it)
             include(it)
@@ -61,11 +69,17 @@ dependencies {
 //            }
 //        })
 
+        modApi("dev.architectury:architectury-forge:${mod.dep("architectury_version")}")
+        implementation("thedarkcolour:kotlinforforge-neoforge:6.0.0")
     }
 }
-
+buildscript {
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0")
+    }
+}
 loom {
-    accessWidenerPath = rootProject.file("src/main/resources/template.accesswidener")
+    accessWidenerPath = rootProject.file("src/main/resources/neocomputers.accesswidener")
 
     decompilers {
         get("vineflower").apply { // Adds names to lambdas - useful for mixins
@@ -74,12 +88,11 @@ loom {
     }
     if (loader == "forge") {
         forge.mixinConfigs(
-            "template-common.mixins.json",
-            "template-forge.mixins.json",
+            "neocomputers-common.mixins.json",
+            "neocomputers-forge.mixins.json",
         )
     }
 }
-
 
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
@@ -108,7 +121,11 @@ publishMods {
         targets.forEach(minecraftVersions::add)
         if (loader == "fabric") {
             requires("fabric-api")
+            requires("fabric-language-kotlin")
             optional("modmenu")
+        }
+        if (loader == "neoforge") {
+            requires("kotlinforforge-neoforge")
         }
     }
 
@@ -118,7 +135,11 @@ publishMods {
         targets.forEach(minecraftVersions::add)
         if (loader == "fabric") {
             requires("fabric-api")
+            requires("fabric-language-kotlin")
             optional("modmenu")
+        }
+        if (loader == "neoforge") {
+            requires("kotlinforforge-neoforge")
         }
     }
 }
@@ -128,6 +149,11 @@ java {
     val java = if (stonecutter.eval(minecraft, ">=1.20.5")) JavaVersion.VERSION_21 else JavaVersion.VERSION_17
     targetCompatibility = java
     sourceCompatibility = java
+}
+
+kotlin {
+    val java = if (stonecutter.eval(minecraft, ">=1.20.5")) 21 else 17
+    jvmToolchain(java)
 }
 
 val shadowBundle: Configuration by configurations.creating {

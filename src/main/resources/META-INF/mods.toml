@@ -1,19 +1,19 @@
 modLoader = "javafml"
 loaderVersion = "*"
 license = "LGPLv3"
-issueTrackerURL="https://AuthorExample/TempLate/issues"
+issueTrackerURL="https://github.com/NeoFlock/NeoComputers/issues"
 
 [[mods]]
-modId = "template"
+modId = "neocomputers"
 version = "${version}"
 displayName = "${name}"
-authors = "AuthorExample"
+authors = "NeoFlock Team"
 description = ""
-logoFile = "assets/template/icon.png"
+logoFile = "assets/neocomputers/icon.png"
 logoBlur = false
 
 [[mixins]]
-config = "template-common.mixins.json"
+config = "neocomputers-common.mixins.json"
 
 [[mixins]]
-config = "template-neoforge.mixins.json"
+config = "neocomputers-neoforge.mixins.json"

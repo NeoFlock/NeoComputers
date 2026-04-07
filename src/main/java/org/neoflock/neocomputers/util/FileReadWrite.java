@@ -1,4 +1,4 @@
-package com.example.template.util;
+package org.neoflock.neocomputers.util;
 
 import java.io.File;
 import java.io.FileOutputStream;
