@@ -1,5 +1,5 @@
 //? if fabric {
-package org.neoflock.neocomputers.platforms.fabric;
+/*package org.neoflock.neocomputers.platforms.fabric;
 
 import org.neoflock.neocomputers.ModPlatform;
 import net.fabricmc.api.ModInitializer;
@@ -24,4 +24,4 @@ public class NeoComputersFabric implements ModInitializer {
 		}
 	}
 }
-//?}
+*///?}
