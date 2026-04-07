@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "*"
 license = "LGPLv3"
-issueTrackerURL="https://github.com/NeoFlock/NeoComputers/issues"
+issueTrackerURL="https://gitea.codersquack.nl/NeoFlock/NeoComputers/issues"
 
 [[mods]]
 modId = "neocomputers"
