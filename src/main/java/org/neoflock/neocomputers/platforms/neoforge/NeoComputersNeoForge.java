@@ -1,8 +1,7 @@
 //? if neoforge {
-package org.neoflock.neocomputers.neocomputers.platforms.neoforge;
+package org.neoflock.neocomputers.platforms.neoforge;
 
 import org.neoflock.neocomputers.ConfigScreen;
-import org.neoflock.neocomputers.NeoComputersInit;
 import org.neoflock.neocomputers.ModPlatform;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoadingContext;
