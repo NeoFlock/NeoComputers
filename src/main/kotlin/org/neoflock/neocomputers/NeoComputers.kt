@@ -48,11 +48,11 @@ object NeoComputers {
         Networking.addNodes(logA, logB, batteryA, batteryB)
 
         Networking.emitMessage(logA, Networking.ClassicPacket(logA, "a", "b", 0, listOf(), 0))
-        LOGGER.info("A: ${batteryA.getEnergy()} / ${batteryA.maxEnergyCapacity()}, B: ${batteryB.getEnergy()} ${batteryB.maxEnergyCapacity()}")
+        LOGGER.info("A: ${batteryA.getEnergy()} / ${batteryA.maxEnergyCapacity()}, B: ${batteryB.getEnergy()} / ${batteryB.maxEnergyCapacity()}")
         Networking.tickAllNodes();
-        LOGGER.info("A: ${batteryA.getEnergy()} / ${batteryA.maxEnergyCapacity()}, B: ${batteryB.getEnergy()} ${batteryB.maxEnergyCapacity()}")
+        LOGGER.info("A: ${batteryA.getEnergy()} / ${batteryA.maxEnergyCapacity()}, B: ${batteryB.getEnergy()} / ${batteryB.maxEnergyCapacity()}")
         LOGGER.info("Had enough: ${if(logA.consumeEnergy(600.0)) 'Y' else 'N'}")
-        LOGGER.info("A: ${batteryA.getEnergy()} / ${batteryA.maxEnergyCapacity()}, B: ${batteryB.getEnergy()} ${batteryB.maxEnergyCapacity()}")
+        LOGGER.info("A: ${batteryA.getEnergy()} / ${batteryA.maxEnergyCapacity()}, B: ${batteryB.getEnergy()} / ${batteryB.maxEnergyCapacity()}")
 
         Networking.removeNodes(logA, logB, batteryA, batteryB)
         
