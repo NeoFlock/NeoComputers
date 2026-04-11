@@ -27,6 +27,7 @@ object Blocks {
     val BLOCKS: DeferredRegister<Block> = DeferredRegister.create(NeoComputers.MODID, Registries.BLOCK)
     val TEST_BLOCK: RegistrySupplier<Block> = BaseBlock.register("test") { BaseBlock("test") }
     val SCREEN_BLOCK: RegistrySupplier<Block> = BaseBlock.register("screen") { ScreenBlock() }
+    val CAPACITOR_BLOCK: RegistrySupplier<Block> = BaseBlock.register("capacitor") { CapacitorBlock() }
 
     fun registerBlockItems() {
         BLOCKS.forEach(Consumer { sup: RegistrySupplier<Block> ->

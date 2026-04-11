@@ -3,9 +3,11 @@ package org.neoflock.neocomputers
 import com.google.common.base.Suppliers
 import dev.architectury.event.events.client.ClientLifecycleEvent
 import dev.architectury.event.events.common.LifecycleEvent
+import dev.architectury.event.events.common.TickEvent
 import dev.architectury.registry.client.gui.MenuScreenRegistry
 import dev.architectury.registry.registries.RegistrarManager
 import net.minecraft.resources.Identifier
+import net.minecraft.util.profiling.jfr.event.ServerTickTimeEvent
 import org.neoflock.neocomputers.block.Blocks
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.gui.buffer.BufferRenderer
@@ -39,7 +41,6 @@ object NeoComputers {
         ClientLifecycleEvent.CLIENT_SETUP.register {
             MenuScreenRegistry.registerScreenFactory(Menus.SCREEN_MENU.get(), ::ScreenScreen)
         }
-
         ClientLifecycleEvent.CLIENT_STARTED.register {
             FontProvider.load(Identifier.fromNamespaceAndPath("neocomputers", "font/unscii.hex"))
 
@@ -52,6 +53,10 @@ object NeoComputers {
             bufferRenderer.dump()
             bufferRenderer.clean()
 
+        }
+
+        TickEvent.SERVER_POST.register {
+            Networking.tickAllNodes()
         }
 
         val logA = Networking.LoggerNode("LogA")
