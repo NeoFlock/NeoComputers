@@ -146,6 +146,7 @@ object Networking {
         }
 
         fun directConnectTo(other: Node) {
+            if(other == this) return;
             if(other in connections) return;
             connections.add(other);
             this.onConnect(other);

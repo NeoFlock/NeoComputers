@@ -40,8 +40,7 @@ class CapacitorEntity(pos: BlockPos, state: BlockState) : NodeEntity(BlockEntiti
 class CapacitorBlock : BaseBlock("capacitor"), EntityBlock {
     override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity? {
         val cap = CapacitorEntity(blockPos, blockState)
-        cap.syncReachable()
-        Networking.addNode(cap.getNode())
+        cap.initNetworking()
         return cap
     }
 

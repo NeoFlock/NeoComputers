@@ -12,6 +12,15 @@ open class NodeEntity(blockEntityType: BlockEntityType<*>, blockPos: BlockPos, b
     // stuff
     open fun getNode(): Networking.Node? = null
 
+    open fun getSubnodes(): List<Networking.Node> = listOf()
+
+    fun initNetworking() {
+        val node = getNode()
+        if(node != null) Networking.addNode(node)
+        getSubnodes().forEach { Networking.addNode(it) }
+        syncReachable()
+    }
+
     open fun getDirectConnections(): List<NodeEntity> {
         if(level == null) return listOf();
         val offs = listOf(
@@ -80,6 +89,7 @@ open class NodeEntity(blockEntityType: BlockEntityType<*>, blockPos: BlockPos, b
         super.setRemoved()
         syncReachable()
         val n = getNode()
-        if(n != null) Networking.removeNode(n);
+        if(n != null) Networking.removeNode(n)
+        getSubnodes().forEach { Networking.removeNode(it) }
     }
 }

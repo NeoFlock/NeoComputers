@@ -26,7 +26,7 @@ class ScreenBlock() : BaseBlock("screen"), EntityBlock {
 
     override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity? {
         val scr = ScreenEntity(blockPos, blockState)
-        Networking.addNode(scr.getNode())
+        scr.initNetworking()
         return scr
     }
 
