@@ -36,45 +36,53 @@ object Networking {
         val reachability = Visibility.NETWORK
         var reachableCache: Set<Node>? = null
 
+        open fun isProducer(): Boolean = false
+        open fun isConsumer(): Boolean = false
         open fun getEnergy(): Double = 0.0
         open fun setEnergy(energy: Double) {}
 
         open fun maxEnergyCapacity(): Double = 0.0
-        open fun getChargerNodes(): Set<Node> = getReachable().plus(this)
+        fun getChargerNodes(): Set<Node> = getReachable().filter { it.isProducer() }.toSet()
         fun totalEnergyInConnections(): Double = getChargerNodes().fold(0.0) { acc, node -> acc + node.getEnergy() }
         fun maxEnergyInConnections(): Double = getChargerNodes().fold(0.0) { acc, node -> acc + node.maxEnergyCapacity() }
 
-        // the algorithm for balancing energy levels
-        fun balanceEnergyLevels() {
-            // basic algorithm: ensure equal percentages
-            val cap = this.maxEnergyInConnections();
-            val total = this.totalEnergyInConnections();
-
-            val percentage = total / cap;
-
-            getChargerNodes().forEach {
-                it.setEnergy(percentage * it.maxEnergyCapacity());
-            }
+        fun consumeFromNodeAsMuchAsPossible(energy: Double): Double {
+            val consumed = min(energy, getEnergy())
+            setEnergy(getEnergy() - consumed)
+            return consumed
         }
 
         // attempts to consume
         fun consumeEnergy(energy: Double): Boolean {
             // consumes energy, returns false if not enough
-            val total = this.totalEnergyInConnections()
+            val total = totalEnergyInConnections() + getEnergy()
             if(energy > total) return false
 
-            val percentageConsumed = energy / total
+            var remaining = energy
+            remaining -= consumeFromNodeAsMuchAsPossible(remaining)
+            if(remaining <= 0.0) return true
 
-            getChargerNodes().forEach {
-                it.setEnergy(it.getEnergy() * (1.0 - percentageConsumed));
+            for (charger in getChargerNodes()) {
+                if(remaining <= 0.0) break
+                remaining -= charger.consumeFromNodeAsMuchAsPossible(remaining)
             }
 
             return true
         }
 
+        fun tryToChargeFully() {
+            var remaining = maxEnergyCapacity() - getEnergy()
+            if(remaining <= 0.0) return
+            for (charger in getChargerNodes()) {
+                if(remaining <= 0.0) break
+                val amount = charger.consumeFromNodeAsMuchAsPossible(remaining)
+                setEnergy(getEnergy() + amount)
+                remaining -= amount
+            }
+        }
+
         open fun tick() {
-            // rationale: the other ones can figure it out
-            if(this.maxEnergyCapacity() > 0) this.balanceEnergyLevels()
+            if(isConsumer()) tryToChargeFully()
         }
         // processes a received message
         open fun received(message: Message) {}
@@ -132,7 +140,7 @@ object Networking {
             other.directConnectTo(this);
         }
 
-        fun disconnectTo(other: Node) {
+        fun disconnectFrom(other: Node) {
             this.directDisconnectFrom(other);
             other.directDisconnectFrom(this);
         }
@@ -158,6 +166,7 @@ object Networking {
     }
 
     class DebugBatteryNode(var power: Double, val capacity: Double): Node() {
+        override fun isProducer() = true
         override fun maxEnergyCapacity() = capacity
         override fun getEnergy() = power
         override fun setEnergy(energy: Double) { power = energy }
@@ -229,6 +238,10 @@ object Networking {
         allNodes.remove(node);
         if(node is WirelessEndpoint) {
             wirelessNodes.remove(node);
+        }
+        // toList() in order to copy it
+        node.connections.toList().forEach {
+            node.disconnectFrom(it)
         }
         allNodes.forEach { it.onNodeRemoved(node) }
     }
