@@ -1,11 +1,14 @@
 package org.neoflock.neocomputers
 
 import com.google.common.base.Suppliers
+import dev.architectury.event.events.client.ClientLifecycleEvent
 import dev.architectury.event.events.common.LifecycleEvent
+import dev.architectury.registry.client.gui.MenuScreenRegistry
 import dev.architectury.registry.registries.RegistrarManager
 import org.neoflock.neocomputers.block.Blocks
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.gui.menu.Menus
+import org.neoflock.neocomputers.gui.screen.ScreenScreen
 import org.neoflock.neocomputers.item.Items
 import org.neoflock.neocomputers.item.Tabs
 import org.neoflock.neocomputers.network.Networking
@@ -26,6 +29,13 @@ object NeoComputers {
         Blocks.BLOCKS.register();
         Blocks.registerBlockItems();
         Items.ITEMS.register();
+        BlockEntities.BLOCKENTITIES.register()
+        Menus.MENUS.register()
+        Tabs.TABS.register();
+
+        ClientLifecycleEvent.CLIENT_SETUP.register {
+            MenuScreenRegistry.registerScreenFactory(Menus.SCREEN_MENU.get(), ::ScreenScreen)
+        }
 
         val logA = Networking.LoggerNode("LogA")
         val logB = Networking.LoggerNode("LogB")
@@ -45,11 +55,7 @@ object NeoComputers {
         LOGGER.info("A: ${batteryA.getEnergy()} / ${batteryA.maxEnergyCapacity()}, B: ${batteryB.getEnergy()} ${batteryB.maxEnergyCapacity()}")
 
         Networking.removeNodes(logA, logB, batteryA, batteryB)
-
-        BlockEntities.BLOCKENTITIES.register()
-        Menus.MENUS.register()
         
-        Tabs.TABS.register();
         LOGGER.info("Registered!")
         //LOGGER.info("Started mod in %s loader".formatted(NeoComputersInit.PLATFORM.getModloader()))
         //LOGGER.info("Kotlin: %s".formatted(NeoComputers.hello()))
