@@ -5,13 +5,16 @@ import dev.architectury.event.events.client.ClientLifecycleEvent
 import dev.architectury.event.events.common.LifecycleEvent
 import dev.architectury.registry.client.gui.MenuScreenRegistry
 import dev.architectury.registry.registries.RegistrarManager
+import net.minecraft.resources.Identifier
 import org.neoflock.neocomputers.block.Blocks
 import org.neoflock.neocomputers.entity.BlockEntities
+import org.neoflock.neocomputers.gui.buffer.BufferRenderer
 import org.neoflock.neocomputers.gui.menu.Menus
 import org.neoflock.neocomputers.gui.screen.ScreenScreen
 import org.neoflock.neocomputers.item.Items
 import org.neoflock.neocomputers.item.Tabs
 import org.neoflock.neocomputers.network.Networking
+import org.neoflock.neocomputers.utils.FontProvider
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.function.Supplier
@@ -35,6 +38,20 @@ object NeoComputers {
 
         ClientLifecycleEvent.CLIENT_SETUP.register {
             MenuScreenRegistry.registerScreenFactory(Menus.SCREEN_MENU.get(), ::ScreenScreen)
+        }
+
+        ClientLifecycleEvent.CLIENT_STARTED.register {
+            FontProvider.load(Identifier.fromNamespaceAndPath("neocomputers", "font/unscii.hex"))
+
+            var buffer: ArrayList<BufferRenderer.GPUChar> = arrayListOf(BufferRenderer.GPUChar('h'), BufferRenderer.GPUChar('a'), BufferRenderer.GPUChar('i'))
+            for (i in 0..<(400-3)) {
+                buffer.add(BufferRenderer.GPUChar(' '))
+            }
+            var bufferRenderer = BufferRenderer(20, 20, Identifier.fromNamespaceAndPath(MODID, "screen/test"), buffer)
+            bufferRenderer.drawBuffer()
+            bufferRenderer.dump()
+            bufferRenderer.clean()
+
         }
 
         val logA = Networking.LoggerNode("LogA")
