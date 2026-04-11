@@ -25,8 +25,8 @@ class BufferRenderer(width: Int, height: Int, id: Identifier, buffer: MutableLis
     private var image: NativeImage = NativeImage(texwidth, texheight, true); // idk what the boolean is
     private var tex: DynamicTexture = DynamicTexture({id.path}, image)
 
-    fun dump() {
-        image.writeToFile(File("/home/mewhenthe/code/NeoComputers/dump.png"))
+    fun dump(path: String) {
+        image.writeToFile(File(path))
         NeoComputers.LOGGER.info("DUMPED!!!")
     }
 

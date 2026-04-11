@@ -50,7 +50,7 @@ object NeoComputers {
             }
             var bufferRenderer = BufferRenderer(20, 20, Identifier.fromNamespaceAndPath(MODID, "screen/test"), buffer)
             bufferRenderer.drawBuffer()
-            bufferRenderer.dump()
+            // bufferRenderer.dump("/home/mewhenthe/code/NeoComputers/dump.png") // NOTE: CHANGE THIS BEFORE RUNNING!!!!
             bufferRenderer.clean()
 
         }
