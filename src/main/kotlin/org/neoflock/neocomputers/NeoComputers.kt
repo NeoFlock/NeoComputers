@@ -6,6 +6,7 @@ import dev.architectury.registry.registries.RegistrarManager
 import org.neoflock.neocomputers.block.Blocks
 import org.neoflock.neocomputers.item.Items
 import org.neoflock.neocomputers.item.Tabs
+import org.neoflock.neocomputers.network.Networking
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.function.Supplier
@@ -23,6 +24,14 @@ object NeoComputers {
         Blocks.BLOCKS.register();
         Blocks.registerBlockItems();
         Items.ITEMS.register();
+
+        val logA = Networking.LoggerNode("LogA");
+        val logB = Networking.LoggerNode("LogB");
+        logA.connectTo(logB);
+        // actually register them (else UB can happen)
+        Networking.addNode(logA);
+        Networking.addNode(logB);
+        Networking.emitMessage(logA, Networking.ClassicPacket(logA, "shitfuck", "shitfuck2", 0, listOf(), 0));
         
         Tabs.TABS.register();
         LOGGER.info("Registered!")
