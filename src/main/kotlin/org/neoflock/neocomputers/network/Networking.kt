@@ -36,7 +36,46 @@ object Networking {
         val reachability = Visibility.NETWORK
         var reachableCache: Set<Node>? = null
 
-        open fun tick() {}
+        open fun getEnergy(): Double = 0.0
+        open fun setEnergy(energy: Double) {}
+
+        open fun maxEnergyCapacity(): Double = 0.0
+        open fun getChargerNodes(): Set<Node> = getReachable().plus(this)
+        fun totalEnergyInConnections(): Double = getChargerNodes().fold(0.0) { acc, node -> acc + node.getEnergy() }
+        fun maxEnergyInConnections(): Double = getChargerNodes().fold(0.0) { acc, node -> acc + node.maxEnergyCapacity() }
+
+        // the algorithm for balancing energy levels
+        fun balanceEnergyLevels() {
+            // basic algorithm: ensure equal percentages
+            val cap = this.maxEnergyInConnections();
+            val total = this.totalEnergyInConnections();
+
+            val percentage = total / cap;
+
+            getChargerNodes().forEach {
+                it.setEnergy(percentage * it.maxEnergyCapacity());
+            }
+        }
+
+        // attempts to consume
+        fun consumeEnergy(energy: Double): Boolean {
+            // consumes energy, returns false if not enough
+            val total = this.totalEnergyInConnections()
+            if(energy > total) return false
+
+            val percentageConsumed = energy / total
+
+            getChargerNodes().forEach {
+                it.setEnergy(it.getEnergy() * (1.0 - percentageConsumed));
+            }
+
+            return true
+        }
+
+        open fun tick() {
+            // rationale: the other ones can figure it out
+            if(this.maxEnergyCapacity() > 0) this.balanceEnergyLevels()
+        }
         // processes a received message
         open fun received(message: Message) {}
 
@@ -101,13 +140,13 @@ object Networking {
         fun directConnectTo(other: Node) {
             if(other in connections) return;
             connections.add(other);
-            onConnect(other);
+            this.onConnect(other);
         }
 
         fun directDisconnectFrom(other: Node) {
             if(other !in connections) return;
             connections.remove(other);
-            onDisconnect(other);
+            this.onDisconnect(other);
         }
     }
 
@@ -116,6 +155,12 @@ object Networking {
             NeoComputers.LOGGER.info("$label: ${message.javaClass.name} message");
             super.received(message)
         }
+    }
+
+    class DebugBatteryNode(var power: Double, val capacity: Double): Node() {
+        override fun maxEnergyCapacity() = capacity
+        override fun getEnergy() = power
+        override fun setEnergy(energy: Double) { power = energy }
     }
 
     abstract class WirelessEndpoint : Node {
@@ -175,6 +220,10 @@ object Networking {
         }
     }
 
+    fun addNodes(vararg nodes: Node) {
+        nodes.forEach { addNode(it) }
+    }
+
     fun removeNode(node: Node) {
         if(node !in allNodes) return;
         allNodes.remove(node);
@@ -182,6 +231,10 @@ object Networking {
             wirelessNodes.remove(node);
         }
         allNodes.forEach { it.onNodeRemoved(node) }
+    }
+
+    fun removeNodes(vararg nodes: Node) {
+        nodes.forEach { removeNode(it) }
     }
 
     val channels = mutableMapOf<String, MutableSet<Node>>();
