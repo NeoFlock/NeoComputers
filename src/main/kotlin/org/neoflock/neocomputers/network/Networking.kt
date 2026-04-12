@@ -7,6 +7,15 @@ import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+enum class PowerRole {
+    // consumes energy, wants to be fully charged
+    // does not give energy to network nodes
+    CONSUMER,
+    // produces/stores energy, will not care to charge itself
+    // will happily give energy to network nodes
+    PRODUCER,
+}
+
 object Networking {
     // maximum amount of hops between nodes
     var maxHopCount = 32
@@ -21,6 +30,7 @@ object Networking {
         NETWORK,
     }
 
+
     abstract class Message(val sender: Node)
 
     class ClassicPacket(sender: Node, val src: String, val dst: String, val port: Int, val data: List<Any>, val hopCount: Int) : Message(sender) {
@@ -33,16 +43,15 @@ object Networking {
 
     open class Node {
         val connections = mutableSetOf<Node>()
-        val reachability = Visibility.NETWORK
-        var reachableCache: Set<Node>? = null
+        private var reachableCache: Set<Node>? = null
 
-        open fun isProducer(): Boolean = false
-        open fun isConsumer(): Boolean = false
+        open fun getReachability() = Visibility.NETWORK
+        open fun getPowerRole() = PowerRole.CONSUMER
         open fun getEnergy(): Double = 0.0
         open fun setEnergy(energy: Double) {}
 
         open fun maxEnergyCapacity(): Double = 0.0
-        fun getChargerNodes(): Set<Node> = getReachable().filter { it.isProducer() }.toSet()
+        fun getChargerNodes(): Set<Node> = getReachable().filter { it.getPowerRole() == PowerRole.PRODUCER }.toSet()
         fun totalEnergyInConnections(): Double = getChargerNodes().fold(0.0) { acc, node -> acc + node.getEnergy() }
         fun maxEnergyInConnections(): Double = getChargerNodes().fold(0.0) { acc, node -> acc + node.maxEnergyCapacity() }
 
@@ -82,7 +91,7 @@ object Networking {
         }
 
         open fun tick() {
-            if(isConsumer()) tryToChargeFully()
+            if(getPowerRole() == PowerRole.CONSUMER) tryToChargeFully()
         }
         // processes a received message
         open fun received(message: Message) {}
@@ -109,12 +118,17 @@ object Networking {
             return reachableCache!!;
         }
 
+        fun invalidateReachableCache() {
+            reachableCache = null
+        }
+
         fun computeReachable(): Set<Node> {
+            val reachability = getReachability()
             if(reachability == Visibility.NONE) {
                 return setOf();
             }
             if(reachability == Visibility.DIRECT) {
-                return connections;
+                return connections.minus(this);
             }
             if(reachability == Visibility.NETWORK) {
                 // absolute cinema
@@ -167,7 +181,7 @@ object Networking {
     }
 
     class DebugBatteryNode(var power: Double, val capacity: Double): Node() {
-        override fun isProducer() = true
+        override fun getPowerRole() = PowerRole.PRODUCER
         override fun maxEnergyCapacity() = capacity
         override fun getEnergy() = power
         override fun setEnergy(energy: Double) { power = energy }

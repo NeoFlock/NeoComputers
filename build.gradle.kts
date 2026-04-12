@@ -11,6 +11,15 @@ plugins {
 val minecraft = stonecutter.current.version
 val loader = loom.platform.get().name.lowercase()
 
+fun minecraftVersionToNum(ver: String): Int {
+    val parts = ver.split(".")
+    if(parts.size == 2) {
+        // 26.1 and above
+        return parts[0].toInt() * 10000 + parts[1].toInt()
+    }
+    return parts[1].toInt() * 100 + parts[2].toInt()
+}
+
 version = "${mod.version}+$minecraft"
 group = mod.group
 base {
@@ -59,6 +68,15 @@ dependencies {
         modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${mod.dep("fabric_version")}")
         modImplementation("net.fabricmc:fabric-language-kotlin:1.13.10+kotlin.2.3.20")
         modApi("dev.architectury:architectury-fabric:${archversion}")
+        fun getTeamRebornEnergy(): String {
+            val curVer = minecraftVersionToNum(minecraft)
+            if (curVer < minecraftVersionToNum("1.20.5")) { return "3.0.0" }
+            if (curVer < minecraftVersionToNum("1.21.0")) { return "4.0.0" }
+            if (curVer < minecraftVersionToNum("1.21.5")) { return "4.1.0" }
+            if (curVer < minecraftVersionToNum("26.1")) { return "4.2.0" }
+            return "5.0.0"
+        }
+        modApi("teamreborn:energy:${getTeamRebornEnergy()}")
     }
     if (loader == "forge") {
         "forge"("net.minecraftforge:forge:${minecraft}-${mod.dep("forge_loader")}")
@@ -83,6 +101,7 @@ dependencies {
         if (minecraft=="1.21.9" || minecraft=="1.21.11") modApi("dev.architectury:architectury-neoforge:${archversion}")
         else modApi("dev.architectury:architectury-forge:${archversion}") // NOTE: this could be wrong
         implementation("thedarkcolour:kotlinforforge-neoforge:6.0.0")
+
     }
 }
 buildscript {

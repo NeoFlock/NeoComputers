@@ -22,7 +22,7 @@ import org.neoflock.neocomputers.entity.ScreenEntity
 import org.neoflock.neocomputers.gui.menu.Menus
 import org.neoflock.neocomputers.network.Networking
 
-class ScreenBlock() : BaseBlock("screen"), EntityBlock {
+class ScreenBlock() : NodeBlock("screen") {
 
     override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity? {
         val scr = ScreenEntity(blockPos, blockState)
@@ -39,7 +39,7 @@ class ScreenBlock() : BaseBlock("screen"), EntityBlock {
     ): InteractionResult {
         if(!level.isClientSide) {
             val screenState = level.getBlockEntity(blockPos, BlockEntities.SCREEN_ENTITY.get()).get()
-            if(!screenState.getNode().consumeEnergy(5.0)) return InteractionResult.SUCCESS;
+            if(!screenState.node.consumeEnergy(5.0)) return InteractionResult.SUCCESS;
             MenuRegistry.openMenu(player as ServerPlayer, object : MenuProvider {
                 override fun getDisplayName(): Component = Component.literal("SCREEEEEN!")
                 override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu {
