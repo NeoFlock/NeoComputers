@@ -47,6 +47,11 @@ object BlockEntities {
             ::CapacitorEntity, mutableSetOf(Blocks.CAPACITOR_BLOCK.get()), BullshitFix()
         )
     }
+    val SOLARGEN_ENTITY: RegistrySupplier<BlockEntityType<CapacitorEntity>> = BLOCKENTITIES.register("solargen_entity") {
+        BlockEntityType(
+            ::CapacitorEntity, mutableSetOf(Blocks.SOLARGEN_BLOCK.get()), BullshitFix()
+        )
+    }
 
     fun registerPowerBlocks() {
         PowerManager.registerPowerBlockEntity(CAPACITOR_ENTITY.get())

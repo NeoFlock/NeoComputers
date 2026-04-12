@@ -2,11 +2,15 @@ package org.neoflock.neocomputers.block
 
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.ChatType
+import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.OutgoingChatMessage
 import net.minecraft.network.chat.PlayerChatMessage
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
