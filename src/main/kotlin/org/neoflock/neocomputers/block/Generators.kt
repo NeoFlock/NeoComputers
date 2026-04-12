@@ -28,3 +28,22 @@ class SolarGeneratorBlock : BaseBlock(), EntityBlock {
         }
     }
 }
+
+class CombustionGeneratorBlock : BaseBlock(), EntityBlock {
+    override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity {
+        return CombustionGeneratorBlockEntity(BlockEntities.COMBUSTGEN_ENTITY.get(), blockPos, blockState)
+    }
+
+    override fun <T : BlockEntity> getTicker(
+        level: Level,
+        blockState: BlockState,
+        blockEntityType: BlockEntityType<T>
+    ): BlockEntityTicker<T> {
+        return object : BlockEntityTicker<T> {
+            override fun tick(level: Level, blockPos: BlockPos, blockState: BlockState, blockEntity: T) {
+                if(blockEntity !is SolarGeneratorBlockEntity) return;
+                blockEntity.giveSolarPower();
+            }
+        }
+    }
+}
