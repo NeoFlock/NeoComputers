@@ -8,31 +8,37 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
-import net.minecraft.world.level.block.Block
-import net.minecraft.world.level.block.EntityBlock
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.level.redstone.Orientation
 import net.minecraft.world.phys.BlockHitResult
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.PowerRole
+import kotlin.math.min
 
 class CapacitorEntity(pos: BlockPos, state: BlockState) : NodeBlockEntity(BlockEntities.CAPACITOR_ENTITY.get(), pos, state) {
-    var amountStored: Double = 0.0
-    val capacity = 20000.0
+    var amountStored: Long = 0
+    val capacity: Long = 20000
 
     override val node = object : Networking.Node() {
         override fun getPowerRole() = PowerRole.PRODUCER
         override fun getEnergy() = amountStored
-        override fun maxEnergyCapacity(): Double = capacity
-        override fun setEnergy(energy: Double) {
-            amountStored = energy
+        override fun getEnergyCapacity() = capacity
+        override fun giveEnergy(amount: Long): Long {
+            val given = min(amount, capacity - amountStored)
+            amountStored += given
+            return given
+        }
+
+        override fun withdrawEnergy(amount: Long): Long {
+            val taken = min(amount, amountStored)
+            amountStored -= taken
+            return taken
         }
     }
 }
 
-class CapacitorBlock : NodeBlock("capacitor")  {
+class CapacitorBlock : NodeBlock()  {
     override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity? {
         val cap = CapacitorEntity(blockPos, blockState)
         cap.initNetworking()

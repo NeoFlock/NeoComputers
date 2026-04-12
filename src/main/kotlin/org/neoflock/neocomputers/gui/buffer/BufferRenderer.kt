@@ -4,30 +4,34 @@ import com.mojang.blaze3d.platform.NativeImage
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.texture.DynamicTexture
 import net.minecraft.client.renderer.texture.TextureManager
-import net.minecraft.resources.Identifier
+import net.minecraft.resources.ResourceLocation
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.utils.FontProvider
 import java.io.File
 import kotlin.experimental.and
 import kotlin.experimental.xor
 
-class BufferRenderer(width: Int, height: Int, id: Identifier, buffer: MutableList<GPUChar>) { // TODO: NN buffer
+class BufferRenderer(width: Int, height: Int, id: ResourceLocation, buffer: MutableList<GPUChar>) { // TODO: NN buffer
     val CHARW = 8
     val CHARH = 16
 
     private var width: Int = width;
     private var height: Int = height;
-    private var id: Identifier = id;
+    private var id: ResourceLocation = id;
     private var buffer: MutableList<GPUChar> = buffer;
 
     private var texwidth: Int = width*CHARW;
     private var texheight: Int = height*CHARH;
     private var image: NativeImage = NativeImage(texwidth, texheight, true); // idk what the boolean is
-    private var tex: DynamicTexture = DynamicTexture({id.path}, image)
+    private var tex: DynamicTexture = DynamicTexture(image)
 
     fun dump(path: String) {
         image.writeToFile(File(path))
         NeoComputers.LOGGER.info("DUMPED!!!")
+    }
+
+    fun toRGBA(color: Int): Int {
+        return color.shl(8).or(0xFF)
     }
 
     fun drawGlyph(x: Int, y: Int, c: Char, fg: Int) {
@@ -37,7 +41,7 @@ class BufferRenderer(width: Int, height: Int, id: Identifier, buffer: MutableLis
             for (i in 0..<CHARW) {
                 // var pixel = ((glyph[j] and ((1 shl (CHARW - i - 1)).toByte())).toInt()) ushr (CHARW - i - 1) // retardation
                 var pixel = (glyph[j] and (0b10000000 ushr i).toByte()).toInt()
-                if (pixel > 0) image.setPixelABGR(x+i, y+j, (0xFF000000+fg).toInt())
+                if (pixel > 0) image.setPixelRGBA(x+i, y+j, toRGBA(fg))
             }
         }
     }

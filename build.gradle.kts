@@ -51,6 +51,7 @@ dependencies {
     when(minecraft) { // NOTE: add more entries if you want to add more versions
         "1.20.1" -> archversion = "9.2.14"
         "1.20.4" -> archversion = "11.1.17"
+        "1.21.1" -> archversion = "13.0.8"
         "1.21.9" -> archversion = "18.0.5"
         else     -> archversion = "19.0.1" 
     }

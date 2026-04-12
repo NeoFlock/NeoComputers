@@ -1,7 +1,7 @@
 package org.neoflock.neocomputers.utils;
 
 import net.minecraft.client.Minecraft
-import net.minecraft.resources.Identifier
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.packs.resources.Resource
 import net.minecraft.server.packs.resources.ResourceManager
 import org.neoflock.neocomputers.NeoComputers
@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets
 object FontProvider {
     val map: MutableMap<Char, ArrayList<Byte>> = mutableMapOf();
 
-    fun load(loc: Identifier) { // TODO: optimize, this can totally be optimized
+    fun load(loc: ResourceLocation) { // TODO: optimize, this can totally be optimized
         var man: ResourceManager = Minecraft.getInstance().resourceManager
         var resource: Resource = man.getResourceOrThrow(loc)
         var stream = resource.open()

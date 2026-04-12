@@ -6,7 +6,7 @@ import dev.architectury.registry.registries.Registrar
 import dev.architectury.registry.registries.RegistrarManager
 import dev.architectury.registry.registries.RegistrySupplier
 import net.minecraft.core.registries.Registries
-import net.minecraft.resources.Identifier
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.resources.ResourceKey
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.Item
@@ -25,13 +25,13 @@ object Blocks {
 
 
     val BLOCKS: DeferredRegister<Block> = DeferredRegister.create(NeoComputers.MODID, Registries.BLOCK)
-    val TEST_BLOCK: RegistrySupplier<Block> = BaseBlock.register("test") { BaseBlock("test") }
     val SCREEN_BLOCK: RegistrySupplier<Block> = BaseBlock.register("screen") { ScreenBlock() }
     val CAPACITOR_BLOCK: RegistrySupplier<Block> = BaseBlock.register("capacitor") { CapacitorBlock() }
 
     fun registerBlockItems() {
         BLOCKS.forEach(Consumer { sup: RegistrySupplier<Block> ->
-            Items.ITEMS.register(sup.id.path) { BlockItem(sup.get()!!, Item.Properties().`arch$tab`(Tabs.TAB).setId(ResourceKey.create(Registries.ITEM, sup.id)))}
+            val id = ResourceKey.create(Registries.ITEM, sup.id)
+            Items.ITEMS.register(sup.id.path) { BlockItem(sup.get()!!, Item.Properties().`arch$tab`(Tabs.TAB))}
         })
     }
 }

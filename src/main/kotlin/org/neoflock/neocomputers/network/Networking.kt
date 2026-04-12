@@ -47,46 +47,51 @@ object Networking {
 
         open fun getReachability() = Visibility.NETWORK
         open fun getPowerRole() = PowerRole.CONSUMER
-        open fun getEnergy(): Double = 0.0
-        open fun setEnergy(energy: Double) {}
+        open fun getEnergy(): Long = 0
+        // give energy, returns how much was actually given
+        // cannot exceed amount specified
+        open fun giveEnergy(amount: Long): Long = 0
+        // take energy out, returns how much was actually taken
+        // cannot exceed amount specified
+        open fun withdrawEnergy(amount: Long): Long = 0
 
-        open fun maxEnergyCapacity(): Double = 0.0
+        open fun getEnergyCapacity(): Long = 0
         fun getChargerNodes(): Set<Node> = getReachable().filter { it.getPowerRole() == PowerRole.PRODUCER }.toSet()
-        fun totalEnergyInConnections(): Double = getChargerNodes().fold(0.0) { acc, node -> acc + node.getEnergy() }
-        fun maxEnergyInConnections(): Double = getChargerNodes().fold(0.0) { acc, node -> acc + node.maxEnergyCapacity() }
-
-        fun consumeFromNodeAsMuchAsPossible(energy: Double): Double {
-            val consumed = min(energy, getEnergy())
-            setEnergy(getEnergy() - consumed)
-            return consumed
-        }
+        fun totalEnergyInConnections(): Long = getChargerNodes().fold(0) { acc, node -> acc + node.getEnergy() }
+        fun maxEnergyInConnections(): Long = getChargerNodes().fold(0) { acc, node -> acc + node.getEnergyCapacity() }
 
         // attempts to consume
-        fun consumeEnergy(energy: Double): Boolean {
+        fun consumeEnergy(energy: Long): Boolean {
             // consumes energy, returns false if not enough
             val total = totalEnergyInConnections() + getEnergy()
             if(energy > total) return false
 
             var remaining = energy
-            remaining -= consumeFromNodeAsMuchAsPossible(remaining)
-            if(remaining <= 0.0) return true
+            remaining -= withdrawEnergy(remaining)
+            if(remaining <= 0) return true
 
             for (charger in getChargerNodes()) {
-                if(remaining <= 0.0) break
-                remaining -= charger.consumeFromNodeAsMuchAsPossible(remaining)
+                if(remaining <= 0) break
+                remaining -= charger.withdrawEnergy(remaining)
             }
 
             return true
         }
 
         fun tryToChargeFully() {
-            var remaining = maxEnergyCapacity() - getEnergy()
-            if(remaining <= 0.0) return
+            var remaining = getEnergyCapacity() - getEnergy()
+            if(remaining <= 0) return
             for (charger in getChargerNodes()) {
-                if(remaining <= 0.0) break
-                val amount = charger.consumeFromNodeAsMuchAsPossible(remaining)
-                setEnergy(getEnergy() + amount)
-                remaining -= amount
+                if(remaining <= 0) break
+                val amount = charger.withdrawEnergy(remaining)
+                val given = giveEnergy(amount)
+                remaining -= given
+                if(given < amount) {
+                    val delta = amount - given // amount lost while given back
+                    if(charger.giveEnergy(delta) < delta) {
+                        NeoComputers.LOGGER.warn("LOSING ENERGY! Tried giving $delta back to $charger and we're losing our marbles!")
+                    }
+                }
             }
         }
 
@@ -171,20 +176,6 @@ object Networking {
             connections.remove(other);
             this.onDisconnect(other);
         }
-    }
-
-    class LoggerNode(val label: String): Node() {
-        override fun received(message: Message) {
-            NeoComputers.LOGGER.info("$label: ${message.javaClass.name} message");
-            super.received(message)
-        }
-    }
-
-    class DebugBatteryNode(var power: Double, val capacity: Double): Node() {
-        override fun getPowerRole() = PowerRole.PRODUCER
-        override fun maxEnergyCapacity() = capacity
-        override fun getEnergy() = power
-        override fun setEnergy(energy: Double) { power = energy }
     }
 
     abstract class WirelessEndpoint : Node {

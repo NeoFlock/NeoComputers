@@ -11,7 +11,6 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityTicker
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.level.redstone.Orientation
 import org.neoflock.neocomputers.network.Networking
 
 abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: BlockPos, blockState: BlockState) : BlockEntity(blockEntityType, blockPos, blockState) {
@@ -73,7 +72,7 @@ abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: Bl
     }
 }
 
-abstract class NodeBlock(name: String): BaseBlock(name), EntityBlock {
+abstract class NodeBlock: BaseBlock(), EntityBlock {
     override fun <T : BlockEntity> getTicker(
         level: Level,
         blockState: BlockState,
@@ -108,7 +107,7 @@ abstract class NodeBlock(name: String): BaseBlock(name), EntityBlock {
         level: Level,
         blockPos: BlockPos,
         block: Block,
-        orientation: Orientation?,
+        blockPos2: BlockPos,
         bl: Boolean
     ) {
         if(!level.isClientSide) {
@@ -118,6 +117,6 @@ abstract class NodeBlock(name: String): BaseBlock(name), EntityBlock {
             }
 
         }
-        super.neighborChanged(blockState, level, blockPos, block, orientation, bl)
+        super.neighborChanged(blockState, level, blockPos, block, blockPos2, bl)
     }
 }
