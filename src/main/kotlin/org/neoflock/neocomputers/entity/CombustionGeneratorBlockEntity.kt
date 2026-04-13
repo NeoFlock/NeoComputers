@@ -16,7 +16,7 @@ class CombustionGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState)
     val energyPerTick: Long = 50
 
     var energy: Long = 0
-    val maxEnergy: Long = 50000
+    val maxEnergy: Long = 100000
     var burningTimeRemaining: Int = 0
 
     override val node = object : Networking.Node() {
@@ -48,7 +48,8 @@ class CombustionGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState)
         return !this.isRemoved
     }
 
-    fun burnFuelForEnergy() {
+    override fun tickNode() {
+        super.tickNode()
         // TODO: give us a block state tag for active
 
         // keep combusting and shi

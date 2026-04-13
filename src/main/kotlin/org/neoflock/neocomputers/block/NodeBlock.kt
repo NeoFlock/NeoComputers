@@ -16,8 +16,9 @@ import org.neoflock.neocomputers.network.Networking
 abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: BlockPos, blockState: BlockState) : BlockEntity(blockEntityType, blockPos, blockState) {
     abstract val node: Networking.Node
 
-    fun initNetworking() {
+    fun initNetworking(): NodeBlockEntity {
         Networking.addNode(node)
+        return this
     }
 
     private var stateIsDirty = true
@@ -52,7 +53,7 @@ abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: Bl
 
     fun needsSynchronization() = stateIsDirty
 
-    fun ensureSynchronized() {
+    open fun tickNode() {
         if(!stateIsDirty) return
         stateIsDirty = false
         computeEdges().forEach {
@@ -81,7 +82,7 @@ abstract class NodeBlock: BaseBlock(), EntityBlock {
         return object : BlockEntityTicker<T> {
             override fun tick(level: Level, blockPos: BlockPos, blockState: BlockState, blockEntity: T) {
                 if(blockEntity !is NodeBlockEntity) return;
-                blockEntity.ensureSynchronized()
+                blockEntity.tickNode()
             }
         }
     }
