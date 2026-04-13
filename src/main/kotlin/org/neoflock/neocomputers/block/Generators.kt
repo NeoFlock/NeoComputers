@@ -9,10 +9,11 @@ import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.entity.SolarGeneratorBlockEntity
+import org.neoflock.neocomputers.entity.CombustionGeneratorBlockEntity
 
 class SolarGeneratorBlock : BaseBlock(), EntityBlock {
     override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity {
-        return SolarGeneratorBlockEntity(BlockEntities.SOLARGEN_ENTITY.get(), blockPos, blockState)
+        return SolarGeneratorBlockEntity(blockPos, blockState)
     }
 
     override fun <T : BlockEntity> getTicker(
@@ -31,7 +32,7 @@ class SolarGeneratorBlock : BaseBlock(), EntityBlock {
 
 class CombustionGeneratorBlock : BaseBlock(), EntityBlock {
     override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity {
-        return CombustionGeneratorBlockEntity(BlockEntities.COMBUSTGEN_ENTITY.get(), blockPos, blockState)
+        return CombustionGeneratorBlockEntity(blockPos, blockState)
     }
 
     override fun <T : BlockEntity> getTicker(
@@ -41,7 +42,7 @@ class CombustionGeneratorBlock : BaseBlock(), EntityBlock {
     ): BlockEntityTicker<T> {
         return object : BlockEntityTicker<T> {
             override fun tick(level: Level, blockPos: BlockPos, blockState: BlockState, blockEntity: T) {
-                if(blockEntity !is SolarGeneratorBlockEntity) return;
+                if(blockEntity !is CombustionGeneratorBlockEntity) return;
                 blockEntity.giveSolarPower();
             }
         }
