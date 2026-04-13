@@ -17,9 +17,10 @@ object PowerManager {
             entity, dir -> object : EnergyStorage {
                 override fun getAmount() = entity.node.getEnergy()
                 override fun getCapacity() = entity.node.getEnergyCapacity()
-                override fun supportsExtraction() = entity.node.getPowerRole() == PowerRole.PRODUCER
-                override fun supportsInsertion(): Boolean = entity.node.getEnergyCapacity() > 0
+                override fun supportsExtraction() = entity.node.getPowerRole() != PowerRole.CONSUMER
+                override fun supportsInsertion() = entity.node.getPowerRole() != PowerRole.GENERATOR
                 override fun extract(maxAmount: Long, transaction: TransactionContext?): Long {
+                    if(entity.node.getPowerRole() == PowerRole.CONSUMER) return 0
                     val taken = entity.node.withdrawEnergy(maxAmount)
                     transaction?.addCloseCallback {
                         ctx, res -> if(res.wasAborted() || !res.wasCommitted()) entity.node.giveEnergy(taken)
@@ -27,9 +28,10 @@ object PowerManager {
                     return taken
                 }
                 override fun insert(maxAmount: Long, transaction: TransactionContext?): Long {
+                    if(entity.node.getPowerRole() == PowerRole.GENERATOR) return 0
                     val given = entity.node.giveEnergy(maxAmount)
-                    transaction?.addCloseCallback {
-                            ctx, res -> if(res.wasAborted() || !res.wasCommitted()) entity.node.withdrawEnergy(given)
+                    transaction?.addCloseCallback { ctx, res ->
+                        if (res.wasAborted() || !res.wasCommitted()) entity.node.withdrawEnergy(given)
                     }
                     return given
                 }

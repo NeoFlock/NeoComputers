@@ -2,7 +2,6 @@ package org.neoflock.neocomputers.network
 
 import net.minecraft.core.BlockPos
 import org.neoflock.neocomputers.NeoComputers
-import java.lang.ref.WeakReference
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -11,9 +10,12 @@ enum class PowerRole {
     // consumes energy, wants to be fully charged
     // does not give energy to network nodes
     CONSUMER,
-    // produces/stores energy, will not care to charge itself
+    // stores energy, will not care to charge itself
     // will happily give energy to network nodes
-    PRODUCER,
+    STORAGE,
+    // only produces energy, thus obviously charges itself
+    // also happily gives energy
+    GENERATOR,
 }
 
 object Networking {
@@ -56,7 +58,7 @@ object Networking {
         open fun withdrawEnergy(amount: Long): Long = 0
 
         open fun getEnergyCapacity(): Long = 0
-        fun getChargerNodes(): Set<Node> = getReachable().filter { it.getPowerRole() == PowerRole.PRODUCER }.toSet()
+        fun getChargerNodes(): Set<Node> = getReachable().filter { it.getPowerRole() != PowerRole.CONSUMER }.toSet()
         fun totalEnergyInConnections(): Long = getChargerNodes().fold(0) { acc, node -> acc + node.getEnergy() }
         fun maxEnergyInConnections(): Long = getChargerNodes().fold(0) { acc, node -> acc + node.getEnergyCapacity() }
 
@@ -78,6 +80,7 @@ object Networking {
             return true
         }
 
+        // PLEASE only call if consumer, in the name of all that is holy
         fun tryToChargeFully() {
             var remaining = getEnergyCapacity() - getEnergy()
             if(remaining <= 0) return
@@ -95,8 +98,55 @@ object Networking {
             }
         }
 
+        // only call if storage
+        fun balanceStorage() {
+            for(battery in getReachable()) {
+                if(battery.getPowerRole() != PowerRole.STORAGE) continue
+                // its so if for example we have a battery with 2x the capacity
+                // we don't try to even the energy between them since that's just bad
+                // and might pointless delete energy over time
+                val capacityRatio = getEnergyCapacity().toDouble() / battery.getEnergyCapacity()
+
+                val meaningfulSurplus = (battery.getEnergy() * capacityRatio - getEnergy()).toLong()
+
+                if(meaningfulSurplus <= 0) {
+                    // WE'RE greedy (or negligible surplus)? Do nothing
+                    continue
+                }
+
+                // steal from this greedy mf
+                val toSteal = meaningfulSurplus / 2
+                if(toSteal == 0L) continue // broke storahh
+
+                val stolen = battery.withdrawEnergy(toSteal)
+                if(giveEnergy(stolen) < stolen) {
+                    NeoComputers.LOGGER.warn("LOSING ENERGY IN NODE $this!!!! THIS IS REALLY BAD!!!")
+                }
+            }
+        }
+
+        // rob the generators
+        fun stealGeneratorPower() {
+            var remaining = getEnergyCapacity() - getEnergy()
+
+            for(generator in getReachable()) {
+                if(generator.getPowerRole() != PowerRole.GENERATOR) continue
+                // rob this mf
+                val robbed = generator.withdrawEnergy(remaining)
+                val taken = giveEnergy(robbed)
+                if(taken < robbed) {
+                    NeoComputers.LOGGER.warn("energy caught being DELETED in the big 26")
+                }
+                remaining -= taken
+            }
+        }
+
         open fun tick() {
             if(getPowerRole() == PowerRole.CONSUMER) tryToChargeFully()
+            if(getPowerRole() == PowerRole.STORAGE) {
+                stealGeneratorPower()
+                balanceStorage()
+            }
         }
         // processes a received message
         open fun received(message: Message) {}
