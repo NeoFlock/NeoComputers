@@ -60,6 +60,7 @@ object BlockEntities {
 
     fun registerPowerBlocks() {
         PowerManager.registerPowerBlockEntity(CAPACITOR_ENTITY.get())
+        PowerManager.registerPowerBlockEntity(SOLARGEN_ENTITY.get())
         PowerManager.registerPowerBlockEntity(COMBUSTGEN_ENTITY.get())
     }
 }

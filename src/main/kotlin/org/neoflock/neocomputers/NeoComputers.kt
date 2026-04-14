@@ -31,6 +31,7 @@ object NeoComputers {
         BlockEntities.BLOCKENTITIES.register()
         BlockEntities.registerPowerBlocks()
         Menus.MENUS.register()
+        Menus.registerScreens()
         Tabs.TABS.register()
 
         ClientLifecycleEvent.CLIENT_SETUP.register {

@@ -1,5 +1,6 @@
 package org.neoflock.neocomputers.block
 
+import dev.architectury.registry.menu.MenuRegistry
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.ChatType
 import net.minecraft.network.chat.OutgoingChatMessage
@@ -33,13 +34,8 @@ class CombustionGeneratorBlock : NodeBlock(), EntityBlock {
     ): InteractionResult {
         if(!level.isClientSide()) {
             val sp = player as ServerPlayer
-            val ent = level.getBlockEntity(blockPos, BlockEntities.COMBUSTGEN_ENTITY.get())
-            if(ent.isPresent) {
-                val bust = ent.get()
-                val fuel = bust.stacks[0]
-                val msg = PlayerChatMessage.system("${fuel.displayName.string} x ${fuel.count} (${bust.node.getEnergy()} / ${bust.node.getEnergyCapacity()} J)")
-                sp.sendChatMessage(OutgoingChatMessage.create(msg), false, ChatType.bind(ChatType.CHAT, player))
-            }
+            val ent = level.getBlockEntity(blockPos, BlockEntities.COMBUSTGEN_ENTITY.get()).get()
+            MenuRegistry.openMenu(sp, ent)
         }
         return InteractionResult.SUCCESS
     }
