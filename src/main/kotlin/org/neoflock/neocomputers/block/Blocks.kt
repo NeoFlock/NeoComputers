@@ -32,6 +32,7 @@ object Blocks {
 
     fun registerBlockItems() {
         BLOCKS.forEach(Consumer { sup: RegistrySupplier<Block> ->
+            NeoComputers.LOGGER.info(sup.id.toString())
             val id = ResourceKey.create(Registries.ITEM, sup.id)
             Items.ITEMS.register(sup.id.path) { BlockItem(sup.get()!!, Item.Properties().`arch$tab`(Tabs.TAB))}
         })
