@@ -26,7 +26,9 @@ object Blocks {
 
     val BLOCKS: DeferredRegister<Block> = DeferredRegister.create(NeoComputers.MODID, Registries.BLOCK)
     val SCREEN_BLOCK: RegistrySupplier<Block> = BaseBlock.register("screen") { ScreenBlock() }
-    val CAPACITOR_BLOCK: RegistrySupplier<Block> = BaseBlock.register("capacitor") { CapacitorBlock() }
+    val CAPACITOR_BLOCK: RegistrySupplier<Block> = BaseBlock.register("capacitor") { CapacitorBlock(1) }
+    val CAPACITOR_BLOCK2: RegistrySupplier<Block> = BaseBlock.register("capacitor2") { CapacitorBlock(2) }
+    val CAPACITOR_BLOCK3: RegistrySupplier<Block> = BaseBlock.register("capacitor3") { CapacitorBlock(3) }
     val SOLARGEN_BLOCK: RegistrySupplier<Block> = BaseBlock.register("solargen") { SolarGeneratorBlock() }
     val COMBUSTGEN_BLOCK: RegistrySupplier<Block> = BaseBlock.register("combustgen") { CombustionGeneratorBlock() }
 

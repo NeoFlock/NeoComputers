@@ -1,0 +1,16 @@
+{
+  power: {
+    // amount of energy the different capacitor tiers can store
+    capacitors: [20000, 50000, 100000],
+
+    // how much energy combustion generators make per tick
+    combustionGeneration: 50,
+    // the energy capacity of the combustion generator
+    combustionMaxPower: 50000,
+
+    // how much energy solar generators make per tick
+    solarGeneration: 50,
+    // the energy capacity of the solar generator
+    solarMaxPower: 10000,
+  },
+}

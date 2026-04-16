@@ -9,6 +9,7 @@ import org.neoflock.neocomputers.gui.buffer.BufferRenderer
 import org.neoflock.neocomputers.gui.menu.Menus
 import org.neoflock.neocomputers.gui.screen.ScreenScreen
 import dev.architectury.registry.menu.MenuRegistry
+import net.minecraft.client.Minecraft
 import org.neoflock.neocomputers.item.Items
 import org.neoflock.neocomputers.item.Tabs
 import org.neoflock.neocomputers.network.Networking

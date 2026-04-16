@@ -12,6 +12,9 @@ import net.minecraft.world.level.block.entity.BlockEntityType
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.Blocks
 import org.neoflock.neocomputers.block.CapacitorEntity
+import org.neoflock.neocomputers.block.CapacitorEntityTier1
+import org.neoflock.neocomputers.block.CapacitorEntityTier2
+import org.neoflock.neocomputers.block.CapacitorEntityTier3
 import org.neoflock.neocomputers.network.PowerManager
 
 // complete fucking bullshit btw
@@ -42,9 +45,19 @@ object BlockEntities {
             ::ScreenEntity, mutableSetOf(Blocks.SCREEN_BLOCK.get()), BullshitFix()
         )
     }
-    val CAPACITOR_ENTITY: RegistrySupplier<BlockEntityType<CapacitorEntity>> = BLOCKENTITIES.register("capacitor_entity") {
+    val CAPACITOR_ENTITY: RegistrySupplier<BlockEntityType<CapacitorEntityTier1>> = BLOCKENTITIES.register("capacitor_entity") {
         BlockEntityType(
-            ::CapacitorEntity, mutableSetOf(Blocks.CAPACITOR_BLOCK.get()), BullshitFix()
+            ::CapacitorEntityTier1, mutableSetOf(Blocks.CAPACITOR_BLOCK.get()), BullshitFix()
+        )
+    }
+    val CAPACITOR2_ENTITY: RegistrySupplier<BlockEntityType<CapacitorEntityTier2>> = BLOCKENTITIES.register("capacitor_entity2") {
+        BlockEntityType(
+            ::CapacitorEntityTier2, mutableSetOf(Blocks.CAPACITOR_BLOCK2.get()), BullshitFix()
+        )
+    }
+    val CAPACITOR3_ENTITY: RegistrySupplier<BlockEntityType<CapacitorEntityTier3>> = BLOCKENTITIES.register("capacitor_entity3") {
+        BlockEntityType(
+            ::CapacitorEntityTier3, mutableSetOf(Blocks.CAPACITOR_BLOCK3.get()), BullshitFix()
         )
     }
     val SOLARGEN_ENTITY: RegistrySupplier<BlockEntityType<SolarGeneratorBlockEntity>> = BLOCKENTITIES.register("solargen_entity") {
@@ -60,6 +73,8 @@ object BlockEntities {
 
     fun registerPowerBlocks() {
         PowerManager.registerPowerBlockEntity(CAPACITOR_ENTITY.get())
+        PowerManager.registerPowerBlockEntity(CAPACITOR2_ENTITY.get())
+        PowerManager.registerPowerBlockEntity(CAPACITOR3_ENTITY.get())
         PowerManager.registerPowerBlockEntity(SOLARGEN_ENTITY.get())
         PowerManager.registerPowerBlockEntity(COMBUSTGEN_ENTITY.get())
     }
