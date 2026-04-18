@@ -40,7 +40,10 @@ class ScreenBlock() : NodeBlock() {
     ): InteractionResult {
         if(!level.isClientSide) {
             val screenState = level.getBlockEntity(blockPos, BlockEntities.SCREEN_ENTITY.get()).get()
-            if(!screenState.node.consumeEnergy(5)) return InteractionResult.SUCCESS;
+            if(!screenState.node.consumeEnergy(5)) {
+                player.sendSystemMessage(Component.literal("Not enough power."))
+                return InteractionResult.SUCCESS
+            };
             MenuRegistry.openMenu(player as ServerPlayer, object : MenuProvider {
                 override fun getDisplayName(): Component = Component.literal("SCREEEEEN!")
                 override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu {

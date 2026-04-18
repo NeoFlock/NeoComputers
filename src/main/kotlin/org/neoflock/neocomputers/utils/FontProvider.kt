@@ -7,6 +7,11 @@ import net.minecraft.server.packs.resources.ResourceManager
 import org.neoflock.neocomputers.NeoComputers
 import java.nio.charset.StandardCharsets
 
+/*
+* OC hex font format:
+* 5 character hex code .. ":" .. variable length hex code .. LF
+* this is essentially a dictionary
+* */
 object FontProvider {
     val map: MutableMap<Char, ArrayList<Byte>> = mutableMapOf();
 
@@ -14,17 +19,24 @@ object FontProvider {
         var man: ResourceManager = Minecraft.getInstance().resourceManager
         var resource: Resource = man.getResourceOrThrow(loc)
         var stream = resource.open()
+        var bfr = stream.bufferedReader();
         while (stream.available() > 0) {
-            var key = Integer.parseInt(String(stream.readNBytes(5), StandardCharsets.UTF_8), 16).toChar()
+
+            /*var key = Integer.parseInt(String(stream.readNBytes(5), StandardCharsets.UTF_8), 16).toChar()
             stream.skip(1)
             var bytes: ArrayList<Byte> = ArrayList<Byte>();
             while (true) { // shut up will you
                 var b1 = stream.read()
                 if (b1 == 10) break // 10 is line break
-                var b2 = stream.read() 
+                var b2 = stream.read()
                 var value: Byte = Integer.parseInt(arrayOf(b1.toChar(), b2.toChar()).joinToString(""), 16).toByte()
                 bytes.add(value)
-            } 
+            } */
+            var line: String = bfr.readLine()
+            var splitLine = line.split(":");
+            var key = splitLine[0].hexToInt().toChar();
+            var value: ByteArray = splitLine[1].hexToByteArray(); // shout out to the kotlin stdlib for having ts
+            var bytes: ArrayList<Byte> = value.toCollection(ArrayList<Byte>());
             map[key] = bytes
         }
         NeoComputers.LOGGER.info("[FontProvider] Loaded font!");
