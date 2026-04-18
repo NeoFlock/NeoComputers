@@ -28,7 +28,6 @@ class ScreenScreen : AbstractContainerScreen<ScreenMenu>{
         bufferRenderer!!.drawBuffer()
         
         renderer.bind(ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "screen/test"))
-        NeoComputers.LOGGER.info("created")
     }
     override fun renderBg(guiGraphics: GuiGraphics, f: Float, i: Int, j: Int) {}
     override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, something: Float) {
@@ -37,6 +36,7 @@ class ScreenScreen : AbstractContainerScreen<ScreenMenu>{
     }
 
     override fun onClose() {
+        super.onClose()
         bufferRenderer!!.clean()
     }
 }

@@ -13,7 +13,7 @@ import org.neoflock.neocomputers.utils.GenericContainerScreen
 
 class CombustionGeneratorScreen(abstractContainerMenu: CombustionGeneratorMenu, inventory: Inventory, component: Component) : GenericContainerScreen<CombustionGeneratorMenu>(abstractContainerMenu, inventory, component) {
     // override fun findMenuTexture(): ResourceLocation = ResourceLocation.withDefaultNamespace("textures/gui/container/dispenser.png")
-    override fun findMenuTexture(): ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/combustgui.png")
+    override fun findMenuTexture(): ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/background.png")
 
     var energy: Long = 0
     var energyCapacity: Long = 1

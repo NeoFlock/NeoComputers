@@ -64,9 +64,9 @@ class BufferRenderer(private var width: Int, private var height: Int, private va
     }
 
     fun clean() {
+        Minecraft.getInstance().textureManager.release(this.id)
         image.close()
         tex.close()
-        Minecraft.getInstance().textureManager.release(this.id)
     }
 
     data class GPUChar(val c: Char, val fg: Int =0xFFFFFF, val bg: Int = 0)

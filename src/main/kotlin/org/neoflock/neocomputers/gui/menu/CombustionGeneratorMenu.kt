@@ -7,10 +7,11 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
+import org.neoflock.neocomputers.gui.widget.DynamicSlot
 import org.neoflock.neocomputers.utils.ContainerUtils
 import org.neoflock.neocomputers.utils.GenericContainerMenu
 
-class CombustionFuelSlot(container: Container, slot: Int, x: Int, y: Int): Slot(container, slot, x, y) {
+class CombustionFuelSlot(container: Container, slot: Int, x: Int, y: Int): DynamicSlot(container, slot, x, y) {
     override fun mayPlace(itemStack: ItemStack): Boolean {
         return ContainerUtils.isBurningFuel(itemStack)
     }

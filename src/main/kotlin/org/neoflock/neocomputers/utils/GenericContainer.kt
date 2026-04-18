@@ -18,6 +18,8 @@ import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.entity.BlockEntityType
+import org.neoflock.neocomputers.NeoComputers
+import org.neoflock.neocomputers.gui.widget.DynamicSlot
 
 // Common container interface, assumes the entire purpose is purely raw item storage
 interface GenericContainer : Container {
@@ -113,7 +115,7 @@ abstract class GenericContainerMenu(menuType: MenuType<*>, id: Int, var containe
 abstract class GenericContainerScreen<T: GenericContainerMenu>(menu: T, inventory: Inventory, component: Component): AbstractContainerScreen<T>(menu, inventory, component) {
     open fun shouldCenterTitle() = true
     open fun shouldRenderTooltip() = true
-    open fun findMenuTexture(): ResourceLocation? = null
+    open fun findMenuTexture(): ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/background.png")
 
     open fun getBoundBlockEntityType(): Set<BlockEntityType<*>> = setOf()
 
@@ -133,16 +135,22 @@ abstract class GenericContainerScreen<T: GenericContainerMenu>(menu: T, inventor
 
     override fun renderBg(guiGraphics: GuiGraphics, f: Float, i: Int, j: Int) {
         val menuTex = findMenuTexture()
-        if(menuTex != null) {
-            val cx = (width - imageWidth) / 2
-            val cy = (height - imageHeight) / 2
+        val cx = (width - imageWidth) / 2
+        val cy = (height - imageHeight) / 2
 
-            guiGraphics.blit(menuTex, imageX, imageY, 0, 0, imageWidth, imageHeight)
+        guiGraphics.blit(menuTex, imageX, imageY, 0, 0, imageWidth, imageHeight)
+
+        for (slot in menu.slots) {
+            if (slot is DynamicSlot) {
+                // NeoComputers.LOGGER.info("slot")
+                slot.draw(guiGraphics, cx, cy, i, j)
+            }
         }
     }
 
     override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, something: Float) {
         super.render(graphics, mouseX, mouseY, something)
+
         if(shouldRenderTooltip()) super.renderTooltip(graphics, mouseX, mouseY)
     }
 }
