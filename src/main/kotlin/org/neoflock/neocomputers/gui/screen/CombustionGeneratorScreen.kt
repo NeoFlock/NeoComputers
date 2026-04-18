@@ -6,12 +6,14 @@ import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Inventory
+import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.gui.menu.CombustionGeneratorMenu
 import org.neoflock.neocomputers.utils.GenericContainerScreen
 
 class CombustionGeneratorScreen(abstractContainerMenu: CombustionGeneratorMenu, inventory: Inventory, component: Component) : GenericContainerScreen<CombustionGeneratorMenu>(abstractContainerMenu, inventory, component) {
-    override fun findMenuTexture(): ResourceLocation = ResourceLocation.withDefaultNamespace("textures/gui/container/dispenser.png")
+    // override fun findMenuTexture(): ResourceLocation = ResourceLocation.withDefaultNamespace("textures/gui/container/dispenser.png")
+    override fun findMenuTexture(): ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/combustgui.png")
 
     var energy: Long = 0
     var energyCapacity: Long = 1
