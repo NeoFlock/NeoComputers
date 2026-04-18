@@ -26,10 +26,12 @@ class SolarGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState) : No
     }
 
     override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
+        super.loadAdditional(compoundTag, provider)
         node.energy = compoundTag.getLong("energy")
     }
 
     override fun saveAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
+        super.saveAdditional(compoundTag, provider)
         compoundTag.putLong("energy", node.energy)
     }
 }

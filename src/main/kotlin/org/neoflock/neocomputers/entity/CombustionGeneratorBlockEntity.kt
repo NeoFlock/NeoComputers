@@ -10,12 +10,14 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
+import net.minecraft.world.ContainerHelper
 import net.minecraft.world.MenuProvider
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.ChestBlock
 import net.minecraft.world.level.block.FurnaceBlock
 import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.block.CombustionGeneratorBlock
@@ -88,12 +90,16 @@ class CombustionGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState)
     }
 
     override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
+        super.loadAdditional(compoundTag, provider)
         node.energy = min(node.energyCapacity, compoundTag.getLong("energy"))
         burningTimeRemaining = compoundTag.getInt("burningTimeRemaining")
+        ContainerHelper.loadAllItems(compoundTag, getItems(), provider)
     }
 
     override fun saveAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
+        super.saveAdditional(compoundTag, provider)
         compoundTag.putLong("energy", node.energy)
         compoundTag.putInt("burningTimeRemaining", burningTimeRemaining)
+        ContainerHelper.saveAllItems(compoundTag, getItems(), provider)
     }
 }
