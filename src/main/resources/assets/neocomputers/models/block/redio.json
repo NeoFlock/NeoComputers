@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "up": "neocomputers:block/redio_top",
+    "down": "neocomputers:block/redio_bottom",
+    "north": "neocomputers:block/redio_north",
+    "south": "neocomputers:block/redio_south",
+    "west": "neocomputers:block/redio_west",
+    "east": "neocomputers:block/redio_east",
+    "particle": "minecraft:block/redstone_block"
+  }
+}

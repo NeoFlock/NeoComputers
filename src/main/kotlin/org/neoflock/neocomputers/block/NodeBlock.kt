@@ -190,20 +190,22 @@ abstract class NodeBlock(properties: Properties = Properties.of()): BaseBlock(pr
         }
     }
 
-    override fun setPlacedBy(
+    override fun onPlace(
+        blockState: BlockState,
         level: Level,
         blockPos: BlockPos,
-        blockState: BlockState,
-        livingEntity: LivingEntity?,
-        itemStack: ItemStack
+        blockState2: BlockState,
+        bl: Boolean
     ) {
+        super.onPlace(blockState, level, blockPos, blockState2, bl)
         if(!level.isClientSide) {
             val ent = level.getBlockEntity(blockPos)
             if(ent is NodeBlockEntity) {
                 ent.invalidateNodeState()
+                ent.computeEdges().forEach { it.invalidateNodeState() }
             }
+            level.updateNeighborsAt(blockPos, this)
         }
-        super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack)
     }
 
     override fun neighborChanged(
@@ -214,6 +216,7 @@ abstract class NodeBlock(properties: Properties = Properties.of()): BaseBlock(pr
         blockPos2: BlockPos,
         bl: Boolean
     ) {
+        super.neighborChanged(blockState, level, blockPos, block, blockPos2, bl)
         if(!level.isClientSide) {
             val ent = level.getBlockEntity(blockPos)
             if(ent is NodeBlockEntity) {
@@ -221,6 +224,5 @@ abstract class NodeBlock(properties: Properties = Properties.of()): BaseBlock(pr
             }
 
         }
-        super.neighborChanged(blockState, level, blockPos, block, blockPos2, bl)
     }
 }

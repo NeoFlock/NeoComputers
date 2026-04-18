@@ -1,5 +1,6 @@
 {
   "neocomputers.confirm": "Confirm",
   "neocomputers.cancel": "Cancel",
-  "block.neocomputers.combustgen": "Combustion Generator"
+  "block.neocomputers.combustgen": "Combustion Generator",
+  "block.neocomputers.redio": "Redstone I/O"
 }

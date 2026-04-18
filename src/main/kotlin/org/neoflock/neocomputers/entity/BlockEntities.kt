@@ -70,6 +70,11 @@ object BlockEntities {
             ::CombustionGeneratorBlockEntity, mutableSetOf(Blocks.COMBUSTGEN_BLOCK.get()), BullshitFix()
         )
     }
+    val REDSTONEIO_ENTITY: RegistrySupplier<BlockEntityType<CombustionGeneratorBlockEntity>> = BLOCKENTITIES.register("redio") {
+        BlockEntityType(
+            ::CombustionGeneratorBlockEntity, mutableSetOf(Blocks.REDSTONEIO_BLOCK.get()), BullshitFix()
+        )
+    }
 
     fun registerPowerBlocks() {
         PowerManager.registerPowerBlockEntity(CAPACITOR_ENTITY.get())

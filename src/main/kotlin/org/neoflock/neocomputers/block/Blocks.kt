@@ -31,6 +31,7 @@ object Blocks {
     val CAPACITOR_BLOCK3: RegistrySupplier<Block> = BaseBlock.register("capacitor3") { CapacitorBlock(3) }
     val SOLARGEN_BLOCK: RegistrySupplier<Block> = BaseBlock.register("solargen") { SolarGeneratorBlock() }
     val COMBUSTGEN_BLOCK: RegistrySupplier<Block> = BaseBlock.register("combustgen") { CombustionGeneratorBlock() }
+    val REDSTONEIO_BLOCK: RegistrySupplier<Block> = BaseBlock.register("redio") { RedstoneIOBlock() }
 
     fun registerBlockItems() {
         BLOCKS.forEach(Consumer { sup: RegistrySupplier<Block> ->
