@@ -19,7 +19,7 @@ class SolarGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState) : No
 
     override fun tickNode(level: Level) {
         super.tickNode(level)
-        val l = level ?: return
+        val l = level
         if(l.isDay) {
             node.giveEnergy(energyPerTick)
         }
