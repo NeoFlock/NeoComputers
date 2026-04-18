@@ -20,6 +20,7 @@ import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.entity.ScreenEntity
 import org.neoflock.neocomputers.gui.menu.Menus
+import org.neoflock.neocomputers.gui.menu.ScreenMenu
 import org.neoflock.neocomputers.network.Networking
 
 class ScreenBlock() : NodeBlock() {

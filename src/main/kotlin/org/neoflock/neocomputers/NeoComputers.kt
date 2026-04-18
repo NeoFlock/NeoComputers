@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerPlayer
 import org.neoflock.neocomputers.block.NodeBlock
 import org.neoflock.neocomputers.block.NodeBlockEntity
 import org.neoflock.neocomputers.block.NodeSynchronizer
+import org.neoflock.neocomputers.gui.render.ScreenRenderer
 import org.neoflock.neocomputers.item.Items
 import org.neoflock.neocomputers.item.Tabs
 import org.neoflock.neocomputers.network.Networking
@@ -40,7 +41,6 @@ object NeoComputers {
         BlockEntities.BLOCKENTITIES.register()
         BlockEntities.registerPowerBlocks()
         Menus.MENUS.register()
-        Menus.registerScreens()
         Tabs.TABS.register()
 
         ClientLifecycleEvent.CLIENT_SETUP.register {
@@ -48,16 +48,11 @@ object NeoComputers {
         }
         ClientLifecycleEvent.CLIENT_STARTED.register {
             FontProvider.load(ResourceLocation.fromNamespaceAndPath(MODID, "font/unscii.hex"))
+            ScreenRenderer.genUnboundTex();
+        }
 
-            val buffer: ArrayList<BufferRenderer.GPUChar> = arrayListOf(BufferRenderer.GPUChar('h'), BufferRenderer.GPUChar('a'), BufferRenderer.GPUChar('i'))
-            for (i in 0..<(400-3)) {
-                buffer.add(BufferRenderer.GPUChar(' '))
-            }
-            val bufferRenderer = BufferRenderer(20, 20, ResourceLocation.fromNamespaceAndPath(MODID, "screen/test"), buffer)
-            bufferRenderer.drawBuffer()
-            // bufferRenderer.dump("/home/mewhenthe/code/NeoComputers/dump.png") // NOTE: CHANGE THIS BEFORE RUNNING!!!!
-            bufferRenderer.clean()
-
+        ClientLifecycleEvent.CLIENT_STOPPING.register {
+            ScreenRenderer.cleanUnboundTex()
         }
 
         TickEvent.SERVER_POST.register {

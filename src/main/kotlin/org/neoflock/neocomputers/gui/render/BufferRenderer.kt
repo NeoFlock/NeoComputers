@@ -11,14 +11,9 @@ import java.io.File
 import kotlin.experimental.and
 import kotlin.experimental.xor
 
-class BufferRenderer(width: Int, height: Int, id: ResourceLocation, buffer: MutableList<GPUChar>) { // TODO: NN buffer
+class BufferRenderer(private var width: Int, private var height: Int, private var id: ResourceLocation, private var buffer: MutableList<GPUChar>) { // TODO: NN buffer
     val CHARW = 8
     val CHARH = 16
-
-    private var width: Int = width;
-    private var height: Int = height;
-    private var id: ResourceLocation = id;
-    private var buffer: MutableList<GPUChar> = buffer;
 
     private var texwidth: Int = width*CHARW;
     private var texheight: Int = height*CHARH;
@@ -64,7 +59,7 @@ class BufferRenderer(width: Int, height: Int, id: ResourceLocation, buffer: Muta
         buffer[y*width+x] = c
     }
 
-    fun register() {  // i would love to do this in the constructor but kotlin quirks blahblah
+    fun register() {
         Minecraft.getInstance().textureManager.register(this.id, tex) // also idk how to unregister this
     }
 

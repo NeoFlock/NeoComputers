@@ -11,6 +11,7 @@ import net.minecraft.world.inventory.MenuType
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.gui.menu.ScreenMenu
 import org.neoflock.neocomputers.gui.screen.CombustionGeneratorScreen
+import org.neoflock.neocomputers.gui.screen.ScreenScreen
 
 object Menus {
     val MENUS: DeferredRegister<MenuType<*>> = DeferredRegister.create(NeoComputers.MODID, Registries.MENU)
@@ -20,5 +21,6 @@ object Menus {
 
     fun registerScreens() {
         MenuScreens.register(Menus.COMBUSTGEN_MENU.get(), {m: CombustionGeneratorMenu, u, comp -> CombustionGeneratorScreen(m, u, comp)})
+        MenuScreens.register(Menus.SCREEN_MENU.get(), ::ScreenScreen)
     }
 }
