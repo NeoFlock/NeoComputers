@@ -44,7 +44,7 @@ object NeoComputers {
         Tabs.TABS.register()
 
         ClientLifecycleEvent.CLIENT_SETUP.register {
-            MenuRegistry.registerScreenFactory(Menus.SCREEN_MENU.get(), ::ScreenScreen)
+            Menus.registerScreens()
         }
         ClientLifecycleEvent.CLIENT_STARTED.register {
             FontProvider.load(ResourceLocation.fromNamespaceAndPath(MODID, "font/unscii.hex"))
