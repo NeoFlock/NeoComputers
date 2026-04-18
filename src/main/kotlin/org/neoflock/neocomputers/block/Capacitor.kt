@@ -29,10 +29,12 @@ open class CapacitorEntity(val capacity: Long, type: BlockEntityType<*>, pos: Bl
     }
 
     override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
+        super.loadAdditional(compoundTag, provider)
         node.energy = min(compoundTag.getLong("energy"), node.energyCapacity)
     }
 
     override fun saveAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
+        super.saveAdditional(compoundTag, provider)
         compoundTag.putLong("energy", node.energy)
     }
 }

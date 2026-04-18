@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.util.RandomSource
+import net.minecraft.world.Containers
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
@@ -73,5 +74,16 @@ class CombustionGeneratorBlock : NodeBlock, EntityBlock {
             level.addParticle(ParticleTypes.SMOKE, x+0.5, y+1, z+0.5, 0.0, 0.0, 0.0)
             level.addParticle(ParticleTypes.FLAME, x+0.5, y+1, z+0.5, 0.0, 0.0, 0.0)
         }
+    }
+
+    override fun onRemove(
+        blockState: BlockState,
+        level: Level,
+        blockPos: BlockPos,
+        blockState2: BlockState,
+        bl: Boolean
+    ) {
+        Containers.dropContentsOnDestroy(blockState, blockState2, level, blockPos)
+        super.onRemove(blockState, level, blockPos, blockState2, bl)
     }
 }
