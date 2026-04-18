@@ -10,7 +10,7 @@ import org.neoflock.neocomputers.NeoComputers
 import java.util.function.Supplier
 import com.google.common.base.Suppliers
 
-open class BaseBlock : Block(BlockBehaviour.Properties.of()) { // TODO: create a TieredBaseBlock class that extends this or something
+open class BaseBlock(properties: Properties = Properties.of()) : Block(properties) { // TODO: create a TieredBaseBlock class that extends this or something
     // val tier: Int
 
     companion object Registry {

@@ -15,12 +15,12 @@ object PowerManager {
         //? if fabric {
         EnergyStorage.SIDED.registerForBlockEntity({
             entity, dir -> object : EnergyStorage {
-                override fun getAmount() = entity.node.getEnergy()
-                override fun getCapacity() = entity.node.getEnergyCapacity()
-                override fun supportsExtraction() = entity.node.getPowerRole() != PowerRole.CONSUMER
-                override fun supportsInsertion() = entity.node.getPowerRole() != PowerRole.GENERATOR
+                override fun getAmount() = entity.node.energy
+                override fun getCapacity() = entity.node.energyCapacity
+                override fun supportsExtraction() = entity.node.powerRole != PowerRole.CONSUMER
+                override fun supportsInsertion() = entity.node.powerRole != PowerRole.GENERATOR
                 override fun extract(maxAmount: Long, transaction: TransactionContext?): Long {
-                    if(entity.node.getPowerRole() == PowerRole.CONSUMER) return 0
+                    if(entity.node.powerRole == PowerRole.CONSUMER) return 0
                     val taken = entity.node.withdrawEnergy(maxAmount)
                     transaction?.addCloseCallback {
                         ctx, res -> if(res.wasAborted() || !res.wasCommitted()) entity.node.giveEnergy(taken)
@@ -28,7 +28,7 @@ object PowerManager {
                     return taken
                 }
                 override fun insert(maxAmount: Long, transaction: TransactionContext?): Long {
-                    if(entity.node.getPowerRole() == PowerRole.GENERATOR) return 0
+                    if(entity.node.powerRole == PowerRole.GENERATOR) return 0
                     val given = entity.node.giveEnergy(maxAmount)
                     transaction?.addCloseCallback { ctx, res ->
                         if (res.wasAborted() || !res.wasCommitted()) entity.node.withdrawEnergy(given)

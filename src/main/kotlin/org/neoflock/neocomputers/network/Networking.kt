@@ -2,6 +2,7 @@ package org.neoflock.neocomputers.network
 
 import net.minecraft.core.BlockPos
 import org.neoflock.neocomputers.NeoComputers
+import java.util.UUID
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -46,26 +47,35 @@ object Networking {
     open class Node {
         val connections = mutableSetOf<Node>()
         private var reachableCache: Set<Node>? = null
+        open var address = UUID.randomUUID()
 
-        open fun getReachability() = Visibility.NETWORK
-        open fun getPowerRole() = PowerRole.CONSUMER
-        open fun getEnergy(): Long = 0
+        open var reachability = Visibility.NETWORK
+        open var powerRole = PowerRole.CONSUMER
+        open var energy: Long = 0
+        open var energyCapacity: Long = 0
         // give energy, returns how much was actually given
         // cannot exceed amount specified
-        open fun giveEnergy(amount: Long): Long = 0
+        open fun giveEnergy(amount: Long): Long {
+            val maximum = min(amount, energyCapacity - energy)
+            energy += maximum
+            return maximum
+        }
         // take energy out, returns how much was actually taken
         // cannot exceed amount specified
-        open fun withdrawEnergy(amount: Long): Long = 0
+        open fun withdrawEnergy(amount: Long): Long {
+            val maximum = min(amount, energy)
+            energy -= maximum
+            return maximum
+        }
 
-        open fun getEnergyCapacity(): Long = 0
-        fun getChargerNodes(): Set<Node> = getReachable().filter { it.getPowerRole() != PowerRole.CONSUMER }.toSet()
-        fun totalEnergyInConnections(): Long = getChargerNodes().fold(0) { acc, node -> acc + node.getEnergy() }
-        fun maxEnergyInConnections(): Long = getChargerNodes().fold(0) { acc, node -> acc + node.getEnergyCapacity() }
+        fun getChargerNodes(): Set<Node> = getReachable().filter { it.powerRole != PowerRole.CONSUMER }.toSet()
+        fun totalEnergyInConnections(): Long = getChargerNodes().fold(0) { acc, node -> acc + node.energy }
+        fun maxEnergyInConnections(): Long = getChargerNodes().fold(0) { acc, node -> acc + node.energyCapacity }
 
         // attempts to consume
         fun consumeEnergy(energy: Long): Boolean {
             // consumes energy, returns false if not enough
-            val total = totalEnergyInConnections() + getEnergy()
+            val total = totalEnergyInConnections() + this.energy
             if(energy > total) return false
 
             var remaining = energy
@@ -82,7 +92,7 @@ object Networking {
 
         // PLEASE only call if consumer, in the name of all that is holy
         fun tryToChargeFully() {
-            var remaining = getEnergyCapacity() - getEnergy()
+            var remaining = energyCapacity - energy
             if(remaining <= 0) return
             for (charger in getChargerNodes()) {
                 if(remaining <= 0) break
@@ -101,13 +111,13 @@ object Networking {
         // only call if storage
         fun balanceStorage() {
             for(battery in getReachable()) {
-                if(battery.getPowerRole() != PowerRole.STORAGE) continue
+                if(battery.powerRole != PowerRole.STORAGE) continue
                 // its so if for example we have a battery with 2x the capacity
                 // we don't try to even the energy between them since that's just bad
                 // and might pointless delete energy over time
-                val capacityRatio = getEnergyCapacity().toDouble() / battery.getEnergyCapacity()
+                val capacityRatio = energyCapacity.toDouble() / battery.energyCapacity
 
-                val meaningfulSurplus = (battery.getEnergy() * capacityRatio - getEnergy()).toLong()
+                val meaningfulSurplus = (battery.energy * capacityRatio - energy).toLong()
 
                 if(meaningfulSurplus <= 0) {
                     // WE'RE greedy (or negligible surplus)? Do nothing
@@ -127,10 +137,10 @@ object Networking {
 
         // rob the generators
         fun stealGeneratorPower() {
-            var remaining = getEnergyCapacity() - getEnergy()
+            var remaining = energyCapacity - energy
 
             for(generator in getReachable()) {
-                if(generator.getPowerRole() != PowerRole.GENERATOR) continue
+                if(generator.powerRole != PowerRole.GENERATOR) continue
                 // rob this mf
                 val robbed = generator.withdrawEnergy(remaining)
                 val taken = giveEnergy(robbed)
@@ -142,8 +152,8 @@ object Networking {
         }
 
         open fun tick() {
-            if(getPowerRole() == PowerRole.CONSUMER) tryToChargeFully()
-            if(getPowerRole() == PowerRole.STORAGE) {
+            if(powerRole == PowerRole.CONSUMER) tryToChargeFully()
+            if(powerRole == PowerRole.STORAGE) {
                 stealGeneratorPower()
                 balanceStorage()
             }
@@ -178,7 +188,6 @@ object Networking {
         }
 
         fun computeReachable(): Set<Node> {
-            val reachability = getReachability()
             if(reachability == Visibility.NONE) {
                 return setOf();
             }

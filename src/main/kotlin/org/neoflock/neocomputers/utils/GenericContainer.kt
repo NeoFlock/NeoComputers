@@ -5,6 +5,8 @@ import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.world.Container;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.packs.resources.Resource
@@ -15,6 +17,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.block.entity.BlockEntityType
 
 // Common container interface, assumes the entire purpose is purely raw item storage
 interface GenericContainer : Container {
@@ -111,6 +114,10 @@ abstract class GenericContainerScreen<T: GenericContainerMenu>(menu: T, inventor
     open fun shouldCenterTitle() = true
     open fun shouldRenderTooltip() = true
     open fun findMenuTexture(): ResourceLocation? = null
+
+    open fun getBoundBlockEntityType(): Set<BlockEntityType<*>> = setOf()
+
+    open fun processScreenStatePacket(buf: FriendlyByteBuf) {}
 
     val imageX: Int
         get() = (width - imageWidth) / 2

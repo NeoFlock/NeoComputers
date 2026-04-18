@@ -1,6 +1,9 @@
 package org.neoflock.neocomputers.block
 
+import net.minecraft.client.player.LocalPlayer
 import net.minecraft.core.BlockPos
+import net.minecraft.core.HolderLookup
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.ChatType
 import net.minecraft.network.chat.OutgoingChatMessage
 import net.minecraft.network.chat.PlayerChatMessage
@@ -19,23 +22,18 @@ import org.neoflock.neocomputers.network.PowerRole
 import kotlin.math.min
 
 open class CapacitorEntity(val capacity: Long, type: BlockEntityType<*>, pos: BlockPos, state: BlockState) : NodeBlockEntity(type, pos, state) {
-    var amountStored: Long = 0
 
     override val node = object : Networking.Node() {
-        override fun getPowerRole() = PowerRole.STORAGE
-        override fun getEnergy() = amountStored
-        override fun getEnergyCapacity() = capacity
-        override fun giveEnergy(amount: Long): Long {
-            val given = min(amount, capacity - amountStored)
-            amountStored += given
-            return given
-        }
+        override var powerRole = PowerRole.STORAGE
+        override var energyCapacity: Long = capacity
+    }
 
-        override fun withdrawEnergy(amount: Long): Long {
-            val taken = min(amount, amountStored)
-            amountStored -= taken
-            return taken
-        }
+    override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
+        node.energy = min(compoundTag.getLong("energy"), node.energyCapacity)
+    }
+
+    override fun saveAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
+        compoundTag.putLong("energy", node.energy)
     }
 }
 
@@ -61,15 +59,15 @@ class CapacitorBlock(val tier: Int) : NodeBlock()  {
         player: Player,
         blockHitResult: BlockHitResult
     ): InteractionResult {
-        if(!level.isClientSide()) {
-            val sp = player as ServerPlayer
+        if(level.isClientSide()) {
+            val p = player as LocalPlayer
             val ent = level.getBlockEntity(blockPos)
             if(ent is CapacitorEntity) {
-                if(sp.isCrouching) ent.amountStored++
-                val msg = PlayerChatMessage.system("energy: ${ent.amountStored} / ${ent.capacity} (${ent.computeEdges().size} edges, ${ent.node.getReachable().size} connected)")
-                sp.sendChatMessage(OutgoingChatMessage.create(msg), false, ChatType.bind(ChatType.CHAT, player))
+                if(p.isCrouching) ent.node.giveEnergy(1)
+                val msg = PlayerChatMessage.system("energy: ${ent.node.energy} / ${ent.capacity} (${ent.computeEdges().size} edges, ${ent.node.getReachable().size} connected)")
+                p.sendSystemMessage(OutgoingChatMessage.create(msg).content())
             }
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.SUCCESS
     }
 }
