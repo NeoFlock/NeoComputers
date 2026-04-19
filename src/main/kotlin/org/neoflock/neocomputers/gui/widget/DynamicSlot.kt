@@ -18,7 +18,7 @@ open class DynamicSlot(container: Container, slot: Int, x: Int, y: Int) : Slot(c
 
     val BACKGROUND: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/slots/slot.png")
 
-    fun draw(graphics: GuiGraphics, relX: Int, relY: Int, mouseX: Int, mouseY: Int) {
+    open fun draw(graphics: GuiGraphics, relX: Int, relY: Int, mouseX: Int, mouseY: Int) {
         RenderSystem.enableBlend() // background
         RenderSystem.setShaderTexture(0, BACKGROUND)
         RenderSystem.setShader { GameRenderer.getPositionTexShader() }
@@ -26,7 +26,7 @@ open class DynamicSlot(container: Container, slot: Int, x: Int, y: Int) : Slot(c
         RenderSystem.disableBlend()
     }
 
-    private fun drawQuad(x: Int, y: Int, width: Int, height: Int, u1: Float, v1: Float, u2: Float, v2: Float) {
+    fun drawQuad(x: Int, y: Int, width: Int, height: Int, u1: Float, v1: Float, u2: Float, v2: Float) {
         var t: Tesselator = Tesselator.getInstance()
         var builder: BufferBuilder = t.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
 

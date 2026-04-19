@@ -1,5 +1,6 @@
 package org.neoflock.neocomputers.gui.menu;
 
+import net.minecraft.world.Container
 import net.minecraft.world.SimpleContainer
 import net.minecraft.world.entity.player.Inventory
 import org.neoflock.neocomputers.gui.menu.Menus;
@@ -7,18 +8,32 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.item.ItemStack
+import org.neoflock.neocomputers.gui.widget.ComponentRoles
+import org.neoflock.neocomputers.gui.widget.ComponentSlot
+import org.neoflock.neocomputers.gui.widget.ComponentSlotRequirement
 import org.neoflock.neocomputers.gui.widget.DynamicSlot
 import org.neoflock.neocomputers.utils.GenericContainerMenu
 
 class CaseMenu : GenericContainerMenu {
+    constructor(i: Int, inv: Inventory) : this(i, inv, SimpleContainer(7))
 
-    constructor(i: Int, inv: Inventory) : super(Menus.CASE_MENU.get(), i, SimpleContainer(10)) {
+    open val eepromRequirement = ComponentSlotRequirement(1, ComponentRoles.FIRMWARE)
+    open val slotRequirements = listOf(
+        listOf(ComponentSlotRequirement(1, ComponentRoles.CARD), ComponentSlotRequirement(1, ComponentRoles.CARD)),
+        listOf(ComponentSlotRequirement(1, ComponentRoles.COMPUTE), ComponentSlotRequirement(1, ComponentRoles.MEMORY), ComponentSlotRequirement(1, ComponentRoles.MEMORY)),
+        listOf(ComponentSlotRequirement(1, ComponentRoles.STORAGE)),
+    )
+
+    constructor(i: Int, inv: Inventory, container: Container) : super(Menus.CASE_MENU.get(), i, container) {
         this.addInventorySlots(inv, 8, 84)
 
-        for (col in 0..2) {
-            for (row in 0..2) {
-                var i = col*3+row
-                this.addSlot(DynamicSlot(this.container!!, i, 98+(col*22), 18*(row+1)-2))
+        this.addSlot(ComponentSlot(this.container!!, 0, 20, 34, eepromRequirement))
+
+        var i = 1
+        for ((col, slotCol) in slotRequirements.withIndex()) {
+            for ((row, slotReq) in slotCol.withIndex()) {
+                this.addSlot(ComponentSlot(this.container!!, i, 98+(col*22), 18*(row+1)-2, slotReq))
+                i++
             }
         }
         // for (int col=1; col<4; col++) {
@@ -30,7 +45,4 @@ class CaseMenu : GenericContainerMenu {
         //     }
         // }
     }
-
-    override fun stillValid(player: Player) = true // TODO: implement this properly
-    override fun quickMoveStack(player: Player, i: Int): ItemStack = ItemStack.EMPTY // there's no container here anyways
 }

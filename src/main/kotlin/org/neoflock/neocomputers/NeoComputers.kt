@@ -22,6 +22,7 @@ import org.neoflock.neocomputers.block.NodeBlock
 import org.neoflock.neocomputers.block.NodeBlockEntity
 import org.neoflock.neocomputers.block.NodeSynchronizer
 import org.neoflock.neocomputers.gui.render.ScreenRenderer
+import org.neoflock.neocomputers.gui.widget.ComponentRoles
 import org.neoflock.neocomputers.item.Items
 import org.neoflock.neocomputers.item.Tabs
 import org.neoflock.neocomputers.network.Networking
@@ -46,6 +47,7 @@ object NeoComputers {
         BlockEntities.registerPowerBlocks()
         Menus.MENUS.register()
         Tabs.TABS.register()
+        ComponentRoles.mapDefaultTextures()
         // i dont know why architectury wants two lambdas but whatever
         EnvExecutor.runInEnv(Env.CLIENT) {{
             ClientLifecycleEvent.CLIENT_SETUP.register {
