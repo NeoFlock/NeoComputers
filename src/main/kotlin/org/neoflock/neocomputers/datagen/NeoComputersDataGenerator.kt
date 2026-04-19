@@ -8,6 +8,6 @@ import org.neoflock.neocomputers.NeoComputers
 class NeoComputersDataGenerator : DataGeneratorEntrypoint {
     override fun onInitializeDataGenerator(generator: FabricDataGenerator) {
         val pack: FabricDataGenerator.Pack = generator.createPack()
-        pack.addProvider { o -> ModelGenerator(o as FabricDataOutput) }
+        pack.addProvider(::ModelGenerator)
     }
 }
