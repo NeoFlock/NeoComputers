@@ -48,6 +48,9 @@ object Tabs {
                 output.accept(ItemStack(Items.WLAN0.get()))
                 output.accept(ItemStack(Items.WLAN1.get()))
 
+                output.accept(ItemStack(Items.REDIO0.get()))
+                output.accept(ItemStack(Items.REDIO1.get()))
+
                 output.accept(ItemStack(Items.EE0.get()))
 
                 val luaBios = ItemStack(Items.EE0.get())

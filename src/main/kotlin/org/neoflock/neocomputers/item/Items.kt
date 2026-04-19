@@ -43,4 +43,7 @@ object Items {
     val HDD0 = ITEMS.register("hdd0") { HardDisk0() }
     val HDD1 = ITEMS.register("hdd1") { HardDisk1() }
     val HDD2 = ITEMS.register("hdd2") { HardDisk2() }
+
+    val REDIO0 = ITEMS.register("redio0") { RedstoneCard0() }
+    val REDIO1 = ITEMS.register("redio1") { RedstoneCard1() }
 }

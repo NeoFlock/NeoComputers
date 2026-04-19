@@ -3,6 +3,8 @@
   "neocomputers.cancel": "Cancel",
   "block.neocomputers.combustgen": "Combustion Generator",
   "block.neocomputers.redio": "Redstone I/O",
+  "item.neocomputers.redio0": "Redstone Card (Tier 1)",
+  "item.neocomputers.redio1": "Redstone Card (Tier 2)",
   "block.neocomputers.solargen": "Solar Generator",
   "block.neocomputers.screen": "Screen (Untiered)",
   "block.neocomputers.capacitor": "Small Capacitor",
