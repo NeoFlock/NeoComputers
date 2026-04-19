@@ -453,3 +453,6 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /.kotlin/
+
+
+/versions/*/src
