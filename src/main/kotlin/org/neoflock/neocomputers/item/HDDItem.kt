@@ -9,14 +9,12 @@ import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.utils.Formatting
 import java.util.UUID
 
-fun getEEPROMProperties(): Item.Properties = Item.Properties()
-    .component(DataComponents.EEPROM_CODE, "")
-    .component(DataComponents.EEPROM_DATA, "")
+fun getDiskProperties(): Item.Properties = Item.Properties()
     .component(DataComponents.LABEL, "")
     .component(DataComponents.READONLY, false)
 
-open class EEPROMItem(val tier: Int, val codeCapacity: Int, val dataCapacity: Int): Item(getEEPROMProperties()), ComponentItem {
-    override fun getComponentRoles(itemStack: ItemStack): Set<String> = setOf(ComponentRoles.FIRMWARE)
+open class HardDiskItem(val tier: Int, val capacity: Long): Item(getDiskProperties()), ComponentItem {
+    override fun getComponentRoles(itemStack: ItemStack): Set<String> = setOf(ComponentRoles.STORAGE)
 
     override fun getComponentTier(itemStack: ItemStack): Int = tier
 
@@ -38,18 +36,13 @@ open class EEPROMItem(val tier: Int, val codeCapacity: Int, val dataCapacity: In
         tooltipFlag: TooltipFlag
     ) {
         if(tooltipFlag.isAdvanced) {
-            val code = itemStack.get(DataComponents.EEPROM_CODE) ?: ""
-            val data = itemStack.get(DataComponents.EEPROM_DATA) ?: ""
             val addr = itemStack.get(DataComponents.ADDRESS)
             val readonly = itemStack.get(DataComponents.READONLY) ?: false
-            val codeSize = code.encodeToByteArray().size
-            val dataSize = data.encodeToByteArray().size
+            val spaceUsed: Long = 0
             val addrComp = if(addr == null) Component.translatable("neocomputers.noaddr") else Component.literal(addr)
             list.addLast(addrComp)
-            list.addLast(Component.translatable("neocomputers.eeprom.codeused", Formatting.formatMemory(codeSize.toLong()),
-                Formatting.formatMemory(codeCapacity.toLong())))
-            list.addLast(Component.translatable("neocomputers.eeprom.dataused", Formatting.formatMemory(dataSize.toLong()),
-                Formatting.formatMemory(dataCapacity.toLong())))
+            list.addLast(Component.translatable("neocomputers.disk.spaceused", Formatting.formatMemory(spaceUsed),
+                Formatting.formatMemory(capacity)))
             list.addLast(Component.translatable(if(readonly) "neocomputers.readonly" else "neocomputers.readwrite"))
         }
         super.appendHoverText(itemStack, tooltipContext, list, tooltipFlag)
@@ -64,4 +57,6 @@ open class EEPROMItem(val tier: Int, val codeCapacity: Int, val dataCapacity: In
     }
 }
 
-class EEPROM0: EEPROMItem(1, 4096, 256)
+class HardDisk0: HardDiskItem(1, 1 shl 20)
+class HardDisk1: HardDiskItem(2, 2 shl 20)
+class HardDisk2: HardDiskItem(3, 4 shl 20)

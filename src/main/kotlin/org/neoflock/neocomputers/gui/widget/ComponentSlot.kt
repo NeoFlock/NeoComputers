@@ -34,6 +34,10 @@ object ComponentRoles {
     val CONTAINER = "container"
     val TABLET = "tablet"
     val RACK_MOUNTABLE = "rack"
+    // Conventional network cards, like LAN, WLAN0, WLAN1, etc.
+    val NETWORK = "network"
+    // Internet cards
+    val INET = "internet"
 
     val MISSING_ROLE_TEXTURE = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/slots/na.png")
 
@@ -59,6 +63,9 @@ object ComponentRoles {
             TOOL to "tool",
             UPGRADE to "upgrade",
             RACK_MOUNTABLE to "rack_mountable",
+            // TODO: give them proper textures
+            NETWORK to "card",
+            INET to "card",
         )
         for((role, tex) in core) {
             mapTexture(role, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/slots/$tex.png"))

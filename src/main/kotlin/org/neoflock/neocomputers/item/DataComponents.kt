@@ -12,6 +12,8 @@ object DataComponents {
         DataComponentType.builder<String>().persistent(Codec.STRING).build())
     val LABEL = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "label"),
         DataComponentType.builder<String>().persistent(Codec.STRING).build())
+    val READONLY = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "readonly"),
+        DataComponentType.builder<Boolean>().persistent(Codec.BOOL).build())
     val EEPROM_CODE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "eeprom_code"),
         DataComponentType.builder<String>().persistent(Codec.STRING).build())
     val EEPROM_DATA = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "eeprom_data"),

@@ -3,6 +3,8 @@ package org.neoflock.neocomputers.block
 import dev.architectury.networking.NetworkManager
 import io.netty.buffer.Unpooled
 import net.minecraft.core.BlockPos
+import net.minecraft.core.HolderLookup
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
@@ -92,6 +94,7 @@ abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: Bl
 
     fun initNetworking(): NodeBlockEntity {
         Networking.addNode(node)
+        invalidateNodeState()
         return this
     }
 
@@ -173,6 +176,17 @@ abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: Bl
     override fun setRemoved() {
         super.setRemoved()
         Networking.removeNode(node)
+    }
+
+    override fun clearRemoved() {
+        super.clearRemoved()
+        initNetworking()
+    }
+
+    override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
+        super.loadAdditional(compoundTag, provider)
+        invalidateNodeState()
+        computeEdges().forEach { it.invalidateNodeState() }
     }
 }
 
