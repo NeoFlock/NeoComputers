@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "up": "neocomputers:block/solargen_top",
+    "down": "neocomputers:block/solargen_back",
+    "north": "neocomputers:block/solargen_back",
+    "south": "neocomputers:block/solargen_back",
+    "east": "neocomputers:block/solargen_side",
+    "west": "neocomputers:block/solargen_side",
+    "particle": "neocomputers:block/solargen_top"
+  }
+}

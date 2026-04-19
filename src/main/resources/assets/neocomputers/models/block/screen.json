@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "up": "neocomputers:block/screen_top",
+    "down": "neocomputers:block/screen_bottom",
+    "north": "neocomputers:block/screen_front",
+    "south": "neocomputers:block/screen_back",
+    "east": "neocomputers:block/screen_side",
+    "west": "neocomputers:block/screen_side",
+    "particle": "neocomputers:block/screen_top"
+  }
+}
