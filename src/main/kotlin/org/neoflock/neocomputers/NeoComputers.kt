@@ -3,6 +3,7 @@ package org.neoflock.neocomputers
 import dev.architectury.event.events.client.ClientLifecycleEvent
 import dev.architectury.event.events.common.PlayerEvent
 import dev.architectury.event.events.common.TickEvent
+import dev.architectury.impl.NetworkAggregator
 import dev.architectury.networking.NetworkManager
 import net.minecraft.resources.ResourceLocation
 import org.neoflock.neocomputers.block.Blocks
@@ -11,8 +12,11 @@ import org.neoflock.neocomputers.gui.buffer.BufferRenderer
 import org.neoflock.neocomputers.gui.menu.Menus
 import org.neoflock.neocomputers.gui.screen.ScreenScreen
 import dev.architectury.registry.menu.MenuRegistry
+import dev.architectury.utils.Env
+import dev.architectury.utils.EnvExecutor
 import net.minecraft.client.Minecraft
 import net.minecraft.client.player.LocalPlayer
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.level.ServerPlayer
 import org.neoflock.neocomputers.block.NodeBlock
 import org.neoflock.neocomputers.block.NodeBlockEntity
@@ -42,18 +46,20 @@ object NeoComputers {
         BlockEntities.registerPowerBlocks()
         Menus.MENUS.register()
         Tabs.TABS.register()
+        // i dont know why architectury wants two lambdas but whatever
+        EnvExecutor.runInEnv(Env.CLIENT) {{
+            ClientLifecycleEvent.CLIENT_SETUP.register {
+                Menus.registerScreens()
+            }
+            ClientLifecycleEvent.CLIENT_STARTED.register {
+                FontProvider.load(ResourceLocation.fromNamespaceAndPath(MODID, "font/unscii.hex"))
+                ScreenRenderer.genUnboundTex();
+            }
 
-        ClientLifecycleEvent.CLIENT_SETUP.register {
-            Menus.registerScreens()
-        }
-        ClientLifecycleEvent.CLIENT_STARTED.register {
-            FontProvider.load(ResourceLocation.fromNamespaceAndPath(MODID, "font/unscii.hex"))
-            ScreenRenderer.genUnboundTex();
-        }
-
-        ClientLifecycleEvent.CLIENT_STOPPING.register {
-            ScreenRenderer.cleanUnboundTex()
-        }
+            ClientLifecycleEvent.CLIENT_STOPPING.register {
+                ScreenRenderer.cleanUnboundTex()
+            }
+        }}
 
         TickEvent.SERVER_POST.register {
             Networking.tickAllNodes()
@@ -69,24 +75,33 @@ object NeoComputers {
             player ->
             NodeSynchronizer.playerScreenClosed(player)
         }
+        // we have to do this because the datagen task runs in the physical server
+        EnvExecutor.runInEnv(Env.CLIENT) {{
+            NetworkManager.registerReceiver(NetworkManager.s2c(),NodeSynchronizer.StatePayload.TYPE, NodeSynchronizer.StatePayload.CODEC, {
+                    packet, ctx ->
+                val level = ctx.player.level()
+                val ent = level.getBlockEntity(packet.blockPos)
+                if(ent is NodeBlockEntity) {
+                    ent.syncWithUpstream(packet.buffer)
+                }
+            })
 
-        NetworkManager.registerReceiver(NetworkManager.s2c(),NodeSynchronizer.StatePayload.TYPE, NodeSynchronizer.StatePayload.CODEC, {
-            packet, ctx ->
-            val level = ctx.player.level()
-            val ent = level.getBlockEntity(packet.blockPos)
-            if(ent is NodeBlockEntity) {
-                ent.syncWithUpstream(packet.buffer)
-            }
-        })
+            NetworkManager.registerReceiver(NetworkManager.s2c(),NodeSynchronizer.ScreenPayload.TYPE, NodeSynchronizer.ScreenPayload.CODEC, {
+                    packet, ctx ->
+                val scr = Minecraft.getInstance().screen
+                if(scr is GenericContainerScreen<*>) {
+                    scr.processScreenStatePacket(packet.buffer)
+                }
+            })
+        }}
+        EnvExecutor.runInEnv(Env.SERVER) {{
+            // https://github.com/architectury/architectury-api/issues/518
+            NetworkManager.registerS2CPayloadType(NodeSynchronizer.StatePayload.TYPE, NodeSynchronizer.StatePayload.CODEC)
+            NetworkManager.registerS2CPayloadType(NodeSynchronizer.ScreenPayload.TYPE, NodeSynchronizer.ScreenPayload.CODEC)
 
-        NetworkManager.registerReceiver(NetworkManager.s2c(),NodeSynchronizer.ScreenPayload.TYPE, NodeSynchronizer.ScreenPayload.CODEC, {
-                packet, ctx ->
-            val scr = Minecraft.getInstance().screen
-            if(scr is GenericContainerScreen<*>) {
-                scr.processScreenStatePacket(packet.buffer)
-            }
-        })
-        
+        }}
+
+
         LOGGER.info("Registered!")
         //LOGGER.info("Started mod in %s loader".formatted(NeoComputersInit.PLATFORM.getModloader()))
         //LOGGER.info("Kotlin: %s".formatted(NeoComputers.hello()))

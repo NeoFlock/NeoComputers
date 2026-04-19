@@ -66,7 +66,8 @@ dependencies {
         //some features (like automatic resource loading from non vanilla namespaces) work only with fabric API installed
         //for example translations from assets/modid/lang/en_us.json won't be working, same stuff with textures
         //but we keep runtime only to not accidentally depend on fabric's api, because it doesn't exist in neo/forge
-        modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${mod.dep("fabric_version")}")
+        //modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${mod.dep("fabric_version")}")
+        modImplementation("net.fabricmc.fabric-api:fabric-api:${mod.dep("fabric_version")}")
         modImplementation("net.fabricmc:fabric-language-kotlin:1.13.10+kotlin.2.3.20")
         modApi("dev.architectury:architectury-fabric:${archversion}")
         fun getTeamRebornEnergy(): String {
@@ -256,4 +257,15 @@ tasks.processResources {
 tasks.build {
     group = "versioned"
     description = "Must run through 'chiseledBuild'"
+}
+if (loader == "fabric") {
+    fabricApi {
+        if (minecraftVersionToNum(minecraft) > minecraftVersionToNum("1.21.4")) {
+            configureDataGeneration() {
+                client = true
+            }
+        } else {
+            configureDataGeneration()
+        }
+    }
 }

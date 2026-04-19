@@ -13,11 +13,14 @@
   "icon": "assets/${id}/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": [
-      "org.neoflock.neocomputers.platforms.fabric.NeoComputersFabric"
+    "fabric-datagen": [
+      "org.neoflock.neocomputers.datagen.NeoComputersDataGenerator"
     ],
     "modmenu": [
       "org.neoflock.neocomputers.platforms.fabric.ModMenuIntegration"
+    ],
+    "main": [
+      "org.neoflock.neocomputers.platforms.fabric.NeoComputersFabric"
     ]
   },
   "mixins": [
