@@ -3,5 +3,9 @@
   "neocomputers.cancel": "Cancel",
   "block.neocomputers.combustgen": "Combustion Generator",
   "block.neocomputers.redio": "Redstone I/O",
-  "neocomputers.memory.capacity": "Capacity: %1$s"
+  "item.neocomputers.eeprom0": "EEPROM (Tier 1)",
+  "neocomputers.noaddr": "No address assigned",
+  "neocomputers.memory.capacity": "Capacity: %1$s",
+  "neocomputers.eeprom.codeused": "Code Storage: %1$s / %2$s",
+  "neocomputers.eeprom.dataused": "Data Storage: %1$s / %2$s"
 }
