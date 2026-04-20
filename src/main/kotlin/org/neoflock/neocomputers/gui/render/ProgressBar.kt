@@ -27,14 +27,12 @@ import kotlin.math.ceil
 object ProgressBar { // TODO: variable length
 
     val BAR: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/bar.png")
-//    val BAROLD: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/bar_old.png")
-//    val font: Font = Minecraft.getInstance().font
 
-    fun render(guiGraphics: GuiGraphics, x: Int, y: Int, value: Long, max: Long, mouseX: Int, mouseY: Int, width: Int=142, height: Int=14, tooltipfunc: (Int) -> String?) { // NOTE: OC never uses a different width and height, changing height is not recommended
-//        RenderSystem.setShader { GameRenderer.getPositionTexShader() }
-//        RenderSystem.setShaderTexture(0, BAROLD)
-//        drawQuad(x, y, width, height, 0F, 0F, 15F, 15F)
-        renderEmptyBar(guiGraphics, x, y, width, height)
+    // NOTE: OC never uses a different width and height, changing height is not recommended
+    fun render(guiGraphics: GuiGraphics, x: Int, y: Int, value: Long, max: Long, mouseX: Int, mouseY: Int, width: Int=142, height: Int=14, tooltipfunc: (Int) -> String?) {
+        guiGraphics.blit(BAR, x, y, 1, height, 0F, 0F, 1, 14, 3, 14)
+        guiGraphics.blit(BAR, x+1, y, width-2, height, 1F, 0F, 1, 14, 3, 14)
+        guiGraphics.blit(BAR, x+width-1, y, 1, height, 2F, 0F, 1, 14, 3, 14)
 
         val frac = value.toFloat() / max.toFloat()
         val linew = ceil(frac*(width-2).toFloat())
@@ -52,33 +50,4 @@ object ProgressBar { // TODO: variable length
             guiGraphics.renderTooltip(Minecraft.getInstance().font, Component.literal(tooltip), mouseX, mouseY)
     }
 
-    private fun renderEmptyBar(graphics: GuiGraphics, x: Int, y: Int, width: Int, height: Int) {
-//        RenderSystem.setShader { GameRenderer.getPositionTexShader() }
-//        RenderSystem.setShaderTexture(0, BAR)
-        graphics.blit(BAR, x, y, 1, height, 0F, 0F, 1, 14, 3, 14)
-        graphics.blit(BAR, x+1, y, width-2, height, 1F, 0F, 1, 14, 3, 14)
-        graphics.blit(BAR, x+width-1, y, 1, height, 2F, 0F, 1, 14, 3, 14)
-//        drawQuad(graphics,x, y, 1, height, 0F, 0F, 1F, 14F, 3F, 14F) // TODO: make this use blit instead (but honestly who cares)
-//        drawQuad(graphics,x+1, y, width-2, height, 1F, 0F, 2F, 14F, 3F, 14F)
-//        drawQuad(graphics,x+width-1, y, 1, height, 2F, 0F, 3F, 14F, 3F, 14F)
-
-    }
-
-    private fun drawQuad(graphics: GuiGraphics, x: Int, y: Int, width: Int, height: Int, u1: Float, v1: Float, u2: Float, v2: Float, texwidth: Float=15F, texheight: Float=15F) { // this should really become a util func
-//        var t: Tesselator = Tesselator.getInstance()
-//        var builder: BufferBuilder = t.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
-
-//        var consumer: VertexConsumer = graphics.bufferSource().getBuffer(RenderType.gui())
-//        var pose: PoseStack = graphics.pose()
-        NeoComputers.LOGGER.info(RenderType.gui().format().toString())
-
-//        builder.addVertex(x.toFloat(), (y+height).toFloat(), 1f).setUv(u1/texwidth, v2/texheight)
-//        builder.addVertex((x+width).toFloat(), (y+height).toFloat(), 1f).setUv(u2/texwidth, v2/texheight)
-//        builder.addVertex((x+width).toFloat(), y.toFloat(), 1f).setUv(u2/texwidth, v1/texheight)
-//        builder.addVertex(x.toFloat(), y.toFloat(), 1f).setUv(u1/texwidth,v1/texheight)
-//
-
-//        BufferUploader.drawWithShader(builder.build()!!)
-
-    }
 }
