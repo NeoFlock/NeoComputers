@@ -287,11 +287,12 @@ object Networking {
 
     fun addNode(node: Node) {
         if(node in allNodes) return;
-        allNodes.forEach { it.onNodeAdded(node) }
-        allNodes.add(node);
+        allNodes.add(node)
         if(node is WirelessEndpoint) {
             wirelessNodes.add(node);
         }
+        // notify at the end so it is notified of its own creation
+        allNodes.forEach { it.onNodeAdded(node) }
     }
 
     fun addNodes(vararg nodes: Node) {
@@ -299,16 +300,17 @@ object Networking {
     }
 
     fun removeNode(node: Node) {
-        if(node !in allNodes) return;
-        allNodes.remove(node);
-        if(node is WirelessEndpoint) {
-            wirelessNodes.remove(node);
-        }
+        if(node !in allNodes) return
+        allNodes.forEach { it.onNodeRemoved(node) }
         // toList() in order to copy it
         node.connections.toList().forEach {
             node.disconnectFrom(it)
         }
-        allNodes.forEach { it.onNodeRemoved(node) }
+        // actually remove at the end so it can listen to its own removal
+        allNodes.remove(node)
+        if(node is WirelessEndpoint) {
+            wirelessNodes.remove(node);
+        }
     }
 
     fun removeNodes(vararg nodes: Node) {

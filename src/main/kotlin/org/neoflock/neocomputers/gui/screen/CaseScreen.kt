@@ -18,6 +18,8 @@ import org.neoflock.neocomputers.utils.GenericContainerScreen
 
 class CaseScreen : GenericContainerScreen<CaseMenu> {
     private val PCB: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/computer.png")
+
+    override fun shouldCenterTitle(): Boolean = false
     
     constructor(abstractContainerMenu: CaseMenu, inventory: Inventory, component: Component) : super(abstractContainerMenu, inventory, component)
     override fun renderBg(guiGraphics: GuiGraphics, f: Float, i: Int, j: Int) {

@@ -3,25 +3,19 @@ package org.neoflock.neocomputers
 import dev.architectury.event.events.client.ClientLifecycleEvent
 import dev.architectury.event.events.common.PlayerEvent
 import dev.architectury.event.events.common.TickEvent
-import dev.architectury.impl.NetworkAggregator
 import dev.architectury.networking.NetworkManager
 import net.minecraft.resources.ResourceLocation
 import org.neoflock.neocomputers.block.Blocks
 import org.neoflock.neocomputers.entity.BlockEntities
-import org.neoflock.neocomputers.gui.buffer.BufferRenderer
 import org.neoflock.neocomputers.gui.menu.Menus
-import org.neoflock.neocomputers.gui.screen.ScreenScreen
-import dev.architectury.registry.menu.MenuRegistry
 import dev.architectury.utils.Env
 import dev.architectury.utils.EnvExecutor
 import net.minecraft.client.Minecraft
-import net.minecraft.client.player.LocalPlayer
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.level.ServerPlayer
-import org.neoflock.neocomputers.block.NodeBlock
 import org.neoflock.neocomputers.block.NodeBlockEntity
 import org.neoflock.neocomputers.block.NodeSynchronizer
 import org.neoflock.neocomputers.gui.render.ScreenRenderer
+import org.neoflock.neocomputers.gui.widget.ComponentRoles
 import org.neoflock.neocomputers.item.Items
 import org.neoflock.neocomputers.item.Tabs
 import org.neoflock.neocomputers.network.Networking
@@ -46,6 +40,7 @@ object NeoComputers {
         BlockEntities.registerPowerBlocks()
         Menus.MENUS.register()
         Tabs.TABS.register()
+        ComponentRoles.mapDefaultTextures()
         // i dont know why architectury wants two lambdas but whatever
         EnvExecutor.runInEnv(Env.CLIENT) {{
             ClientLifecycleEvent.CLIENT_SETUP.register {
@@ -100,7 +95,6 @@ object NeoComputers {
             NetworkManager.registerS2CPayloadType(NodeSynchronizer.ScreenPayload.TYPE, NodeSynchronizer.ScreenPayload.CODEC)
 
         }}
-
 
         LOGGER.info("Registered!")
         //LOGGER.info("Started mod in %s loader".formatted(NeoComputersInit.PLATFORM.getModloader()))
