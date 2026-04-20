@@ -27,7 +27,7 @@ class CombustionGeneratorScreen : GenericContainerScreen<CombustionGeneratorMenu
         var relX: Int = (this.width - this.imageWidth) / 2;
         var relY: Int = (this.height - this.imageHeight) / 2;
 
-        ProgressBar.render(graphics, relX+17, relY+55, energy, energyCapacity, mouseX, mouseY, 50, 14) {
+        ProgressBar.render(graphics, relX+17, relY+55, energy, energyCapacity, mouseX, mouseY) {
             String.format("Energy: %d%% (%d/%d)", it, energy, energyCapacity)
         }
         // bar.x = imageX + 17

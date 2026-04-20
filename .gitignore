@@ -456,3 +456,6 @@ FodyWeavers.xsd
 
 
 /versions/*/src
+
+.lite_project.lua
+.config/lite-xl/**
