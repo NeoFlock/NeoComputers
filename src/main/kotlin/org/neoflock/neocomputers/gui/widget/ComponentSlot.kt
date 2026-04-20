@@ -10,6 +10,7 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.ItemLike
 import org.neoflock.neocomputers.NeoComputers
+import org.neoflock.neocomputers.entity.MachineEntity
 import org.neoflock.neocomputers.item.ComponentItem
 
 // Sort of a mis-nomer, does not need to be associated with components specifically
@@ -84,7 +85,7 @@ data class ComponentSlotRequirement(val tier: Int, val role: String) {
 
 // Tier 0 allows ALL tiers, making it completely untiered.
 // Role determines what the role is.
-class ComponentSlot(container: Container, slot: Int, x: Int, y: Int, val requirement: ComponentSlotRequirement): DynamicSlot(container, slot, x, y) {
+class ComponentSlot(container: Container, slot: Int, x: Int, y: Int, val machine: MachineEntity, val requirement: ComponentSlotRequirement): DynamicSlot(container, slot, x, y) {
     override fun draw(graphics: GuiGraphics, relX: Int, relY: Int, mouseX: Int, mouseY: Int) {
         super.draw(graphics, relX, relY, mouseX, mouseY)
         if(!hasItem()) {
@@ -116,14 +117,14 @@ class ComponentSlot(container: Container, slot: Int, x: Int, y: Int, val require
         super.set(itemStack)
         val item = itemStack.item
         if(item is ComponentItem) {
-            item.whenComponentPlaced(itemStack, requirement.role)
+            item.whenComponentPlaced(itemStack, machine, requirement.role)
         }
     }
 
     override fun onTake(player: Player, itemStack: ItemStack) {
         val item = itemStack.item
         if(item is ComponentItem) {
-            item.whenComponentTaken(itemStack, requirement.role)
+            item.whenComponentTaken(itemStack, machine, requirement.role)
         }
         super.onTake(player, itemStack)
     }

@@ -17,7 +17,7 @@ object PowerManager {
             entity, dir -> object : EnergyStorage {
                 override fun getAmount() = entity.node.energy
                 override fun getCapacity() = entity.node.energyCapacity
-                override fun supportsExtraction() = entity.node.powerRole != PowerRole.CONSUMER
+                override fun supportsExtraction() = entity.node.powerRole != PowerRole.CONSUMER && entity.node.energyCapacity > 0
                 override fun supportsInsertion() = entity.node.powerRole != PowerRole.GENERATOR
                 override fun extract(maxAmount: Long, transaction: TransactionContext?): Long {
                     if(entity.node.powerRole == PowerRole.CONSUMER) return 0

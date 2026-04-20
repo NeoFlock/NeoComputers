@@ -1,6 +1,8 @@
 package org.neoflock.neocomputers.item
 
 import net.minecraft.world.item.ItemStack
+import org.neoflock.neocomputers.entity.MachineEntity
+import org.neoflock.neocomputers.entity.MachineEvent
 import org.neoflock.neocomputers.network.Networking
 import java.util.UUID
 
@@ -14,19 +16,28 @@ interface ComponentItem {
     fun getComponentCapacity(itemStack: ItemStack): Int = 0
 
     // Component placed, node must now exist
-    fun whenComponentPlaced(itemStack: ItemStack, newRole: String) {
-        val node = toComponentNode(itemStack) ?: return
+    fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity, newRole: String) {
+        val oldNode = getComponentNode(itemStack)
+        if(oldNode != null) Networking.removeNode(oldNode) // did a mod forget to call whenComponentTaken?
+        val node = toComponentNode(itemStack, machine) ?: return
         Networking.addNode(node)
     }
 
     // Component taken, and thus removed
-    fun whenComponentTaken(itemStack: ItemStack, previousRole: String) {
-        val node = toComponentNode(itemStack) ?: return
+    fun whenComponentTaken(itemStack: ItemStack, machine: MachineEntity, previousRole: String) {
+        val node = getComponentNode(itemStack) ?: return
         Networking.removeNode(node)
     }
 
-    // To node, if applicable
-    fun toComponentNode(itemStack: ItemStack): Networking.Node?
+    // To node, if applicable. Meant to create the node, but not add it, as it will use the itemStack's address to find it again
+    fun toComponentNode(itemStack: ItemStack, machine: MachineEntity): Networking.Node?
+
+    // Gets the node associated to an item, if it exists
+    fun getComponentNode(itemStack: ItemStack): Networking.Node? {
+        val address = itemStack.get(DataComponents.ADDRESS) ?: return null
+        val uuid = UUID.fromString(address) ?: return null
+        return Networking.getNode(uuid)
+    }
 
     fun ensureHasAddress(itemStack: ItemStack): UUID {
         if(!itemStack.has(DataComponents.ADDRESS)) {
@@ -34,4 +45,6 @@ interface ComponentItem {
         }
         return UUID.fromString(itemStack.get(DataComponents.ADDRESS))
     }
+
+    fun onMachineEvent(itemStack: ItemStack, machine: MachineEntity, event: MachineEvent) {}
 }
