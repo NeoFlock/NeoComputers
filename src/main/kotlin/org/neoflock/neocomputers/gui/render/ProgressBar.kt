@@ -4,7 +4,9 @@ import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.BufferBuilder
 import com.mojang.blaze3d.vertex.BufferUploader
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
+import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.Tesselator
+import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.blaze3d.vertex.VertexFormat
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
@@ -32,12 +34,12 @@ object ProgressBar { // TODO: variable length
 //        RenderSystem.setShader { GameRenderer.getPositionTexShader() }
 //        RenderSystem.setShaderTexture(0, BAROLD)
 //        drawQuad(x, y, width, height, 0F, 0F, 15F, 15F)
-        renderEmptyBar(x, y, width, height)
+        renderEmptyBar(guiGraphics, x, y, width, height)
 
         val frac = value.toFloat() / max.toFloat()
         val linew = ceil(frac*(width-2).toFloat())
         guiGraphics.fill(
-            RenderType.guiOverlay(),
+            RenderType.gui(),
             x + 1,
             y + 1,
             x + 1 + (linew.toInt()),
@@ -45,29 +47,38 @@ object ProgressBar { // TODO: variable length
             0xFF66CC66.toInt()
         )
 
-        val tooltip = tooltipfunc((ceil(frac) * 100F).toInt()) ?: return
+        val tooltip = tooltipfunc((ceil(frac * 100F)).toInt()) ?: return
         if (mouseX > x && mouseX < x+width && mouseY > y && mouseY < y+height )
             guiGraphics.renderTooltip(Minecraft.getInstance().font, Component.literal(tooltip), mouseX, mouseY)
     }
 
-    private fun renderEmptyBar(x: Int, y: Int, width: Int, height: Int) {
-        RenderSystem.setShader { GameRenderer.getPositionTexShader() }
-        RenderSystem.setShaderTexture(0, BAR)
-        drawQuad(x, y, 1, height, 0F, 0F, 1F, 14F, 3F, 14F)
-        drawQuad(x+1, y, width-2, height, 1F, 0F, 2F, 14F, 3F, 14F)
-        drawQuad(x+width-1, y, 1, height, 2F, 0F, 3F, 14F, 3F, 14F)
+    private fun renderEmptyBar(graphics: GuiGraphics, x: Int, y: Int, width: Int, height: Int) {
+//        RenderSystem.setShader { GameRenderer.getPositionTexShader() }
+//        RenderSystem.setShaderTexture(0, BAR)
+        graphics.blit(BAR, x, y, 1, height, 0F, 0F, 1, 14, 3, 14)
+        graphics.blit(BAR, x+1, y, width-2, height, 1F, 0F, 1, 14, 3, 14)
+        graphics.blit(BAR, x+width-1, y, 1, height, 2F, 0F, 1, 14, 3, 14)
+//        drawQuad(graphics,x, y, 1, height, 0F, 0F, 1F, 14F, 3F, 14F) // TODO: make this use blit instead (but honestly who cares)
+//        drawQuad(graphics,x+1, y, width-2, height, 1F, 0F, 2F, 14F, 3F, 14F)
+//        drawQuad(graphics,x+width-1, y, 1, height, 2F, 0F, 3F, 14F, 3F, 14F)
 
     }
 
-    private fun drawQuad(x: Int, y: Int, width: Int, height: Int, u1: Float, v1: Float, u2: Float, v2: Float, texwidth: Float=15F, texheight: Float=15F) { // this should really become a util func
-        var t: Tesselator = Tesselator.getInstance()
-        var builder: BufferBuilder = t.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
+    private fun drawQuad(graphics: GuiGraphics, x: Int, y: Int, width: Int, height: Int, u1: Float, v1: Float, u2: Float, v2: Float, texwidth: Float=15F, texheight: Float=15F) { // this should really become a util func
+//        var t: Tesselator = Tesselator.getInstance()
+//        var builder: BufferBuilder = t.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
 
-        builder.addVertex(x.toFloat(), (y+height).toFloat(), 1f).setUv(u1/texwidth, v2/texheight)
-        builder.addVertex((x+width).toFloat(), (y+height).toFloat(), 1f).setUv(u2/texwidth, v2/texheight)
-        builder.addVertex((x+width).toFloat(), y.toFloat(), 1f).setUv(u2/texwidth, v1/texheight)
-        builder.addVertex(x.toFloat(), y.toFloat(), 1f).setUv(u1/texwidth,v1/texheight)
+//        var consumer: VertexConsumer = graphics.bufferSource().getBuffer(RenderType.gui())
+//        var pose: PoseStack = graphics.pose()
+        NeoComputers.LOGGER.info(RenderType.gui().format().toString())
 
-        BufferUploader.drawWithShader(builder.build()!!)
+//        builder.addVertex(x.toFloat(), (y+height).toFloat(), 1f).setUv(u1/texwidth, v2/texheight)
+//        builder.addVertex((x+width).toFloat(), (y+height).toFloat(), 1f).setUv(u2/texwidth, v2/texheight)
+//        builder.addVertex((x+width).toFloat(), y.toFloat(), 1f).setUv(u2/texwidth, v1/texheight)
+//        builder.addVertex(x.toFloat(), y.toFloat(), 1f).setUv(u1/texwidth,v1/texheight)
+//
+
+//        BufferUploader.drawWithShader(builder.build()!!)
+
     }
 }
