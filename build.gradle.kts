@@ -42,11 +42,29 @@ repositories {
         name = "Kotlin for Forge"
         setUrl("https://thedarkcolour.github.io/KotlinForForge/")
     }
+    maven {
+        name = "ParchmentMC"
+        setUrl("https://maven.parchmentmc.org")
+    }
 }
 dependencies {
     minecraft("com.mojang:minecraft:$minecraft")
-    mappings(loom.officialMojangMappings())
+//    mappings(loom.officialMojangMappings())
 
+    mappings(loom.layered(){
+        var date = ""
+        when (minecraft) {
+            "1.20.1" -> date = "2023.09.03"
+            "1.20.4" -> date = "2024.04.14"
+            "1.21.1" -> date = "2024.11.17"
+            "1.21.9" -> date = "2025.10.05"
+            "1.21.11" -> date = "2025.12.20"
+            else -> date="idk lol 67"
+        }
+
+        officialMojangMappings() // TODO: versions
+        parchment("org.parchmentmc.data:parchment-${minecraft}:${date}@zip")
+    })
     var archversion = "idk"
     when(minecraft) { // NOTE: add more entries if you want to add more versions
         "1.20.1" -> archversion = "9.2.14"
