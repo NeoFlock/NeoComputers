@@ -24,15 +24,19 @@ import kotlin.math.ceil
 
 // #66CC66
 
-object ProgressBar { // TODO: variable length
+object ProgressBar {
 
-    val BAR: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/bar.png")
-
-    // NOTE: OC never uses a different width and height, changing height is not recommended
+    // NOTE: OC never uses a different width and height
     fun render(guiGraphics: GuiGraphics, x: Int, y: Int, value: Long, max: Long, mouseX: Int, mouseY: Int, width: Int=142, height: Int=14, tooltipfunc: (Int) -> String?) {
-        guiGraphics.blit(BAR, x, y, 1, height, 0F, 0F, 1, 14, 3, 14)
-        guiGraphics.blit(BAR, x+1, y, width-2, height, 1F, 0F, 1, 14, 3, 14)
-        guiGraphics.blit(BAR, x+width-1, y, 1, height, 2F, 0F, 1, 14, 3, 14)
+        RenderSystem.disableBlend()
+        guiGraphics.fill(x, y, x+width-1, y+1, 0xFF373737.toInt()) // top left corner + top edge
+        guiGraphics.fill(x, y+1, x+1, y+height-1, 0xFF373737.toInt()) // left edge
+
+        guiGraphics.fill(x, y+height-1, x+1, y+height, 0xFF8B8B8B.toInt()) // bottom left corner
+        guiGraphics.fill(x+width-1, y, x+width, y+1, 0xFF8B8B8B.toInt()) // top right corner
+
+        guiGraphics.fill(x+1, y+height-1, x+width, y+height, 0xFFFFFFFF.toInt()) // bottom right corner + bottom edge
+        guiGraphics.fill(x+width-1, y+height-1, x+width, y+1, 0xFFFFFFFF.toInt()) // right edge
 
         val frac = value.toFloat() / max.toFloat()
         val linew = ceil(frac*(width-2).toFloat())
