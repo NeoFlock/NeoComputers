@@ -1,7 +1,27 @@
 {
   "variants": {
-    "": {
+    "facing=north": {
       "model": "neocomputers:block/screen"
+    },
+    "facing=east": {
+      "model": "neocomputers:block/screen",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "neocomputers:block/screen",
+      "y": -90
+    },
+    "facing=south": {
+      "model": "neocomputers:block/screen",
+      "y": 180
+    },
+    "facing=up": {
+      "model": "neocomputers:block/screen",
+      "x": -90
+    },
+    "facing=down": {
+      "model": "neocomputers:block/screen",
+      "x": 90
     }
   }
 }
