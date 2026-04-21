@@ -2,6 +2,7 @@ package org.neoflock.neocomputers.entity
 
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.world.level.Level
 import org.neoflock.neocomputers.item.ComponentItem
 import org.neoflock.neocomputers.network.Networking
 import java.time.Duration
@@ -15,7 +16,8 @@ data class MachinePowerEvent(override val machine: MachineEntity, val nowRunning
 
 interface MachineEntity {
     // Block position of machine, for wireless tech
-    fun getBlockPosition(): BlockPos
+    fun getMachineBlockPosition(): BlockPos
+    fun getMachineLevel(): Level
 
     fun beepAsync(frequency: Int, duration: Duration, volume: Double): Boolean
 

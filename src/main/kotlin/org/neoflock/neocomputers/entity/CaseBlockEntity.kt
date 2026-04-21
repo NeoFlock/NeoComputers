@@ -20,6 +20,7 @@ import net.minecraft.world.MenuProvider
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.CaseBlock
@@ -67,13 +68,8 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     }
 
     override fun encodeScreenData(player: ServerPlayer, packet: FriendlyByteBuf) {
+        super.encodeScreenData(player, packet)
         packet.writeBoolean(isOn)
-        packet.writeLong(node.energy)
-        packet.writeLong(node.energyCapacity)
-        packet.writeLong(getMachineMemoryUsed())
-        packet.writeLong(getMachineMemoryTotal())
-        packet.writeLong(getMachineComponentsUsed())
-        packet.writeLong(getMachineMemoryTotal())
     }
 
     val redstoneIn = Array(Direction.entries.size) {0}
@@ -110,14 +106,11 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
             // Rising edge
             start()
         }
-        if(newValue == 0) {
-            // Not accurate but whatevs
-            stop()
-        }
         setChanged()
     }
 
-    override fun getBlockPosition(): BlockPos = blockPos
+    override fun getMachineBlockPosition(): BlockPos = blockPos
+    override fun getMachineLevel(): Level = level!!
 
     override fun isRunning(): Boolean = isOn
 

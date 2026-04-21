@@ -1,6 +1,8 @@
 package org.neoflock.neocomputers.sounds
 
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance
+import net.minecraft.client.resources.sounds.EntityBoundSoundInstance
+import net.minecraft.client.resources.sounds.MinecartSoundInstance
 import net.minecraft.client.resources.sounds.SoundInstance
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
@@ -10,7 +12,7 @@ class ComputerRunningSoundInstance: AbstractTickableSoundInstance {
     val machine: MachineEntity
 
     fun updatePosition() {
-        val pos = machine.getBlockPosition()
+        val pos = machine.getMachineBlockPosition()
         this.x = pos.x.toDouble() + 0.5
         this.y = pos.y.toDouble() + 0.5
         this.z = pos.z.toDouble() + 0.5
@@ -21,7 +23,7 @@ class ComputerRunningSoundInstance: AbstractTickableSoundInstance {
         this.looping = true
         this.delay = 0
         this.volume = 1.0F
-        this.relative = true
+        this.pitch = 1.0F
         updatePosition()
     }
 

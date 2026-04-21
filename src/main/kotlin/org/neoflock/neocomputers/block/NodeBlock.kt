@@ -68,6 +68,27 @@ object NodeSynchronizer {
         override fun type() = TYPE
     }
 
+    class ScreenDataPayload(var entityTypeWireID: String, var buffer: FriendlyByteBuf): CustomPacketPayload {
+        companion object {
+            val SCREEN_SYNC_ID = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "screen_data")
+            val TYPE = CustomPacketPayload.Type<ScreenDataPayload>(SCREEN_SYNC_ID)
+            val CODEC = object : StreamCodec<RegistryFriendlyByteBuf, ScreenDataPayload> {
+                override fun decode(buf: RegistryFriendlyByteBuf): ScreenDataPayload {
+                    val id = buf.readByteArray().decodeToString()
+                    val buffer = FriendlyByteBuf(buf.copy(buf.readerIndex(), buf.readableBytes()))
+                    return ScreenDataPayload(id, buffer)
+                }
+
+                override fun encode(buf: RegistryFriendlyByteBuf, payload: ScreenDataPayload) {
+                    buf.writeByteArray(payload.entityTypeWireID.encodeToByteArray())
+                    buf.writeBytes(payload.buffer)
+                }
+            }
+        }
+
+        override fun type() = TYPE
+    }
+
     val screenMap = mutableMapOf<ServerPlayer, NodeBlockEntity>()
 
     fun playerScreenClosed(player: ServerPlayer) {
@@ -89,7 +110,7 @@ object NodeSynchronizer {
     }
 
     fun sendScreenInteraction(friendlyByteBuf: FriendlyByteBuf) {
-        NetworkManager.sendToServer(ScreenPayload("", friendlyByteBuf))
+        NetworkManager.sendToServer(ScreenDataPayload("", friendlyByteBuf))
     }
 }
 

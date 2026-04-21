@@ -72,6 +72,15 @@ object NeoComputers {
             player ->
             NodeSynchronizer.playerScreenClosed(player)
         }
+
+        NetworkManager.registerReceiver(NetworkManager.c2s(),NodeSynchronizer.ScreenDataPayload.TYPE, NodeSynchronizer.ScreenDataPayload.CODEC, {
+                packet, ctx ->
+            val player = ctx.player
+            if(player is ServerPlayer) {
+                NodeSynchronizer.screenMap[player]?.processScreenInteraction(player, packet.buffer)
+            }
+        })
+
         // we have to do this because the datagen task runs in the physical server
         EnvExecutor.runInEnv(Env.CLIENT) {{
             NetworkManager.registerReceiver(NetworkManager.s2c(),NodeSynchronizer.StatePayload.TYPE, NodeSynchronizer.StatePayload.CODEC, {
@@ -94,14 +103,7 @@ object NeoComputers {
         EnvExecutor.runInEnv(Env.SERVER) {{
             // https://github.com/architectury/architectury-api/issues/518
             NetworkManager.registerS2CPayloadType(NodeSynchronizer.StatePayload.TYPE, NodeSynchronizer.StatePayload.CODEC)
-
-            NetworkManager.registerReceiver(NetworkManager.c2s(),NodeSynchronizer.ScreenPayload.TYPE, NodeSynchronizer.ScreenPayload.CODEC, {
-                    packet, ctx ->
-                val player = ctx.player
-                if(player is ServerPlayer) {
-                    NodeSynchronizer.screenMap[player]?.processScreenInteraction(player, packet.buffer)
-                }
-            })
+            NetworkManager.registerS2CPayloadType(NodeSynchronizer.ScreenPayload.TYPE, NodeSynchronizer.ScreenPayload.CODEC)
         }}
 
         LOGGER.info("Registered!")
