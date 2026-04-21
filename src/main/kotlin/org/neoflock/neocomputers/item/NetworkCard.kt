@@ -4,6 +4,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
+import org.neoflock.neocomputers.entity.MachineEntity
 import org.neoflock.neocomputers.gui.widget.ComponentRoles
 import org.neoflock.neocomputers.network.Networking
 
@@ -12,12 +13,13 @@ open class NetworkCard(val tier: Int, val maxRange: Int, val isWired: Boolean): 
 
     override fun getComponentTier(itemStack: ItemStack): Int = tier
 
-    override fun whenComponentPlaced(itemStack: ItemStack, newRole: String) {
+    override fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity, newRole: String) {
         ensureHasAddress(itemStack)
+        super.whenComponentPlaced(itemStack, machine, newRole)
     }
 
     // TODO: Modem Component
-    override fun toComponentNode(itemStack: ItemStack): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity): Networking.Node? = null
 
     override fun appendHoverText(
         itemStack: ItemStack,

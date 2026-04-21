@@ -44,10 +44,10 @@ object Networking {
     class ComputerCheckedSignal(sender: Node, val player: String?, val name: String, val data: Array<Any>): Message(sender)
     class ComputerUncheckedSignal(sender: Node, val name: String, val data: Array<Any>): Message(sender)
 
-    open class Node {
+    open class Node(_address: UUID? = null) {
         val connections = mutableSetOf<Node>()
         private var reachableCache: Set<Node>? = null
-        open var address = UUID.randomUUID()
+        var address = _address ?: UUID.randomUUID()
 
         open var reachability = Visibility.NETWORK
         open var powerRole = PowerRole.CONSUMER
@@ -237,9 +237,7 @@ object Networking {
         }
     }
 
-    abstract class WirelessEndpoint : Node {
-
-        constructor(position: BlockPos);
+    abstract class WirelessEndpoint(address: UUID?) : Node(address) {
 
         abstract fun getRange(): Double
         abstract fun getDimension(): Int
@@ -249,7 +247,7 @@ object Networking {
     }
 
     val wirelessNodes = mutableSetOf<WirelessEndpoint>()
-    val allNodes = mutableSetOf<Node>()
+    val allNodes = mutableMapOf<UUID, Node>()
 
     // node may differ from message.sender in the case of relays,
     // as they might have DIRECT reachability but
@@ -281,18 +279,27 @@ object Networking {
     }
 
     fun tickAllNodes() {
-        allNodes.forEach { it.tick() }
+        allNodes.forEach { it.value.tick() }
         tickCount++
     }
 
+    fun getNode(address: UUID): Node? = allNodes[address]
+
+    // TODO: use setter, more convenient
+    fun changeNodeAddress(node: Node, address: UUID) {
+        allNodes.remove(node.address)
+        node.address = address
+        allNodes[address] = node
+    }
+
     fun addNode(node: Node) {
-        if(node in allNodes) return;
-        allNodes.add(node)
+        if(node.address in allNodes) return;
+        allNodes[node.address] = node
         if(node is WirelessEndpoint) {
             wirelessNodes.add(node);
         }
         // notify at the end so it is notified of its own creation
-        allNodes.forEach { it.onNodeAdded(node) }
+        allNodes.forEach { it.value.onNodeAdded(node) }
     }
 
     fun addNodes(vararg nodes: Node) {
@@ -300,14 +307,14 @@ object Networking {
     }
 
     fun removeNode(node: Node) {
-        if(node !in allNodes) return
-        allNodes.forEach { it.onNodeRemoved(node) }
+        if(node.address !in allNodes) return
+        allNodes.forEach { it.value.onNodeRemoved(node) }
         // toList() in order to copy it
         node.connections.toList().forEach {
             node.disconnectFrom(it)
         }
         // actually remove at the end so it can listen to its own removal
-        allNodes.remove(node)
+        allNodes.remove(node.address)
         if(node is WirelessEndpoint) {
             wirelessNodes.remove(node);
         }

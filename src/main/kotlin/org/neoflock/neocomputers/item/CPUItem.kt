@@ -2,6 +2,7 @@ package org.neoflock.neocomputers.item
 
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
+import org.neoflock.neocomputers.entity.MachineEntity
 import org.neoflock.neocomputers.gui.widget.ComponentRoles
 import org.neoflock.neocomputers.network.Networking
 
@@ -12,7 +13,7 @@ open class CPUItem(val tier: Int, val maxComponents: Int): Item(Item.Properties(
 
     override fun getComponentCapacity(itemStack: ItemStack): Int = maxComponents
 
-    override fun toComponentNode(itemStack: ItemStack): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity): Networking.Node? = null
 }
 
 class CPU0: CPUItem(1, 8)
