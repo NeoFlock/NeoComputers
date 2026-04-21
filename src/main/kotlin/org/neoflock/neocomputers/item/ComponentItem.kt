@@ -21,11 +21,13 @@ interface ComponentItem {
         if(oldNode != null) Networking.removeNode(oldNode) // did a mod forget to call whenComponentTaken?
         val node = toComponentNode(itemStack, machine) ?: return
         Networking.addNode(node)
+        machine.getMachineNode().connectTo(node)
     }
 
     // Component taken, and thus removed
     fun whenComponentTaken(itemStack: ItemStack, machine: MachineEntity, previousRole: String) {
         val node = getComponentNode(itemStack) ?: return
+        node.disconnectFrom(machine.getMachineNode())
         Networking.removeNode(node)
     }
 

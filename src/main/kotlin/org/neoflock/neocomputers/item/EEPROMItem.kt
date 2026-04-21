@@ -8,15 +8,15 @@ import org.neoflock.neocomputers.entity.MachineEntity
 import org.neoflock.neocomputers.gui.widget.ComponentRoles
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.utils.Formatting
-import java.util.UUID
+import java.nio.ByteBuffer
 
-fun getEEPROMProperties(): Item.Properties = Item.Properties()
-    .component(DataComponents.EEPROM_CODE, "")
-    .component(DataComponents.EEPROM_DATA, "")
+fun getEEPROMProperties(codeCap: Int, dataCap: Int): Item.Properties = Item.Properties()
+    .component(DataComponents.EEPROM_CODE, ByteBuffer.allocate(codeCap))
+    .component(DataComponents.EEPROM_DATA, ByteBuffer.allocate(dataCap))
     .component(DataComponents.LABEL, "")
     .component(DataComponents.READONLY, false)
 
-open class EEPROMItem(val tier: Int, val codeCapacity: Int, val dataCapacity: Int): Item(getEEPROMProperties()), ComponentItem {
+open class EEPROMItem(val tier: Int, val codeCapacity: Int, val dataCapacity: Int): Item(getEEPROMProperties(codeCapacity, dataCapacity)), ComponentItem {
     override fun getComponentRoles(itemStack: ItemStack): Set<String> = setOf(ComponentRoles.FIRMWARE)
 
     override fun getComponentTier(itemStack: ItemStack): Int = tier
@@ -39,12 +39,10 @@ open class EEPROMItem(val tier: Int, val codeCapacity: Int, val dataCapacity: In
         tooltipFlag: TooltipFlag
     ) {
         if(tooltipFlag.isAdvanced) {
-            val code = itemStack.get(DataComponents.EEPROM_CODE) ?: ""
-            val data = itemStack.get(DataComponents.EEPROM_DATA) ?: ""
+            val codeSize = itemStack.get(DataComponents.EEPROM_CODE)?.position() ?: 0
+            val dataSize = itemStack.get(DataComponents.EEPROM_DATA)?.position() ?: 0
             val addr = itemStack.get(DataComponents.ADDRESS)
             val readonly = itemStack.get(DataComponents.READONLY) ?: false
-            val codeSize = code.encodeToByteArray().size
-            val dataSize = data.encodeToByteArray().size
             val addrComp = if(addr == null) Component.translatable("neocomputers.noaddr") else Component.literal(addr)
             list.addLast(addrComp)
             list.addLast(Component.translatable("neocomputers.eeprom.codeused", Formatting.formatMemory(codeSize.toLong()),

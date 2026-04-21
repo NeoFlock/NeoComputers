@@ -75,6 +75,11 @@ object BlockEntities {
             ::CombustionGeneratorBlockEntity, mutableSetOf(Blocks.REDSTONEIO_BLOCK.get()), BullshitFix()
         )
     }
+    val CASE_ENTITY: RegistrySupplier<BlockEntityType<CaseBlockEntity>> = BLOCKENTITIES.register("case") {
+        BlockEntityType(
+            ::CaseBlockEntity, mutableSetOf(Blocks.CASE_BLOCK.get()), BullshitFix()
+        )
+    }
 
     fun registerPowerBlocks() {
         PowerManager.registerPowerBlockEntity(CAPACITOR_ENTITY.get())

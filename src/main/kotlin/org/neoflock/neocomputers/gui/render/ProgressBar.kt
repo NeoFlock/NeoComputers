@@ -34,7 +34,7 @@ object ProgressBar { // TODO: variable length
         guiGraphics.blit(BAR, x+1, y, width-2, height, 1F, 0F, 1, 14, 3, 14)
         guiGraphics.blit(BAR, x+width-1, y, 1, height, 2F, 0F, 1, 14, 3, 14)
 
-        val frac = value.toFloat() / max.toFloat()
+        val frac = if(max == 0L) 0.0f else value.toFloat() / max.toFloat()
         val linew = ceil(frac*(width-2).toFloat())
         guiGraphics.fill(
             RenderType.gui(),

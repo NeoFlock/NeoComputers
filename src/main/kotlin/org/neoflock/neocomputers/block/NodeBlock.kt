@@ -87,6 +87,10 @@ object NodeSynchronizer {
             NetworkManager.sendToPlayer(player, ScreenPayload(nodeTypeToWireID(ent.type), buf))
         }
     }
+
+    fun sendScreenInteraction(friendlyByteBuf: FriendlyByteBuf) {
+        NetworkManager.sendToServer(ScreenPayload("", friendlyByteBuf))
+    }
 }
 
 abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: BlockPos, blockState: BlockState) : BlockEntity(blockEntityType, blockPos, blockState) {
@@ -118,6 +122,8 @@ abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: Bl
 
     // Encodes data meant for the associated screen of a player
     open fun encodeScreenData(player: ServerPlayer, packet: FriendlyByteBuf) {}
+
+    open fun processScreenInteraction(player: ServerPlayer, packet: FriendlyByteBuf) {}
 
     private var stateIsDirty = true
 

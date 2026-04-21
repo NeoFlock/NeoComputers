@@ -1,0 +1,9 @@
+{
+  "computer_running": {
+    "subtitle": "sounds.neocomputers.computer_running",
+    "category": "ambient",
+    "sounds": [
+      {"name": "neocomputers:computer_running", "stream": true}
+    ]
+  }
+}

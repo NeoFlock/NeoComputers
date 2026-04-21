@@ -2,28 +2,89 @@ package org.neoflock.neocomputers.block;
 
 import dev.architectury.registry.menu.MenuRegistry
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.Component
+import net.minecraft.core.Direction
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.InteractionHand
+import net.minecraft.sounds.SoundEvent
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.SoundSource
+import net.minecraft.util.RandomSource
+import net.minecraft.world.Containers
 import net.minecraft.world.InteractionResult
-import net.minecraft.world.MenuProvider
-import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.inventory.AbstractContainerMenu
-import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.EntityBlock
-import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.SoundType
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.block.state.StateDefinition
+import net.minecraft.world.level.block.state.properties.BooleanProperty
 import net.minecraft.world.phys.BlockHitResult
 import org.neoflock.neocomputers.NeoComputers
+import org.neoflock.neocomputers.block.CombustionGeneratorBlock.Companion.COMBUSTGEN_ACTIVE
 import org.neoflock.neocomputers.entity.BlockEntities
-import org.neoflock.neocomputers.entity.ScreenEntity
-import org.neoflock.neocomputers.gui.menu.Menus
-import org.neoflock.neocomputers.gui.menu.ScreenMenu
-import org.neoflock.neocomputers.network.Networking
+import org.neoflock.neocomputers.entity.CaseBlockEntity
+import org.neoflock.neocomputers.entity.MachineEntity
+import org.neoflock.neocomputers.sounds.Sounds
 
-class CaseBlock() : BaseBlock() { // placeholder stuff
+class CaseBlock() : NodeBlock(Properties.of().sound(SoundType.METAL).lightLevel(CaseBlock::getLuminance)) { // placeholder stuff
+    companion object {
+        val COMPUTER_RUNNING = BooleanProperty.create("running")!!
+
+        fun getLuminance(blockState: BlockState): Int {
+            return if(blockState.getValue(COMPUTER_RUNNING)) 3 else 0
+        }
+    }
+
+    override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState) = CaseBlockEntity(blockPos, blockState)
+
+    override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block?, BlockState?>) {
+        builder.add(COMPUTER_RUNNING)
+    }
+
+    fun getMachine(level: BlockGetter, blockPos: BlockPos): CaseBlockEntity {
+        return level.getBlockEntity(blockPos) as CaseBlockEntity
+    }
+
+    override fun getSignal(
+        blockState: BlockState,
+        blockGetter: BlockGetter,
+        blockPos: BlockPos,
+        direction: Direction
+    ): Int {
+        return getMachine(blockGetter, blockPos).redstoneOut[dirToIdx(direction.opposite)]
+    }
+
+    override fun onPlace(
+        blockState: BlockState,
+        level: Level,
+        blockPos: BlockPos,
+        blockState2: BlockState,
+        bl: Boolean
+    ) {
+        if(!level.isClientSide) {
+            level.updateNeighborsAt(blockPos, this)
+            getMachine(level, blockPos).refetchAllRedstone()
+        }
+        super.onPlace(blockState, level, blockPos, blockState2, bl)
+    }
+
+    override fun neighborChanged(
+        blockState: BlockState,
+        level: Level,
+        blockPos: BlockPos,
+        block: Block,
+        blockPos2: BlockPos,
+        bl: Boolean
+    ) {
+        super.neighborChanged(blockState, level, blockPos, block, blockPos2, bl)
+        if(!level.isClientSide) {
+            val dir = Direction.getNearest(blockPos2.center.subtract(blockPos.center))
+            getMachine(level, blockPos).refetchRedstone(dir)
+        }
+    }
+
     override fun useWithoutItem(
         blockState: BlockState,
         level: Level,
@@ -32,13 +93,21 @@ class CaseBlock() : BaseBlock() { // placeholder stuff
         blockHitResult: BlockHitResult
     ): InteractionResult {
         if(!level.isClientSide) {
-            MenuRegistry.openMenu(player as ServerPlayer, object : MenuProvider {
-                override fun getDisplayName(): Component = Component.literal("Computer")
-                override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu {
-                    return Menus.CASE_MENU.get().create(i, inventory);
-                }
-            })
+            val ent = level.getBlockEntity(blockPos, BlockEntities.CASE_ENTITY.get()).get()
+            MenuRegistry.openMenu(player as ServerPlayer, ent)
+            NodeSynchronizer.registerPlayerScreen(player, ent)
         }
         return InteractionResult.SUCCESS
+    }
+
+    override fun onRemove(
+        blockState: BlockState,
+        level: Level,
+        blockPos: BlockPos,
+        blockState2: BlockState,
+        bl: Boolean
+    ) {
+        Containers.dropContentsOnDestroy(blockState, blockState2, level, blockPos)
+        super.onRemove(blockState, level, blockPos, blockState2, bl)
     }
 }
