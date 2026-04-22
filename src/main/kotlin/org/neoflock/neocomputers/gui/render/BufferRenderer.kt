@@ -20,14 +20,18 @@ class BufferRenderer(private var width: Int, private var height: Int, private va
     private var image: NativeImage = NativeImage(texwidth, texheight, true); // idk what the boolean is
     private var tex: DynamicTexture = DynamicTexture(image)
 
+    init {
+        Minecraft.getInstance().textureManager.register(this.id, tex)
+    }
+
     fun dump(path: String) {
         image.writeToFile(File(path))
         NeoComputers.LOGGER.info("DUMPED!!!")
     }
 
-    fun toRGBA(color: Int): Int {
-        return color.shl(8).or(0xFF)
-    }
+//    fun toRGBA(color: Int): Int {
+//        return color.shl(8).or(0xFF)
+//    }
 
     fun drawGlyph(x: Int, y: Int, c: Char, fg: Int) {
         var glyph: ArrayList<Byte> = FontProvider.map[c]!!
@@ -36,7 +40,7 @@ class BufferRenderer(private var width: Int, private var height: Int, private va
             for (i in 0..<CHARW) {
                 // var pixel = ((glyph[j] and ((1 shl (CHARW - i - 1)).toByte())).toInt()) ushr (CHARW - i - 1) // retardation
                 var pixel = (glyph[j] and (0b10000000 ushr i).toByte()).toInt()
-                if (pixel > 0) image.setPixelRGBA(x+i, y+j, toRGBA(fg))
+                if (pixel > 0) image.setPixelRGBA(x+i, y+j, 0xFF000000.toInt()+fg)
             }
         }
     }
@@ -59,15 +63,11 @@ class BufferRenderer(private var width: Int, private var height: Int, private va
         buffer[y*width+x] = c
     }
 
-    fun register() {
-        Minecraft.getInstance().textureManager.register(this.id, tex) // also idk how to unregister this
-    }
-
     fun clean() {
         Minecraft.getInstance().textureManager.release(this.id)
         image.close()
         tex.close()
     }
 
-    data class GPUChar(val c: Char, val fg: Int =0xFFFFFF, val bg: Int = 0)
+    data class GPUChar(val c: Char, val fg: Int =0xFFFFFF, val bg: Int = 0) // all is bgr
 }

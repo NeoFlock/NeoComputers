@@ -1,5 +1,7 @@
 package org.neoflock.neocomputers
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat
+import com.mojang.blaze3d.vertex.VertexFormat
 import dev.architectury.event.events.client.ClientLifecycleEvent
 import dev.architectury.event.events.common.PlayerEvent
 import dev.architectury.event.events.common.TickEvent
@@ -11,11 +13,15 @@ import org.neoflock.neocomputers.gui.menu.Menus
 import dev.architectury.utils.Env
 import dev.architectury.utils.EnvExecutor
 import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.RenderStateShard
+import net.minecraft.client.renderer.RenderType
 import net.minecraft.server.level.ServerPlayer
 import org.neoflock.neocomputers.block.NodeBlockEntity
 import org.neoflock.neocomputers.block.NodeSynchronizer
+import org.neoflock.neocomputers.gui.buffer.BufferRenderer
 import org.neoflock.neocomputers.gui.render.ScreenRenderer
 import org.neoflock.neocomputers.gui.widget.ComponentRoles
+import org.neoflock.neocomputers.item.GPUCard
 import org.neoflock.neocomputers.item.Items
 import org.neoflock.neocomputers.item.Tabs
 import org.neoflock.neocomputers.network.Networking
@@ -24,11 +30,18 @@ import org.neoflock.neocomputers.utils.FontProvider
 import org.neoflock.neocomputers.utils.GenericContainerScreen
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.nio.Buffer
 
 object NeoComputers {
     const val MODID: String = "neocomputers"
     val LOGGER: Logger = LoggerFactory.getLogger("NeoComputers")
     var PLATFORM: ModPlatform? = null
+
+    val BlockEntityRenderType: RenderType = RenderType.create(
+        "nc_blockentities",
+        DefaultVertexFormat.POSITION_TEX,
+        VertexFormat.Mode.QUADS,
+        0xc000, RenderType.CompositeState.builder().setShaderState(RenderStateShard.POSITION_TEX_SHADER).createCompositeState(false)) // TODO: figure out correct buffer size and composite state
 
 
     fun entrypoint(platform: ModPlatform?) {
@@ -51,6 +64,14 @@ object NeoComputers {
             ClientLifecycleEvent.CLIENT_STARTED.register {
                 FontProvider.load(ResourceLocation.fromNamespaceAndPath(MODID, "font/unscii.hex"))
                 ScreenRenderer.genUnboundTex();
+
+                var buffer: MutableList<BufferRenderer.GPUChar> = mutableListOf(BufferRenderer.GPUChar('h'), BufferRenderer.GPUChar('i'))
+                for (i in 0..398) {
+                    buffer.add(BufferRenderer.GPUChar(' '))
+                }
+
+                var renderer: BufferRenderer = BufferRenderer(20, 20, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "screen/test"), buffer)
+                renderer.drawBuffer()
             }
 
             ClientLifecycleEvent.CLIENT_STOPPING.register {

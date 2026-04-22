@@ -1,8 +1,10 @@
 package org.neoflock.neocomputers.block;
 
+import dev.architectury.registry.menu.ExtendedMenuProvider
 import dev.architectury.registry.menu.MenuRegistry
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
@@ -35,6 +37,7 @@ import kotlin.math.max
 class ScreenBlock() : NodeBlock() {
     companion object {
         val FACING: EnumProperty<Direction> = EnumProperty.create<Direction>("facing", Direction::class.java)
+        val ENERGY: Long = 5
     }
 
     init {
@@ -56,14 +59,19 @@ class ScreenBlock() : NodeBlock() {
     ): InteractionResult {
         if(!level.isClientSide) {
             val screenState = level.getBlockEntity(blockPos, BlockEntities.SCREEN_ENTITY.get()).get()
-            if(!screenState.node.consumeEnergy(5)) {
+            if(!screenState.node.consumeEnergy(ENERGY)) {
                 player.sendSystemMessage(Component.literal("Not enough power."))
                 return InteractionResult.SUCCESS
             };
-            MenuRegistry.openMenu(player as ServerPlayer, object : MenuProvider {
+            MenuRegistry.openExtendedMenu(player as ServerPlayer, object : ExtendedMenuProvider {
                 override fun getDisplayName(): Component = Component.literal("SCREEEEEN!")
                 override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu {
-                    return Menus.SCREEN_MENU.get().create(i, inventory);
+//                    return Menus.SCREEN_MENU.get().create(i, inventory);
+                    return ScreenMenu(i, inventory, level.getBlockEntity(blockPos, BlockEntities.SCREEN_ENTITY.get()).get())
+                }
+
+                override fun saveExtraData(buf: FriendlyByteBuf?) {
+                    buf!!.writeBlockPos(blockPos)
                 }
             })
         }

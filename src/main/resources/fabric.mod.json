@@ -21,6 +21,9 @@
     ],
     "main": [
       "org.neoflock.neocomputers.platforms.fabric.NeoComputersFabric"
+    ],
+    "client": [
+      "org.neoflock.neocomputers.platforms.fabric.client.NeoComputersFabricClient"
     ]
   },
   "mixins": [

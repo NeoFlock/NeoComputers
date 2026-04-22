@@ -17,7 +17,8 @@ import org.neoflock.neocomputers.gui.screen.ScreenScreen
 object Menus {
     val MENUS: DeferredRegister<MenuType<*>> = DeferredRegister.create(NeoComputers.MODID, Registries.MENU)
 
-    val SCREEN_MENU: RegistrySupplier<MenuType<ScreenMenu>> = MENUS.register("screen_menu") { MenuType(::ScreenMenu, FeatureFlagSet.of()) }
+//    val SCREEN_MENU: RegistrySupplier<MenuType<ScreenMenu>> = MENUS.register("screen_menu") { MenuType(::ScreenMenu, FeatureFlagSet.of()) }
+    val SCREEN_MENU: RegistrySupplier<MenuType<ScreenMenu>> = MENUS.register("screen_menu") { MenuRegistry.ofExtended<ScreenMenu>(::ScreenMenu) }
     val COMBUSTGEN_MENU: RegistrySupplier<MenuType<CombustionGeneratorMenu>> = MENUS.register("combustgen_menu") { MenuType(::CombustionGeneratorMenu, FeatureFlagSet.of() ) }
     val CASE_MENU: RegistrySupplier<MenuType<CaseMenu>> = MENUS.register("case_menu") { MenuType(::CaseMenu, FeatureFlagSet.of() )}
 
