@@ -38,7 +38,7 @@ object ProgressBar {
         guiGraphics.fill(x+1, y+height-1, x+width, y+height, 0xFFFFFFFF.toInt()) // bottom right corner + bottom edge
         guiGraphics.fill(x+width-1, y+height-1, x+width, y+1, 0xFFFFFFFF.toInt()) // right edge
 
-        val frac = value.toFloat() / max.toFloat()
+        val frac = if(max == 0L) 0.0f else value.toFloat() / max.toFloat()
         val linew = ceil(frac*(width-2).toFloat())
         guiGraphics.fill(
             RenderType.gui(),

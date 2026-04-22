@@ -19,6 +19,7 @@ import org.neoflock.neocomputers.gui.widget.ComponentRoles
 import org.neoflock.neocomputers.item.Items
 import org.neoflock.neocomputers.item.Tabs
 import org.neoflock.neocomputers.network.Networking
+import org.neoflock.neocomputers.sounds.Sounds
 import org.neoflock.neocomputers.utils.FontProvider
 import org.neoflock.neocomputers.utils.GenericContainerScreen
 import org.slf4j.Logger
@@ -40,6 +41,7 @@ object NeoComputers {
         BlockEntities.registerPowerBlocks()
         Menus.MENUS.register()
         Tabs.TABS.register()
+        Sounds.SOUNDS.register()
         ComponentRoles.mapDefaultTextures()
         // i dont know why architectury wants two lambdas but whatever
         EnvExecutor.runInEnv(Env.CLIENT) {{
@@ -70,6 +72,15 @@ object NeoComputers {
             player ->
             NodeSynchronizer.playerScreenClosed(player)
         }
+
+        NetworkManager.registerReceiver(NetworkManager.c2s(),NodeSynchronizer.ScreenDataPayload.TYPE, NodeSynchronizer.ScreenDataPayload.CODEC, {
+                packet, ctx ->
+            val player = ctx.player
+            if(player is ServerPlayer) {
+                NodeSynchronizer.screenMap[player]?.processScreenInteraction(player, packet.buffer)
+            }
+        })
+
         // we have to do this because the datagen task runs in the physical server
         EnvExecutor.runInEnv(Env.CLIENT) {{
             NetworkManager.registerReceiver(NetworkManager.s2c(),NodeSynchronizer.StatePayload.TYPE, NodeSynchronizer.StatePayload.CODEC, {
@@ -93,7 +104,6 @@ object NeoComputers {
             // https://github.com/architectury/architectury-api/issues/518
             NetworkManager.registerS2CPayloadType(NodeSynchronizer.StatePayload.TYPE, NodeSynchronizer.StatePayload.CODEC)
             NetworkManager.registerS2CPayloadType(NodeSynchronizer.ScreenPayload.TYPE, NodeSynchronizer.ScreenPayload.CODEC)
-
         }}
 
         LOGGER.info("Registered!")

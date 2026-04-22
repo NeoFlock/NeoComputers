@@ -6,6 +6,7 @@ import net.minecraft.core.component.DataComponentType
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import org.neoflock.neocomputers.NeoComputers
+import java.nio.ByteBuffer
 
 object DataComponents {
     val ADDRESS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "address"),
@@ -15,7 +16,7 @@ object DataComponents {
     val READONLY = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "readonly"),
         DataComponentType.builder<Boolean>().persistent(Codec.BOOL).build())
     val EEPROM_CODE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "eeprom_code"),
-        DataComponentType.builder<String>().persistent(Codec.STRING).build())
+        DataComponentType.builder<ByteBuffer>().persistent(Codec.BYTE_BUFFER).build())
     val EEPROM_DATA = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "eeprom_data"),
-        DataComponentType.builder<String>().persistent(Codec.STRING).build())
+        DataComponentType.builder<ByteBuffer>().persistent(Codec.BYTE_BUFFER).build())
 }

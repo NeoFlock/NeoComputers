@@ -62,7 +62,7 @@ interface GenericContainer : Container {
     }
 }
 
-abstract class GenericContainerMenu(menuType: MenuType<*>, id: Int, var container: Container?): AbstractContainerMenu(menuType, id) {
+abstract class GenericContainerMenu(menuType: MenuType<*>, id: Int, var container: Container): AbstractContainerMenu(menuType, id) {
     fun addInventorySlots(inventory: Inventory, x: Int, y: Int) {
         // Based off the code in ChestMenu
         for (i in 0..2) {
@@ -88,7 +88,7 @@ abstract class GenericContainerMenu(menuType: MenuType<*>, id: Int, var containe
 
         val stack = slot.item
         val copied = stack.copy()
-        val contSize = container!!.containerSize
+        val contSize = container.containerSize
 
         if(i < contSize) {
             if(!this.moveItemStackTo(stack, contSize, slots.size, true)) {
@@ -108,7 +108,7 @@ abstract class GenericContainerMenu(menuType: MenuType<*>, id: Int, var containe
     }
 
     override fun stillValid(player: Player): Boolean {
-        return container!!.stillValid(player)
+        return container.stillValid(player)
     }
 }
 
@@ -148,9 +148,13 @@ abstract class GenericContainerScreen<T: GenericContainerMenu>(menu: T, inventor
         }
     }
 
+    open fun renderCustomOverlay(graphics: GuiGraphics, mouseX: Int, mouseY: Int, blend: Float) {
+
+    }
+
     override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, something: Float) {
         super.render(graphics, mouseX, mouseY, something)
-
+        renderCustomOverlay(graphics, mouseX, mouseY, something)
         if(shouldRenderTooltip()) super.renderTooltip(graphics, mouseX, mouseY)
     }
 }

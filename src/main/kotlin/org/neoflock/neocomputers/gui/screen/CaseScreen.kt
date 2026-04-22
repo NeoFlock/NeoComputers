@@ -4,16 +4,19 @@ import com.mojang.blaze3d.vertex.BufferBuilder
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.Tesselator
 import com.mojang.blaze3d.vertex.VertexFormat
+import io.netty.buffer.Unpooled
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.components.ImageButton
 import net.minecraft.client.gui.components.WidgetSprites
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
+import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Inventory
 import org.neoflock.neocomputers.NeoComputers
+import org.neoflock.neocomputers.block.NodeSynchronizer
 import org.neoflock.neocomputers.gui.menu.CaseMenu
 import org.neoflock.neocomputers.gui.widget.ButtonSprites
 import org.neoflock.neocomputers.gui.widget.ImagerButton
@@ -27,18 +30,26 @@ class CaseScreen : GenericContainerScreen<CaseMenu> {
 //    private val BTN_ENABLED_HOVER: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/button/power/enabled_hover.png")
 //    private val BTN_DISABLED_HOVER: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/power/disabled_hover.png")
 
-
-    private var btn: ImagerButton? = null;
+    private var btn: ImagerButton? = null
     override fun shouldCenterTitle(): Boolean = false
-    
+
+    var isOn = false
+
+    override fun processScreenStatePacket(buf: FriendlyByteBuf) {
+        super.processScreenStatePacket(buf)
+        isOn = buf.readBoolean()
+        btn?.pressed = isOn
+    }
+
     constructor(abstractContainerMenu: CaseMenu, inventory: Inventory, component: Component) : super(abstractContainerMenu, inventory, component) {
         btn = ImagerButton(
             15, 15,
             18, 18,
             ButtonSprites(BTN, 18, 18, 36, 36)
         ) {
-            var btn = it as ImagerButton
-            btn.pressed = !btn.pressed
+            val buf = FriendlyByteBuf(Unpooled.buffer())
+            buf.writeByte(if(isOn) 0x02 else 0x01)
+            NodeSynchronizer.sendScreenInteraction(buf)
         }
 //        addRenderableWidget(btn!!)
     }
@@ -46,7 +57,6 @@ class CaseScreen : GenericContainerScreen<CaseMenu> {
         super.renderBg(guiGraphics, f, i ,j)
         val relX = (this.width - this.imageWidth) / 2
         val relY = (this.height - this.imageHeight) / 2
-
 
         btn!!.x = relX+70
         btn!!.y = relY+33
@@ -63,6 +73,5 @@ class CaseScreen : GenericContainerScreen<CaseMenu> {
             return true
         } else return false
     }
-
 
 }

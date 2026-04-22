@@ -20,7 +20,7 @@ open class GPUCard(val tier: Int, val vram: Long): Item(Properties()), Component
         super.whenComponentPlaced(itemStack, machine, newRole)
     }
 
-    // TODO: Modem Component
+    // TODO: GPU Component
     override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity): Networking.Node? = null
 
     override fun appendHoverText(

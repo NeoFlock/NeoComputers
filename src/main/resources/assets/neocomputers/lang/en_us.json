@@ -46,5 +46,6 @@
   "neocomputers.noaddr": "No address assigned",
   "neocomputers.memory.capacity": "Capacity: %1$s",
   "neocomputers.eeprom.codeused": "Code Storage: %1$s / %2$s",
-  "neocomputers.eeprom.dataused": "Data Storage: %1$s / %2$s"
+  "neocomputers.eeprom.dataused": "Data Storage: %1$s / %2$s",
+  "sounds.neocomputers.computer_running": "Computer Fans"
 }

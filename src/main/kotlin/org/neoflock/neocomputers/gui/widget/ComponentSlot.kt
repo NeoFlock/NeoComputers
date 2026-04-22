@@ -85,7 +85,7 @@ data class ComponentSlotRequirement(val tier: Int, val role: String) {
 
 // Tier 0 allows ALL tiers, making it completely untiered.
 // Role determines what the role is.
-class ComponentSlot(container: Container, slot: Int, x: Int, y: Int, val machine: MachineEntity, val requirement: ComponentSlotRequirement): DynamicSlot(container, slot, x, y) {
+class ComponentSlot(container: Container, slot: Int, x: Int, y: Int, val machine: MachineEntity?, val requirement: ComponentSlotRequirement): DynamicSlot(container, slot, x, y) {
     override fun draw(graphics: GuiGraphics, relX: Int, relY: Int, mouseX: Int, mouseY: Int) {
         super.draw(graphics, relX, relY, mouseX, mouseY)
         if(!hasItem()) {
@@ -115,16 +115,20 @@ class ComponentSlot(container: Container, slot: Int, x: Int, y: Int, val machine
 
     override fun set(itemStack: ItemStack) {
         super.set(itemStack)
-        val item = itemStack.item
-        if(item is ComponentItem) {
-            item.whenComponentPlaced(itemStack, machine, requirement.role)
+        if(machine != null) {
+            val item = itemStack.item
+            if (item is ComponentItem) {
+                item.whenComponentPlaced(itemStack, machine, requirement.role)
+            }
         }
     }
 
     override fun onTake(player: Player, itemStack: ItemStack) {
-        val item = itemStack.item
-        if(item is ComponentItem) {
-            item.whenComponentTaken(itemStack, machine, requirement.role)
+        if(machine != null) {
+            val item = itemStack.item
+            if (item is ComponentItem) {
+                item.whenComponentTaken(itemStack, machine, requirement.role)
+            }
         }
         super.onTake(player, itemStack)
     }

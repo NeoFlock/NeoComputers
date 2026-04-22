@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.EntityBlock
+import net.minecraft.world.level.block.FurnaceBlock
 import net.minecraft.world.level.block.SoundType
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
@@ -30,15 +31,15 @@ class SolarGeneratorBlock : NodeBlock(), EntityBlock {
 // TODO: make it glow when burning
 class CombustionGeneratorBlock : NodeBlock, EntityBlock {
     companion object {
-        val ACTIVE = BooleanProperty.create("active")
+        val COMBUSTGEN_ACTIVE = BooleanProperty.create("active")
 
         fun getLuminance(blockState: BlockState): Int {
-            return if(blockState.getValue(ACTIVE)) 5 else 0
+            return if(blockState.getValue(COMBUSTGEN_ACTIVE)) 5 else 0
         }
     }
 
     constructor(): super(Properties.of().sound(SoundType.STONE).lightLevel(CombustionGeneratorBlock::getLuminance)) {
-        registerDefaultState(defaultBlockState().setValue(ACTIVE, false))
+        registerDefaultState(defaultBlockState().setValue(COMBUSTGEN_ACTIVE, false))
     }
 
     override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity = CombustionGeneratorBlockEntity(blockPos, blockState).initNetworking()
@@ -60,12 +61,12 @@ class CombustionGeneratorBlock : NodeBlock, EntityBlock {
     }
 
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block?, BlockState?>) {
-        builder.add(ACTIVE)
+        builder.add(COMBUSTGEN_ACTIVE)
     }
 
     override fun animateTick(blockState: BlockState, level: Level, blockPos: BlockPos, randomSource: RandomSource) {
-        if(blockState.getValue(ACTIVE)) {
-            if(randomSource.nextDouble() < 0.1) level.playSound(null, blockPos, SoundEvents.FURNACE_FIRE_CRACKLE, SoundSource.AMBIENT)
+        if(blockState.getValue(COMBUSTGEN_ACTIVE)) {
+            if(randomSource.nextDouble() < 0.1) level.playLocalSound(blockPos, SoundEvents.FURNACE_FIRE_CRACKLE, SoundSource.AMBIENT, 1F, 1F, false)
 
             val x = blockPos.x.toDouble()
             val y = blockPos.y.toDouble()

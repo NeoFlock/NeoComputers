@@ -68,6 +68,27 @@ object NodeSynchronizer {
         override fun type() = TYPE
     }
 
+    class ScreenDataPayload(var entityTypeWireID: String, var buffer: FriendlyByteBuf): CustomPacketPayload {
+        companion object {
+            val SCREEN_SYNC_ID = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "screen_data")
+            val TYPE = CustomPacketPayload.Type<ScreenDataPayload>(SCREEN_SYNC_ID)
+            val CODEC = object : StreamCodec<RegistryFriendlyByteBuf, ScreenDataPayload> {
+                override fun decode(buf: RegistryFriendlyByteBuf): ScreenDataPayload {
+                    val id = buf.readByteArray().decodeToString()
+                    val buffer = FriendlyByteBuf(buf.copy(buf.readerIndex(), buf.readableBytes()))
+                    return ScreenDataPayload(id, buffer)
+                }
+
+                override fun encode(buf: RegistryFriendlyByteBuf, payload: ScreenDataPayload) {
+                    buf.writeByteArray(payload.entityTypeWireID.encodeToByteArray())
+                    buf.writeBytes(payload.buffer)
+                }
+            }
+        }
+
+        override fun type() = TYPE
+    }
+
     val screenMap = mutableMapOf<ServerPlayer, NodeBlockEntity>()
 
     fun playerScreenClosed(player: ServerPlayer) {
@@ -86,6 +107,10 @@ object NodeSynchronizer {
             ent.encodeScreenData(player, buf)
             NetworkManager.sendToPlayer(player, ScreenPayload(nodeTypeToWireID(ent.type), buf))
         }
+    }
+
+    fun sendScreenInteraction(friendlyByteBuf: FriendlyByteBuf) {
+        NetworkManager.sendToServer(ScreenDataPayload("", friendlyByteBuf))
     }
 }
 
@@ -118,6 +143,8 @@ abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: Bl
 
     // Encodes data meant for the associated screen of a player
     open fun encodeScreenData(player: ServerPlayer, packet: FriendlyByteBuf) {}
+
+    open fun processScreenInteraction(player: ServerPlayer, packet: FriendlyByteBuf) {}
 
     private var stateIsDirty = true
 
