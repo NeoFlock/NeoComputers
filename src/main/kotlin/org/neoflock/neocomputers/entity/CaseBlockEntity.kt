@@ -1,10 +1,7 @@
 package org.neoflock.neocomputers.entity
 
 import net.minecraft.client.Minecraft
-import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler
-import net.minecraft.client.resources.sounds.EntityBoundSoundInstance
 import net.minecraft.client.resources.sounds.SoundInstance
-import net.minecraft.client.sounds.LoopingAudioStream
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.HolderLookup
@@ -14,7 +11,6 @@ import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.Container
 import net.minecraft.world.ContainerHelper
 import net.minecraft.world.MenuProvider
 import net.minecraft.world.entity.player.Inventory
@@ -25,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.CaseBlock
 import org.neoflock.neocomputers.block.NodeBlockEntity
+import org.neoflock.neocomputers.block.NodeSynchronizer
 import org.neoflock.neocomputers.block.dirToIdx
 import org.neoflock.neocomputers.gui.menu.CaseMenu
 import org.neoflock.neocomputers.item.ComponentItem
@@ -45,7 +42,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     var soundInstance: SoundInstance? = null
 
     override val node = object : Networking.Node() {
-        override var powerRole = PowerRole.STORAGE
+        override var powerRole = PowerRole.CONSUMER
         override var energyCapacity: Long = 500
     }
 
@@ -130,7 +127,6 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
         isOn = value
         val world = level ?: return
         blockState?.setValue(CaseBlock.COMPUTER_RUNNING, isOn)
-        if(value) beepAsync(8000, Duration.ofSeconds(1), 1.0)
         if(world.isClientSide) {
             if(value) {
                 soundInstance = ComputerRunningSoundInstance(this, Sounds.COMPUTER_RUNNING.get(), SoundSource.AMBIENT)
@@ -147,29 +143,50 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     }
 
     override fun start(): Boolean {
+        if(isOn) return true
         err = null
+        val archs = getMachineArchitectures()
+        // Beep patterns taken from https://github.com/MightyPirates/OpenComputers/blob/571482db88080d56329e8f8cf0db2a90825bf1d7/src/main/scala/li/cil/oc/server/machine/Machine.scala
+        if(archs.isEmpty()) {
+            crash("no cpu")
+            beepAsync("-..")
+            return false
+        }
         if(getMachineComponentsUsed() > getMachineComponentsTotal()) {
             crash("too many components")
+            beepAsync("-..")
             return false
         }
         if(node.energy < 100) {
             crash("not enough energy")
+            // we add a beep for the special case where we do have a little bit of energy :P
+            if(node.energy > 0) beepAsync("..")
             return false
         }
         if(getMachineMemoryTotal() == 0L) {
             crash("no memory provided")
+            beepAsync("-.")
             return false
         }
+        if(arch !in archs) {
+            // Just pick one!
+            arch = archs.first()
+        }
+        beepAsync(".")
         setRunning(true)
         return isOn
     }
 
     override fun stop(): Boolean {
+        if(!isOn) return false
         setRunning(false)
         return isOn
     }
 
     override fun crash(error: String): Boolean {
+        if(isOn) {
+            beepAsync("--")
+        }
         setRunning(false)
         err = error
         return true
@@ -190,8 +207,8 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
         return old
     }
 
-    override fun beepAsync(frequency: Int, duration: Duration, volume: Double): Boolean {
-        NeoComputers.LOGGER.warn("beep not yet implemented")
+    override fun beepAsync(pattern: String, frequency: Int, duration: Duration, volume: Double): Boolean {
+        NodeSynchronizer.emitBeep(level!!, NodeSynchronizer.BeepDataPayload(getMachineBlockPosition(), pattern, frequency, duration, volume))
         return true
     }
 
@@ -230,10 +247,6 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
 
     override fun getDisplayName(): Component? = Component.literal("Computer")
     override fun createMenu(i: Int, inventory: Inventory, player: Player) = CaseMenu(i, inventory, this)
-
-    override fun setChanged() {
-        super.setChanged()
-    }
 
     override fun setRemoved() {
         setRunning(false)

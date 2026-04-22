@@ -288,7 +288,7 @@ object Networking {
     // TODO: use setter, more convenient
     fun changeNodeAddress(node: Node, address: UUID) {
         if(node.address.equals(address)) return
-        NeoComputers.LOGGER.info("remapping node from ${node.address} to $address")
+        if(node.address !in allNodes.get()) return
         allNodes.get().remove(node.address)
         node.address = address
         allNodes.get()[address] = node
@@ -296,7 +296,6 @@ object Networking {
 
     fun addNode(node: Node) {
         if(node.address in allNodes.get()) return
-        NeoComputers.LOGGER.info("adding node ${node.address}")
         allNodes.get()[node.address] = node
         if(node is WirelessEndpoint) {
             wirelessNodes.get().add(node);
@@ -311,7 +310,6 @@ object Networking {
 
     fun removeNode(node: Node) {
         if(node.address !in allNodes.get()) return
-        NeoComputers.LOGGER.info("removing node ${node.address}")
         allNodes.get().forEach { it.value.onNodeRemoved(node) }
         // toList() in order to copy it
         node.connections.toList().forEach {

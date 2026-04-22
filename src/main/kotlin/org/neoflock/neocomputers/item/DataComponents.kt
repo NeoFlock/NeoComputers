@@ -23,4 +23,7 @@ object DataComponents {
         DataComponentType.builder<Int>().persistent(Codec.INT).build())
     val EEPROM_DATASIZE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "eeprom_datasize"),
         DataComponentType.builder<Int>().persistent(Codec.INT).build())
+
+    val TUNNEL_CHANNEL = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "tunnel_channel"),
+        DataComponentType.builder<String>().persistent(Codec.STRING).build())
 }

@@ -1,6 +1,7 @@
 package org.neoflock.neocomputers
 
 import dev.architectury.event.events.client.ClientLifecycleEvent
+import dev.architectury.event.events.common.LifecycleEvent
 import dev.architectury.event.events.common.PlayerEvent
 import dev.architectury.event.events.common.TickEvent
 import dev.architectury.networking.NetworkManager
@@ -64,6 +65,22 @@ object NeoComputers {
             NodeSynchronizer.syncScreens()
         }
 
+        TickEvent.PLAYER_POST.register {
+            Sounds.tickCustomSounds()
+        }
+
+        LifecycleEvent.SERVER_STARTING.register {
+            Networking.allNodes.remove()
+            Networking.wirelessNodes.remove()
+            Networking.channels.remove()
+        }
+
+        ClientLifecycleEvent.CLIENT_STARTED.register {
+            Networking.allNodes.remove()
+            Networking.wirelessNodes.remove()
+            Networking.channels.remove()
+        }
+
         PlayerEvent.CLOSE_MENU.register {
             player, menu ->
             if(player is ServerPlayer) NodeSynchronizer.playerScreenClosed(player)
@@ -105,11 +122,18 @@ object NeoComputers {
                     scr.processScreenStatePacket(packet.buffer)
                 }
             })
+
+            NetworkManager.registerReceiver(NetworkManager.s2c(),NodeSynchronizer.BeepDataPayload.TYPE, NodeSynchronizer.BeepDataPayload.CODEC, {
+                    packet, ctx ->
+                // TODO: implement volume
+                Sounds.beep(packet.pos.center, packet.pattern, packet.freq, packet.duration.toMillis().toInt())
+            })
         }}
         EnvExecutor.runInEnv(Env.SERVER) {{
             // https://github.com/architectury/architectury-api/issues/518
             NetworkManager.registerS2CPayloadType(NodeSynchronizer.StatePayload.TYPE, NodeSynchronizer.StatePayload.CODEC)
             NetworkManager.registerS2CPayloadType(NodeSynchronizer.ScreenPayload.TYPE, NodeSynchronizer.ScreenPayload.CODEC)
+            NetworkManager.registerS2CPayloadType(NodeSynchronizer.BeepDataPayload.TYPE, NodeSynchronizer.BeepDataPayload.CODEC)
         }}
 
         LOGGER.info("Registered!")

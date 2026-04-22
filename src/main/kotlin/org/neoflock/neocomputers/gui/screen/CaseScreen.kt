@@ -9,11 +9,13 @@ import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.inventory.tooltip.TooltipComponent
+import net.minecraft.world.phys.Vec3
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.NodeSynchronizer
 import org.neoflock.neocomputers.gui.menu.CaseMenu
 import org.neoflock.neocomputers.gui.widget.ButtonSprites
 import org.neoflock.neocomputers.gui.widget.ImagerButton
+import org.neoflock.neocomputers.sounds.Sounds
 import org.neoflock.neocomputers.utils.Formatting
 import org.neoflock.neocomputers.utils.GenericContainerScreen
 import java.util.Optional

@@ -28,6 +28,7 @@
   "item.neocomputers.lan": "Wired Network Card",
   "item.neocomputers.wlan0": "Wireless Network Card (Tier 1)",
   "item.neocomputers.wlan1": "Wireless Network Card (Tier 2)",
+  "item.neocomputers.tunnel": "Linked Card",
   "item.neocomputers.data0": "Data Card (Tier 1)",
   "item.neocomputers.data1": "Data Card (Tier 2)",
   "item.neocomputers.data2": "Data Card (Tier 3)",
@@ -47,5 +48,6 @@
   "neocomputers.memory.capacity": "Capacity: %1$s",
   "neocomputers.eeprom.codeused": "Code Storage: %1$s / %2$s",
   "neocomputers.eeprom.dataused": "Data Storage: %1$s / %2$s",
+  "neocomputers.tunnel.channel": "Linked Channel: %1$s",
   "sounds.neocomputers.computer_running": "Computer Fans"
 }

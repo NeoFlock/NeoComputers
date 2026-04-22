@@ -19,7 +19,12 @@ interface MachineEntity {
     fun getMachineBlockPosition(): BlockPos
     fun getMachineLevel(): Level
 
-    fun beepAsync(frequency: Int, duration: Duration, volume: Double): Boolean
+    // Pattern can have dots (.), dashes (-) and spaces ( ).
+    // Each character is duration long, and has a 50ms break.
+    // For non-short ones, which are typically reserved only for hardware interactions,
+    // the duration is doubled.
+    // Architectures should only use short ones.
+    fun beepAsync(pattern: String, frequency: Int = 1000, duration: Duration = Duration.ofMillis(200), volume: Double = 1.0): Boolean
 
     fun isRunning(): Boolean
     fun start(): Boolean
