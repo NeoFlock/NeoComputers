@@ -13,6 +13,8 @@ import java.nio.ByteBuffer
 fun getEEPROMProperties(codeCap: Int, dataCap: Int): Item.Properties = Item.Properties()
     .component(DataComponents.EEPROM_CODE, ByteBuffer.allocate(codeCap))
     .component(DataComponents.EEPROM_DATA, ByteBuffer.allocate(dataCap))
+    .component(DataComponents.EEPROM_CODESIZE, 0)
+    .component(DataComponents.EEPROM_DATASIZE, 0)
     .component(DataComponents.LABEL, "")
     .component(DataComponents.READONLY, false)
 
@@ -39,8 +41,8 @@ open class EEPROMItem(val tier: Int, val codeCapacity: Int, val dataCapacity: In
         tooltipFlag: TooltipFlag
     ) {
         if(tooltipFlag.isAdvanced) {
-            val codeSize = itemStack.get(DataComponents.EEPROM_CODE)?.position() ?: 0
-            val dataSize = itemStack.get(DataComponents.EEPROM_DATA)?.position() ?: 0
+            val codeSize = itemStack.get(DataComponents.EEPROM_CODESIZE) ?: 0
+            val dataSize = itemStack.get(DataComponents.EEPROM_DATASIZE) ?: 0
             val addr = itemStack.get(DataComponents.ADDRESS)
             val readonly = itemStack.get(DataComponents.READONLY) ?: false
             val addrComp = if(addr == null) Component.translatable("neocomputers.noaddr") else Component.literal(addr)

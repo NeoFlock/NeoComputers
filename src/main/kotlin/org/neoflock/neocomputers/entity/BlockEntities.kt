@@ -87,5 +87,6 @@ object BlockEntities {
         PowerManager.registerPowerBlockEntity(CAPACITOR3_ENTITY.get())
         PowerManager.registerPowerBlockEntity(SOLARGEN_ENTITY.get())
         PowerManager.registerPowerBlockEntity(COMBUSTGEN_ENTITY.get())
+        PowerManager.registerPowerBlockEntity(CASE_ENTITY.get())
     }
 }

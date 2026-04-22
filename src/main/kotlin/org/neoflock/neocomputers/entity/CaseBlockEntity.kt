@@ -40,6 +40,8 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     val stacks: NonNullList<ItemStack> = NonNullList<ItemStack>.withSize(7, ItemStack.EMPTY)
 
     var isOn = false
+    var err: String? = null
+    var arch = "Lua 5.3"
     var soundInstance: SoundInstance? = null
 
     override val node = object : Networking.Node() {
@@ -70,6 +72,14 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     override fun encodeScreenData(player: ServerPlayer, packet: FriendlyByteBuf) {
         super.encodeScreenData(player, packet)
         packet.writeBoolean(isOn)
+        packet.writeByteArray((err ?: "").encodeToByteArray())
+        packet.writeLong(node.energy)
+        packet.writeLong(node.energyCapacity)
+        packet.writeLong(getMachineMemoryUsed())
+        packet.writeLong(getMachineMemoryTotal())
+        packet.writeLong(getMachineComponentsUsed())
+        packet.writeLong(getMachineComponentsTotal())
+        packet.writeUtf(arch)
     }
 
     val redstoneIn = Array(Direction.entries.size) {0}
@@ -120,6 +130,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
         isOn = value
         val world = level ?: return
         blockState?.setValue(CaseBlock.COMPUTER_RUNNING, isOn)
+        if(value) beepAsync(8000, Duration.ofSeconds(1), 1.0)
         if(world.isClientSide) {
             if(value) {
                 soundInstance = ComputerRunningSoundInstance(this, Sounds.COMPUTER_RUNNING.get(), SoundSource.AMBIENT)
@@ -136,6 +147,19 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     }
 
     override fun start(): Boolean {
+        err = null
+        if(getMachineComponentsUsed() > getMachineComponentsTotal()) {
+            crash("too many components")
+            return false
+        }
+        if(node.energy < 100) {
+            crash("not enough energy")
+            return false
+        }
+        if(getMachineMemoryTotal() == 0L) {
+            crash("no memory provided")
+            return false
+        }
         setRunning(true)
         return isOn
     }
@@ -146,11 +170,12 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     }
 
     override fun crash(error: String): Boolean {
-        NeoComputers.LOGGER.warn("Crashing cases is not implemented yet lol")
-        return false
+        setRunning(false)
+        err = error
+        return true
     }
 
-    override fun getLastError(): String? = null
+    override fun getLastError(): String? = err
 
     override fun getMachineNode(): Networking.Node = node
 
@@ -172,12 +197,22 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
 
     override fun getMachineMemoryTotal(): Long = stacks.mapNotNull { (it.item as? ComponentItem)?.getMemoryCapacity(it) }.sum().toLong()
     override fun getMachineMemoryUsed(): Long = 0
-    override fun getMachineComponentsUsed(): Long = node.connections.size.toLong()
+    override fun getMachineComponentsUsed(): Long = node.getReachable().size.toLong()
     override fun getMachineComponentsTotal(): Long = stacks.mapNotNull { (it.item as? ComponentItem)?.getComponentCapacity(it) }.sum().toLong()
+    override fun getMachineArchitecture() = arch
+    override fun getMachineArchitectures() = stacks.mapNotNull { (it.item as? ComponentItem)?.getArchitecturesProvided(it) }.flatten().toSet()
+    override fun setMachineArchitecture(arch: String) {
+        if(this.arch == arch) return
+        this.arch = arch
+        if(isRunning()) {
+            stop()
+            start()
+        }
+    }
 
     override fun getItems(): NonNullList<ItemStack> = stacks
 
-    override fun stillValid(player: Player): Boolean = true
+    override fun stillValid(player: Player): Boolean = !this.isRemoved
 
     override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
         super.loadAdditional(compoundTag, provider)
@@ -196,9 +231,6 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     override fun getDisplayName(): Component? = Component.literal("Computer")
     override fun createMenu(i: Int, inventory: Inventory, player: Player) = CaseMenu(i, inventory, this)
 
-    override fun canPlaceItem(i: Int, itemStack: ItemStack): Boolean = false
-    override fun canTakeItem(container: Container, i: Int, itemStack: ItemStack): Boolean = false
-
     override fun setChanged() {
         super.setChanged()
     }
@@ -206,5 +238,16 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     override fun setRemoved() {
         setRunning(false)
         super.setRemoved()
+    }
+
+    override fun tickNode(level: Level) {
+        super.tickNode(level)
+        if(!level.isClientSide) {
+            if (isRunning()) {
+                if (!node.consumeEnergy(1)) {
+                    crash("out of energy")
+                }
+            }
+        }
     }
 }

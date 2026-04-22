@@ -14,6 +14,7 @@ interface ComponentItem {
     // Get machine properties they can influence
     fun getMemoryCapacity(itemStack: ItemStack): Int = 0
     fun getComponentCapacity(itemStack: ItemStack): Int = 0
+    fun getArchitecturesProvided(itemStack: ItemStack): Set<String> = setOf()
 
     // Component placed, node must now exist
     fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity, newRole: String) {

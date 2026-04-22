@@ -4,6 +4,7 @@ import dev.architectury.event.events.client.ClientLifecycleEvent
 import dev.architectury.event.events.common.PlayerEvent
 import dev.architectury.event.events.common.TickEvent
 import dev.architectury.networking.NetworkManager
+import dev.architectury.platform.Platform
 import net.minecraft.resources.ResourceLocation
 import org.neoflock.neocomputers.block.Blocks
 import org.neoflock.neocomputers.entity.BlockEntities
@@ -73,13 +74,18 @@ object NeoComputers {
             NodeSynchronizer.playerScreenClosed(player)
         }
 
-        NetworkManager.registerReceiver(NetworkManager.c2s(),NodeSynchronizer.ScreenDataPayload.TYPE, NodeSynchronizer.ScreenDataPayload.CODEC, {
-                packet, ctx ->
-            val player = ctx.player
-            if(player is ServerPlayer) {
-                NodeSynchronizer.screenMap[player]?.processScreenInteraction(player, packet.buffer)
-            }
-        })
+        // networking has no way to define a C2S packet type, so we need the listener on both
+        // however, defining it separately on both breaks both ends
+        // so we define it once, but on both platforms
+        if(Platform.getEnvironment() == Env.CLIENT || Platform.getEnvironment() == Env.SERVER) {
+            NetworkManager.registerReceiver(NetworkManager.c2s(),NodeSynchronizer.ScreenDataPayload.TYPE, NodeSynchronizer.ScreenDataPayload.CODEC, {
+                    packet, ctx ->
+                val player = ctx.player
+                if(player is ServerPlayer) {
+                    NodeSynchronizer.screenMap[player]?.processScreenInteraction(player, packet.buffer)
+                }
+            })
+        }
 
         // we have to do this because the datagen task runs in the physical server
         EnvExecutor.runInEnv(Env.CLIENT) {{

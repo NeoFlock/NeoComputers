@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.network.Networking
+import org.neoflock.neocomputers.network.PowerRole
 
 object NodeSynchronizer {
     class StatePayload(var blockPos: BlockPos, var buffer: FriendlyByteBuf): CustomPacketPayload {
@@ -134,7 +135,7 @@ abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: Bl
 
     // runs on the client, meant to decode server state packets to synchronize client state
     open fun syncWithUpstream(packet: FriendlyByteBuf) {
-        node.address = packet.readUUID()
+        Networking.changeNodeAddress(node, packet.readUUID())
         node.energy = packet.readLong()
         node.energyCapacity = packet.readLong()
         node.reachability = packet.readEnum(node.reachability.javaClass)
@@ -202,6 +203,9 @@ abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: Bl
 
     override fun setRemoved() {
         super.setRemoved()
+        if(node.powerRole == PowerRole.GENERATOR) {
+            NeoComputers.LOGGER.info("removed generator ${node.address}")
+        }
         Networking.removeNode(node)
     }
 

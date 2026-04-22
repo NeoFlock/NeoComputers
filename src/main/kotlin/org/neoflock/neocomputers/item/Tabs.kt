@@ -72,6 +72,7 @@ object Tabs {
                     codeBuf.put(code)
                     luaBios.set(DataComponents.LABEL, "Lua BIOS")
                     luaBios.set(DataComponents.EEPROM_CODE, codeBuf)
+                    luaBios.set(DataComponents.EEPROM_CODESIZE, code.size)
                     output.accept(luaBios)
                 } while(false)
             }

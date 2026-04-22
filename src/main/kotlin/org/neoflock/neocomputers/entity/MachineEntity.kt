@@ -34,6 +34,9 @@ interface MachineEntity {
     fun getMachineMemoryUsed(): Long
     fun getMachineComponentsUsed(): Long
     fun getMachineComponentsTotal(): Long
+    fun getMachineArchitecture(): String
+    fun getMachineArchitectures(): Set<String>
+    fun setMachineArchitecture(arch: String)
 
     // Redstone signals
     fun getRedstoneInput(direction: Direction): Int
