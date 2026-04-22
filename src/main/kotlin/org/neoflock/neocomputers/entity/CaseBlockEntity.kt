@@ -49,11 +49,13 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     override fun encodeDownstreamData(packet: FriendlyByteBuf) {
         super.encodeDownstreamData(packet)
         packet.writeBoolean(isOn)
+        packet.writeUtf(err ?: "")
     }
 
     override fun syncWithUpstream(packet: FriendlyByteBuf) {
         super.syncWithUpstream(packet)
         setRunning(packet.readBoolean())
+        err = packet.readUtf().ifEmpty { null }
     }
 
     override fun processScreenInteraction(player: ServerPlayer, packet: FriendlyByteBuf) {
