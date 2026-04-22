@@ -19,4 +19,11 @@ object DataComponents {
         DataComponentType.builder<ByteBuffer>().persistent(Codec.BYTE_BUFFER).build())
     val EEPROM_DATA = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "eeprom_data"),
         DataComponentType.builder<ByteBuffer>().persistent(Codec.BYTE_BUFFER).build())
+    val EEPROM_CODESIZE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "eeprom_codesize"),
+        DataComponentType.builder<Int>().persistent(Codec.INT).build())
+    val EEPROM_DATASIZE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "eeprom_datasize"),
+        DataComponentType.builder<Int>().persistent(Codec.INT).build())
+
+    val TUNNEL_CHANNEL = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "tunnel_channel"),
+        DataComponentType.builder<String>().persistent(Codec.STRING).build())
 }

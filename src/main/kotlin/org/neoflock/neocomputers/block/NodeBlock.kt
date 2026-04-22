@@ -24,6 +24,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.network.Networking
+import org.neoflock.neocomputers.network.PowerRole
+import java.time.Duration
 
 object NodeSynchronizer {
     class StatePayload(var blockPos: BlockPos, var buffer: FriendlyByteBuf): CustomPacketPayload {
@@ -70,8 +72,8 @@ object NodeSynchronizer {
 
     class ScreenDataPayload(var entityTypeWireID: String, var buffer: FriendlyByteBuf): CustomPacketPayload {
         companion object {
-            val SCREEN_SYNC_ID = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "screen_data")
-            val TYPE = CustomPacketPayload.Type<ScreenDataPayload>(SCREEN_SYNC_ID)
+            val SCREEN_DATA_ID = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "screen_data")
+            val TYPE = CustomPacketPayload.Type<ScreenDataPayload>(SCREEN_DATA_ID)
             val CODEC = object : StreamCodec<RegistryFriendlyByteBuf, ScreenDataPayload> {
                 override fun decode(buf: RegistryFriendlyByteBuf): ScreenDataPayload {
                     val id = buf.readByteArray().decodeToString()
@@ -82,6 +84,33 @@ object NodeSynchronizer {
                 override fun encode(buf: RegistryFriendlyByteBuf, payload: ScreenDataPayload) {
                     buf.writeByteArray(payload.entityTypeWireID.encodeToByteArray())
                     buf.writeBytes(payload.buffer)
+                }
+            }
+        }
+
+        override fun type() = TYPE
+    }
+
+    class BeepDataPayload(val pos: BlockPos, val pattern: String, val freq: Int, val duration: Duration, val volume: Double): CustomPacketPayload {
+        companion object {
+            val BEEP_DATA_ID = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "beep_data")
+            val TYPE = CustomPacketPayload.Type<BeepDataPayload>(BEEP_DATA_ID)
+            val CODEC = object : StreamCodec<RegistryFriendlyByteBuf, BeepDataPayload> {
+                override fun decode(buf: RegistryFriendlyByteBuf): BeepDataPayload {
+                    val pos = buf.readBlockPos()
+                    val pattern = buf.readUtf()
+                    val freq = buf.readVarInt()
+                    val duration = buf.readVarLong()
+                    val volume = buf.readDouble()
+                    return BeepDataPayload(pos, pattern, freq, Duration.ofMillis(duration), volume)
+                }
+
+                override fun encode(buf: RegistryFriendlyByteBuf, payload: BeepDataPayload) {
+                    buf.writeBlockPos(payload.pos)
+                    buf.writeUtf(payload.pattern)
+                    buf.writeVarInt(payload.freq)
+                    buf.writeVarLong(payload.duration.toMillis())
+                    buf.writeDouble(payload.volume)
                 }
             }
         }
@@ -112,6 +141,14 @@ object NodeSynchronizer {
     fun sendScreenInteraction(friendlyByteBuf: FriendlyByteBuf) {
         NetworkManager.sendToServer(ScreenDataPayload("", friendlyByteBuf))
     }
+
+    fun emitBeep(level: Level, beepDataPayload: BeepDataPayload) {
+        if(level is ServerLevel) {
+            level.players().forEach {
+                NetworkManager.sendToPlayer(it, beepDataPayload)
+            }
+        }
+    }
 }
 
 abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: BlockPos, blockState: BlockState) : BlockEntity(blockEntityType, blockPos, blockState) {
@@ -134,7 +171,7 @@ abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: Bl
 
     // runs on the client, meant to decode server state packets to synchronize client state
     open fun syncWithUpstream(packet: FriendlyByteBuf) {
-        node.address = packet.readUUID()
+        Networking.changeNodeAddress(node, packet.readUUID())
         node.energy = packet.readLong()
         node.energyCapacity = packet.readLong()
         node.reachability = packet.readEnum(node.reachability.javaClass)
@@ -176,7 +213,7 @@ abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: Bl
         stateIsDirty = true
     }
 
-    fun needsSynchronization() = stateIsDirty
+    open fun needsSynchronization() = stateIsDirty
 
     open fun tickNode(level: Level) {
         if(!level.isClientSide) {
@@ -225,7 +262,8 @@ abstract class NodeBlock(properties: Properties = Properties.of()): BaseBlock(pr
     ): BlockEntityTicker<T>? {
         return object : BlockEntityTicker<T> {
             override fun tick(level: Level, blockPos: BlockPos, blockState: BlockState, blockEntity: T) {
-                if(blockEntity !is NodeBlockEntity) return;
+                if(blockEntity !is NodeBlockEntity) return
+                if(Networking.getNode(blockEntity.node.address) == null) blockEntity.initNetworking()
                 blockEntity.tickNode(level)
             }
         }

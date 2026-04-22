@@ -1,26 +1,24 @@
 package org.neoflock.neocomputers.gui.screen;
 
-import com.mojang.blaze3d.vertex.BufferBuilder
-import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.Tesselator
-import com.mojang.blaze3d.vertex.VertexFormat
 import io.netty.buffer.Unpooled
+import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
-import net.minecraft.client.gui.components.Button
-import net.minecraft.client.gui.components.ImageButton
-import net.minecraft.client.gui.components.WidgetSprites
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.inventory.tooltip.TooltipComponent
+import net.minecraft.world.phys.Vec3
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.NodeSynchronizer
 import org.neoflock.neocomputers.gui.menu.CaseMenu
 import org.neoflock.neocomputers.gui.widget.ButtonSprites
 import org.neoflock.neocomputers.gui.widget.ImagerButton
+import org.neoflock.neocomputers.sounds.Sounds
+import org.neoflock.neocomputers.utils.Formatting
 import org.neoflock.neocomputers.utils.GenericContainerScreen
+import java.util.Optional
 
 class CaseScreen : GenericContainerScreen<CaseMenu> {
     private val PCB: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/computer.png")
@@ -34,11 +32,49 @@ class CaseScreen : GenericContainerScreen<CaseMenu> {
     override fun shouldCenterTitle(): Boolean = false
 
     var isOn = false
+    var lastError: String? = null
+    var energy: Long = 0L
+    var maxEnergy: Long = 0L
+    var memory: Long = 0L
+    var maxMemory: Long = 0L
+    var components: Long = 0L
+    var maxComponents: Long = 0L
+    var arch = ""
 
     override fun processScreenStatePacket(buf: FriendlyByteBuf) {
         super.processScreenStatePacket(buf)
         isOn = buf.readBoolean()
         btn?.pressed = isOn
+        val error = buf.readByteArray().decodeToString()
+        if(error.isEmpty()) {
+            lastError = null
+        } else {
+            lastError = error
+        }
+
+        energy = buf.readLong()
+        maxEnergy = buf.readLong()
+        memory = buf.readLong()
+        maxMemory = buf.readLong()
+        components = buf.readLong()
+        maxComponents = buf.readLong()
+        arch = buf.readUtf()
+    }
+
+    fun computeButtonTooltip(): List<Component> {
+        val msgs = mutableListOf(Component.literal("Computer " + if(isOn) "ON" else "OFF").withStyle(if(isOn) ChatFormatting.GREEN else ChatFormatting.RED))
+        if(lastError != null) {
+            msgs.addLast(Component.literal("Error: ").withStyle(ChatFormatting.RED).append(Component.literal(lastError!!)))
+        }
+        if(arch.isNotEmpty()) {
+            msgs.addLast(Component.literal("Architecture: $arch"))
+        }
+        if(hasShiftDown()) {
+            msgs.addLast(Component.literal("Energy: $energy / $maxEnergy J").withStyle(if(energy < 100) ChatFormatting.RED else ChatFormatting.WHITE))
+            msgs.addLast(Component.literal("Memory: ${Formatting.formatMemory(memory)} / ${Formatting.formatMemory(maxMemory)}"))
+            msgs.addLast(Component.literal("Components: $components / $maxComponents").withStyle(if(components <= maxComponents) ChatFormatting.WHITE else ChatFormatting.RED))
+        }
+        return msgs
     }
 
     constructor(abstractContainerMenu: CaseMenu, inventory: Inventory, component: Component) : super(abstractContainerMenu, inventory, component) {
@@ -64,14 +100,20 @@ class CaseScreen : GenericContainerScreen<CaseMenu> {
         guiGraphics.blit(PCB, relX, relY, 0, 0, this.imageWidth, this.imageHeight)
     }
 
+    override fun renderCustomOverlay(graphics: GuiGraphics, mouseX: Int, mouseY: Int, blend: Float) {
+        super.renderCustomOverlay(graphics, mouseX, mouseY, blend)
+        if(btn!!.isHovered) {
+            graphics.renderTooltip(this.font, computeButtonTooltip(), Optional.empty<TooltipComponent>(), mouseX, mouseY)
+        }
+    }
+
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean { // todo: make a better widget system than mojang, practically not even using the fact it's a widget atp
-        NeoComputers.LOGGER.info(String.format("btn: %d %d %d %d, mouse %s %s", btn!!.x, btn!!.y, btn!!.x+btn!!.width, btn!!.y+btn!!.height, mouseX.toString(), mouseY.toString()))
-        if (button != 0) return false
-        if (btn!!.x < mouseX.toInt() && mouseX.toInt() < btn!!.x+btn!!.width && btn!!.y < mouseY.toInt() && mouseY.toInt() < btn!!.y+btn!!.height) {
+        if (button == 0 && btn!!.isHovered) {
             btn!!.playDownSound(Minecraft.getInstance().soundManager)
             btn!!.onClick(mouseX, mouseY)
             return true
-        } else return false
+        }
+        return super.mouseClicked(mouseX, mouseY, button)
     }
 
 }

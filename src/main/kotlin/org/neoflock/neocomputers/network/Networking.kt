@@ -246,8 +246,8 @@ object Networking {
         abstract fun receiveWireless(message: Message, emitter: WirelessEndpoint)
     }
 
-    val wirelessNodes = mutableSetOf<WirelessEndpoint>()
-    val allNodes = mutableMapOf<UUID, Node>()
+    val wirelessNodes = ThreadLocal.withInitial { mutableSetOf<WirelessEndpoint>() }
+    val allNodes = ThreadLocal.withInitial { mutableMapOf<UUID, Node>() }
 
     // node may differ from message.sender in the case of relays,
     // as they might have DIRECT reachability but
@@ -267,7 +267,7 @@ object Networking {
         val startPos = starter.getPosition();
         val startDim = starter.getDimension();
         val range = starter.getRange();
-        wirelessNodes.forEach {
+        wirelessNodes.get().forEach {
             if(it.getDimension() != startDim) return;
             val pos = it.getPosition();
             val d = distanceBetween(startPos, pos);
@@ -279,27 +279,29 @@ object Networking {
     }
 
     fun tickAllNodes() {
-        allNodes.forEach { it.value.tick() }
+        allNodes.get().forEach { it.value.tick() }
         tickCount++
     }
 
-    fun getNode(address: UUID): Node? = allNodes[address]
+    fun getNode(address: UUID): Node? = allNodes.get()[address]
 
     // TODO: use setter, more convenient
     fun changeNodeAddress(node: Node, address: UUID) {
-        allNodes.remove(node.address)
+        if(node.address.equals(address)) return
+        if(node.address !in allNodes.get()) return
+        allNodes.get().remove(node.address)
         node.address = address
-        allNodes[address] = node
+        allNodes.get()[address] = node
     }
 
     fun addNode(node: Node) {
-        if(node.address in allNodes) return;
-        allNodes[node.address] = node
+        if(node.address in allNodes.get()) return
+        allNodes.get()[node.address] = node
         if(node is WirelessEndpoint) {
-            wirelessNodes.add(node);
+            wirelessNodes.get().add(node);
         }
         // notify at the end so it is notified of its own creation
-        allNodes.forEach { it.value.onNodeAdded(node) }
+        allNodes.get().forEach { it.value.onNodeAdded(node) }
     }
 
     fun addNodes(vararg nodes: Node) {
@@ -307,16 +309,16 @@ object Networking {
     }
 
     fun removeNode(node: Node) {
-        if(node.address !in allNodes) return
-        allNodes.forEach { it.value.onNodeRemoved(node) }
+        if(node.address !in allNodes.get()) return
+        allNodes.get().forEach { it.value.onNodeRemoved(node) }
         // toList() in order to copy it
         node.connections.toList().forEach {
             node.disconnectFrom(it)
         }
         // actually remove at the end so it can listen to its own removal
-        allNodes.remove(node.address)
+        allNodes.get().remove(node.address)
         if(node is WirelessEndpoint) {
-            wirelessNodes.remove(node);
+            wirelessNodes.get().remove(node);
         }
     }
 
@@ -324,25 +326,28 @@ object Networking {
         nodes.forEach { removeNode(it) }
     }
 
-    val channels = mutableMapOf<String, MutableSet<Node>>();
+    val channels = ThreadLocal.withInitial { mutableMapOf<String, MutableSet<Node>>() }
 
     fun addToChannel(channel: String, node: Node) {
-        if(!channels.containsKey(channel)) {
-            channels[channel] = mutableSetOf();
+        val localChannels = channels.get()
+        if(!localChannels.containsKey(channel)) {
+            localChannels[channel] = mutableSetOf();
         }
-        channels[channel]!!.add(node);
+        localChannels[channel]!!.add(node);
     }
 
     fun removeFromChannel(channel: String, node: Node) {
-        if(!channels.containsKey(channel)) return;
-        channels[channel]?.remove(node);
-        if(channels[channel].isNullOrEmpty()) {
-            channels.remove(channel);
+        val localChannels = channels.get()
+        if(!localChannels.containsKey(channel)) return;
+        localChannels[channel]?.remove(node);
+        if(localChannels[channel].isNullOrEmpty()) {
+            localChannels.remove(channel);
         }
     }
 
     fun emitChannelMessage(starter: Node, channel: String, message: Message) {
-        val c = channels[channel] ?: return;
+        val localChannels = channels.get()
+        val c = localChannels[channel] ?: return;
         c.forEach { if(it != starter) it.received(message); };
     }
 }

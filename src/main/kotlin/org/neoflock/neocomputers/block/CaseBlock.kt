@@ -37,7 +37,7 @@ class CaseBlock() : NodeBlock(Properties.of().sound(SoundType.METAL).lightLevel(
         }
     }
 
-    override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState) = CaseBlockEntity(blockPos, blockState)
+    override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState) = CaseBlockEntity(blockPos, blockState).initNetworking()
 
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block?, BlockState?>) {
         builder.add(COMPUTER_RUNNING)

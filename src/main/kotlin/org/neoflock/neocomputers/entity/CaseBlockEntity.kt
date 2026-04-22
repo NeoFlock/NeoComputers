@@ -1,10 +1,7 @@
 package org.neoflock.neocomputers.entity
 
 import net.minecraft.client.Minecraft
-import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler
-import net.minecraft.client.resources.sounds.EntityBoundSoundInstance
 import net.minecraft.client.resources.sounds.SoundInstance
-import net.minecraft.client.sounds.LoopingAudioStream
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.HolderLookup
@@ -14,7 +11,6 @@ import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.Container
 import net.minecraft.world.ContainerHelper
 import net.minecraft.world.MenuProvider
 import net.minecraft.world.entity.player.Inventory
@@ -25,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.CaseBlock
 import org.neoflock.neocomputers.block.NodeBlockEntity
+import org.neoflock.neocomputers.block.NodeSynchronizer
 import org.neoflock.neocomputers.block.dirToIdx
 import org.neoflock.neocomputers.gui.menu.CaseMenu
 import org.neoflock.neocomputers.item.ComponentItem
@@ -40,10 +37,12 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     val stacks: NonNullList<ItemStack> = NonNullList<ItemStack>.withSize(7, ItemStack.EMPTY)
 
     var isOn = false
+    var err: String? = null
+    var arch = "Lua 5.3"
     var soundInstance: SoundInstance? = null
 
     override val node = object : Networking.Node() {
-        override var powerRole = PowerRole.STORAGE
+        override var powerRole = PowerRole.CONSUMER
         override var energyCapacity: Long = 500
     }
 
@@ -70,6 +69,14 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     override fun encodeScreenData(player: ServerPlayer, packet: FriendlyByteBuf) {
         super.encodeScreenData(player, packet)
         packet.writeBoolean(isOn)
+        packet.writeByteArray((err ?: "").encodeToByteArray())
+        packet.writeLong(node.energy)
+        packet.writeLong(node.energyCapacity)
+        packet.writeLong(getMachineMemoryUsed())
+        packet.writeLong(getMachineMemoryTotal())
+        packet.writeLong(getMachineComponentsUsed())
+        packet.writeLong(getMachineComponentsTotal())
+        packet.writeUtf(arch)
     }
 
     val redstoneIn = Array(Direction.entries.size) {0}
@@ -136,21 +143,56 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     }
 
     override fun start(): Boolean {
+        if(isOn) return true
+        err = null
+        val archs = getMachineArchitectures()
+        // Beep patterns taken from https://github.com/MightyPirates/OpenComputers/blob/571482db88080d56329e8f8cf0db2a90825bf1d7/src/main/scala/li/cil/oc/server/machine/Machine.scala
+        if(archs.isEmpty()) {
+            crash("no cpu")
+            beepAsync("-..")
+            return false
+        }
+        if(getMachineComponentsUsed() > getMachineComponentsTotal()) {
+            crash("too many components")
+            beepAsync("-..")
+            return false
+        }
+        if(node.energy < 100) {
+            crash("not enough energy")
+            // we add a beep for the special case where we do have a little bit of energy :P
+            if(node.energy > 0) beepAsync("..")
+            return false
+        }
+        if(getMachineMemoryTotal() == 0L) {
+            crash("no memory provided")
+            beepAsync("-.")
+            return false
+        }
+        if(arch !in archs) {
+            // Just pick one!
+            arch = archs.first()
+        }
+        beepAsync(".")
         setRunning(true)
         return isOn
     }
 
     override fun stop(): Boolean {
+        if(!isOn) return false
         setRunning(false)
         return isOn
     }
 
     override fun crash(error: String): Boolean {
-        NeoComputers.LOGGER.warn("Crashing cases is not implemented yet lol")
-        return false
+        if(isOn) {
+            beepAsync("--")
+        }
+        setRunning(false)
+        err = error
+        return true
     }
 
-    override fun getLastError(): String? = null
+    override fun getLastError(): String? = err
 
     override fun getMachineNode(): Networking.Node = node
 
@@ -165,19 +207,29 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
         return old
     }
 
-    override fun beepAsync(frequency: Int, duration: Duration, volume: Double): Boolean {
-        NeoComputers.LOGGER.warn("beep not yet implemented")
+    override fun beepAsync(pattern: String, frequency: Int, duration: Duration, volume: Double): Boolean {
+        NodeSynchronizer.emitBeep(level!!, NodeSynchronizer.BeepDataPayload(getMachineBlockPosition(), pattern, frequency, duration, volume))
         return true
     }
 
     override fun getMachineMemoryTotal(): Long = stacks.mapNotNull { (it.item as? ComponentItem)?.getMemoryCapacity(it) }.sum().toLong()
     override fun getMachineMemoryUsed(): Long = 0
-    override fun getMachineComponentsUsed(): Long = node.connections.size.toLong()
+    override fun getMachineComponentsUsed(): Long = node.getReachable().size.toLong()
     override fun getMachineComponentsTotal(): Long = stacks.mapNotNull { (it.item as? ComponentItem)?.getComponentCapacity(it) }.sum().toLong()
+    override fun getMachineArchitecture() = arch
+    override fun getMachineArchitectures() = stacks.mapNotNull { (it.item as? ComponentItem)?.getArchitecturesProvided(it) }.flatten().toSet()
+    override fun setMachineArchitecture(arch: String) {
+        if(this.arch == arch) return
+        this.arch = arch
+        if(isRunning()) {
+            stop()
+            start()
+        }
+    }
 
     override fun getItems(): NonNullList<ItemStack> = stacks
 
-    override fun stillValid(player: Player): Boolean = true
+    override fun stillValid(player: Player): Boolean = !this.isRemoved
 
     override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
         super.loadAdditional(compoundTag, provider)
@@ -196,15 +248,19 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     override fun getDisplayName(): Component? = Component.literal("Computer")
     override fun createMenu(i: Int, inventory: Inventory, player: Player) = CaseMenu(i, inventory, this)
 
-    override fun canPlaceItem(i: Int, itemStack: ItemStack): Boolean = false
-    override fun canTakeItem(container: Container, i: Int, itemStack: ItemStack): Boolean = false
-
-    override fun setChanged() {
-        super.setChanged()
-    }
-
     override fun setRemoved() {
         setRunning(false)
         super.setRemoved()
+    }
+
+    override fun tickNode(level: Level) {
+        super.tickNode(level)
+        if(!level.isClientSide) {
+            if (isRunning()) {
+                if (!node.consumeEnergy(1)) {
+                    crash("out of energy")
+                }
+            }
+        }
     }
 }

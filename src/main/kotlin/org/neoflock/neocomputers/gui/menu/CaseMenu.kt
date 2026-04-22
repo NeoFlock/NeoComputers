@@ -20,19 +20,19 @@ open class CaseMenu : GenericContainerMenu {
     constructor(i: Int, inv: Inventory) : this(i, inv, SimpleContainer(7))
 
     constructor(i: Int, inv: Inventory, container: Container) : super(Menus.CASE_MENU.get(), i, container) {
-        this.addInventorySlots(inv, 8, 84)
-
         val machine = container as? CaseBlockEntity
 
-        this.addSlot(ComponentSlot(this.container, 0, 20, 34, machine, eepromRequirement))
+        this.addSlot(ComponentSlot(container, 0, 20, 34, machine, eepromRequirement))
 
         var i = 1
         for ((col, slotCol) in slotRequirements.withIndex()) {
             for ((row, slotReq) in slotCol.withIndex()) {
-                this.addSlot(ComponentSlot(this.container, i, 98+(col*22), 18*(row+1)-2, machine, slotReq))
+                this.addSlot(ComponentSlot(container, i, 98+(col*22), 18*(row+1)-2, machine, slotReq))
                 i++
             }
         }
+
+        this.addInventorySlots(inv, 8, 84)
 
         // for (int col=1; col<4; col++) {
         //     for (int row=1; row<4; row++) {

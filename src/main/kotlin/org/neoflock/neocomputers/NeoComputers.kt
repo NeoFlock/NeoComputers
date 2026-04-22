@@ -3,9 +3,11 @@ package org.neoflock.neocomputers
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.VertexFormat
 import dev.architectury.event.events.client.ClientLifecycleEvent
+import dev.architectury.event.events.common.LifecycleEvent
 import dev.architectury.event.events.common.PlayerEvent
 import dev.architectury.event.events.common.TickEvent
 import dev.architectury.networking.NetworkManager
+import dev.architectury.platform.Platform
 import net.minecraft.resources.ResourceLocation
 import org.neoflock.neocomputers.block.Blocks
 import org.neoflock.neocomputers.entity.BlockEntities
@@ -84,6 +86,22 @@ object NeoComputers {
             NodeSynchronizer.syncScreens()
         }
 
+        TickEvent.PLAYER_POST.register {
+            Sounds.tickCustomSounds()
+        }
+
+        LifecycleEvent.SERVER_STARTING.register {
+            Networking.allNodes.remove()
+            Networking.wirelessNodes.remove()
+            Networking.channels.remove()
+        }
+
+        ClientLifecycleEvent.CLIENT_STARTED.register {
+            Networking.allNodes.remove()
+            Networking.wirelessNodes.remove()
+            Networking.channels.remove()
+        }
+
         PlayerEvent.CLOSE_MENU.register {
             player, menu ->
             if(player is ServerPlayer) NodeSynchronizer.playerScreenClosed(player)
@@ -94,13 +112,18 @@ object NeoComputers {
             NodeSynchronizer.playerScreenClosed(player)
         }
 
-        NetworkManager.registerReceiver(NetworkManager.c2s(),NodeSynchronizer.ScreenDataPayload.TYPE, NodeSynchronizer.ScreenDataPayload.CODEC, {
-                packet, ctx ->
-            val player = ctx.player
-            if(player is ServerPlayer) {
-                NodeSynchronizer.screenMap[player]?.processScreenInteraction(player, packet.buffer)
-            }
-        })
+        // networking has no way to define a C2S packet type, so we need the listener on both
+        // however, defining it separately on both breaks both ends
+        // so we define it once, but on both platforms
+        if(Platform.getEnvironment() == Env.CLIENT || Platform.getEnvironment() == Env.SERVER) {
+            NetworkManager.registerReceiver(NetworkManager.c2s(),NodeSynchronizer.ScreenDataPayload.TYPE, NodeSynchronizer.ScreenDataPayload.CODEC, {
+                    packet, ctx ->
+                val player = ctx.player
+                if(player is ServerPlayer) {
+                    NodeSynchronizer.screenMap[player]?.processScreenInteraction(player, packet.buffer)
+                }
+            })
+        }
 
         // we have to do this because the datagen task runs in the physical server
         EnvExecutor.runInEnv(Env.CLIENT) {{
@@ -120,11 +143,18 @@ object NeoComputers {
                     scr.processScreenStatePacket(packet.buffer)
                 }
             })
+
+            NetworkManager.registerReceiver(NetworkManager.s2c(),NodeSynchronizer.BeepDataPayload.TYPE, NodeSynchronizer.BeepDataPayload.CODEC, {
+                    packet, ctx ->
+                // TODO: implement volume
+                Sounds.beep(packet.pos.center, packet.pattern, packet.freq, packet.duration.toMillis().toInt())
+            })
         }}
         EnvExecutor.runInEnv(Env.SERVER) {{
             // https://github.com/architectury/architectury-api/issues/518
             NetworkManager.registerS2CPayloadType(NodeSynchronizer.StatePayload.TYPE, NodeSynchronizer.StatePayload.CODEC)
             NetworkManager.registerS2CPayloadType(NodeSynchronizer.ScreenPayload.TYPE, NodeSynchronizer.ScreenPayload.CODEC)
+            NetworkManager.registerS2CPayloadType(NodeSynchronizer.BeepDataPayload.TYPE, NodeSynchronizer.BeepDataPayload.CODEC)
         }}
 
         LOGGER.info("Registered!")
