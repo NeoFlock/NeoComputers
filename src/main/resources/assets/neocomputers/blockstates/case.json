@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "neocomputers:block/case"
+    },
+    "facing=east": {
+      "model": "neocomputers:block/case",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "neocomputers:block/case",
+      "y": -90
+    },
+    "facing=south": {
+      "model": "neocomputers:block/case",
+      "y": 180
+    }
+  }
+}
