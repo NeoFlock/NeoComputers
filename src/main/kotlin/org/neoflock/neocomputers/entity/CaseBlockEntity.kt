@@ -259,6 +259,9 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
         super.tickNode(level)
         if(!level.isClientSide) {
             if (isRunning()) {
+                if(getMachineComponentsUsed() > getMachineComponentsTotal()) {
+                    crash("too many components")
+                }
                 if (!node.consumeEnergy(1)) {
                     crash("out of energy")
                 }
