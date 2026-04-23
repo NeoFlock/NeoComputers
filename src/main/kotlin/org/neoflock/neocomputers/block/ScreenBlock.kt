@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.EntityBlock
@@ -81,22 +82,8 @@ class ScreenBlock() : NodeBlock() {
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block?, BlockState?>) {
         builder.add(FACING)
     }
-    override fun setPlacedBy(level: Level, pos: BlockPos, state: BlockState, placer: LivingEntity?, stack: ItemStack) {
-        super.setPlacedBy(level, pos, state, placer, stack)
-//        state.setValue(state.)
-        level.setBlockAndUpdate(pos, state.setValue(FACING, lookingdir(placer!!)))
-    }
 
-    private fun lookingdir(placer: LivingEntity): Direction {
-        val vec = placer.lookAngle
-        NeoComputers.LOGGER.info(vec.toString())
-        val biggest = max(max(abs(vec.x), abs(vec.y)), abs(vec.z))
-        when(biggest) {
-            abs(vec.x) -> if(vec.x < 0) return Direction.EAST else return Direction.WEST
-            abs(vec.y) -> if(vec.y < 0) return Direction.UP else return Direction.DOWN
-            abs(vec.z) -> if(vec.z < 0) return Direction.SOUTH else return Direction.NORTH
-        }
-        NeoComputers.LOGGER.warn("Failed to obtain looking direction!")
-        return Direction.NORTH // wtf
+    override fun getStateForPlacement(context: BlockPlaceContext): BlockState? {
+        return super.getStateForPlacement(context)!!.setValue(FACING, context.nearestLookingDirection.opposite)
     }
 }

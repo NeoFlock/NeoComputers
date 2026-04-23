@@ -19,15 +19,16 @@ class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
 
     private var cleanrenderer: () -> Unit = { }; // TODO: THIS SUCKS, FIND A BETTER WAY
 
-    override fun setChanged() {
-        super.setChanged()
-        if (bound == "screen/unbound") {
+    override fun tickNode(level: Level) {
+        super.tickNode(level)
+        if (bound == "screen/unbound" && level.isClientSide) { // am i epstein or am i just retarded?
             createscreenstuffs()
         }
     }
 
     override fun setRemoved() {
         super.setRemoved()
+        bound = "screen/unbound" // ensure no missing texture is displayed
         cleanrenderer()
     }
 
