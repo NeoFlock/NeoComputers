@@ -39,11 +39,11 @@ object NeoComputers {
     val LOGGER: Logger = LoggerFactory.getLogger("NeoComputers")
     var PLATFORM: ModPlatform? = null
 
-    val BlockEntityRenderType: RenderType = RenderType.create(
-        "nc_blockentities",
-        DefaultVertexFormat.POSITION_TEX,
-        VertexFormat.Mode.QUADS,
-        0xc000, RenderType.CompositeState.builder().setShaderState(RenderStateShard.POSITION_TEX_SHADER).createCompositeState(false)) // TODO: figure out correct buffer size and composite state
+//    val BlockEntityRenderType: RenderType = RenderType.create(
+//        "nc_blockentities",
+//        DefaultVertexFormat.POSITION_TEX,
+//        VertexFormat.Mode.QUADS,
+//        0xc000, RenderType.CompositeState.builder().setShaderState(RenderStateShard.POSITION_TEX_SHADER).createCompositeState(false)) // TODO: figure out correct buffer size and composite state
 
 
     fun entrypoint(platform: ModPlatform?) {
