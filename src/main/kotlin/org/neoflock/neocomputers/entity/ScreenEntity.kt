@@ -1,7 +1,9 @@
 package org.neoflock.neocomputers.entity;
 
 import net.minecraft.core.BlockPos
+import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.NeoComputers
@@ -17,7 +19,16 @@ class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
     var bound = "screen/unbound"
     var render_on_block = false
 
+    val scrwidth: Short = 160
+    val scrheight: Short = 50
+
     private var cleanrenderer: () -> Unit = { }; // TODO: THIS SUCKS, FIND A BETTER WAY
+
+    override fun encodeScreenData(player: ServerPlayer, packet: FriendlyByteBuf) {
+        super.encodeScreenData(player, packet)
+        packet.writeShort(scrwidth.toInt())
+        packet.writeShort(scrheight.toInt())
+    }
 
     override fun tickNode(level: Level) {
         super.tickNode(level)
@@ -38,13 +49,13 @@ class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
         if (level!!.isClientSide) {
             var buffer: MutableList<BufferRenderer.GPUChar> = mutableListOf()
             for(char in node.address.toString()) {
-                buffer.add(BufferRenderer.GPUChar(char, 0xFFFF00, 0x0000FF))
+                buffer.add(BufferRenderer.GPUChar(char))
             }
-            for (i in 0..((40*20)-36)) {
+            for (i in 0..((scrwidth*scrheight)-36)) {
                 buffer.add(BufferRenderer.GPUChar(' '))
             }
 
-            var renderer: BufferRenderer = BufferRenderer(40, 20, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, bound), buffer)
+            var renderer: BufferRenderer = BufferRenderer(scrwidth.toInt(), scrheight.toInt(), ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, bound), buffer)
             renderer.drawBuffer()
             cleanrenderer = { renderer.clean() }
         }

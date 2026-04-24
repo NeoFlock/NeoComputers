@@ -1,6 +1,7 @@
 package org.neoflock.neocomputers.utils
 
 // based off the ImplementedContainer of https://docs.fabricmc.net/develop/blocks/block-containers
+import dev.architectury.registry.menu.MenuRegistry
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.world.Container;

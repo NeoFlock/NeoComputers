@@ -64,11 +64,14 @@ class ScreenBlock() : NodeBlock() {
                 player.sendSystemMessage(Component.literal("Not enough power."))
                 return InteractionResult.SUCCESS
             };
-            MenuRegistry.openExtendedMenu(player as ServerPlayer, object : ExtendedMenuProvider {
+            val sp = player as ServerPlayer
+            val ent = level.getBlockEntity(blockPos, BlockEntities.SCREEN_ENTITY.get()).get()
+            NodeSynchronizer.registerPlayerScreen(sp, ent)
+            MenuRegistry.openExtendedMenu(sp, object : ExtendedMenuProvider {
                 override fun getDisplayName(): Component = Component.literal("SCREEEEEN!")
                 override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu {
 //                    return Menus.SCREEN_MENU.get().create(i, inventory);
-                    return ScreenMenu(i, inventory, level.getBlockEntity(blockPos, BlockEntities.SCREEN_ENTITY.get()).get())
+                    return ScreenMenu(i, inventory, ent)
                 }
 
                 override fun saveExtraData(buf: FriendlyByteBuf?) {

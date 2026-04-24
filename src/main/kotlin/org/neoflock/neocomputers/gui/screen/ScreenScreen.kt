@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.Tesselator
 import com.mojang.blaze3d.vertex.VertexFormat
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
+import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Inventory
@@ -14,18 +15,34 @@ import org.neoflock.neocomputers.entity.ScreenEntity
 import org.neoflock.neocomputers.gui.buffer.BufferRenderer
 import org.neoflock.neocomputers.gui.menu.ScreenMenu
 import org.neoflock.neocomputers.gui.render.ScreenRenderer
+import org.neoflock.neocomputers.utils.GenericContainerScreen
+import kotlin.math.min
 
-class ScreenScreen : AbstractContainerScreen<ScreenMenu>{
+class ScreenScreen : GenericContainerScreen<ScreenMenu>{
     private var renderer: ScreenRenderer = ScreenRenderer();
+
+    var scrWidth: Short = 0
+    var scrHeight: Short = 0
+
+    override fun processScreenStatePacket(buf: FriendlyByteBuf) {
+        super.processScreenStatePacket(buf)
+        scrWidth = buf.readShort()
+        scrHeight = buf.readShort()
+    }
 
     constructor(abstractContainerMenu: ScreenMenu, inventory: Inventory, component: Component) : super(abstractContainerMenu, inventory, component) {
         var ent: ScreenEntity = abstractContainerMenu.entity!!;
         renderer.bind(ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, ent.bound))
+        // advanced graphics programming
+        this.titleLabelX = Int.MAX_VALUE
+        this.inventoryLabelX = Int.MAX_VALUE
     }
-    override fun renderBg(guiGraphics: GuiGraphics, f: Float, i: Int, j: Int) {}
-    override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, something: Float) {
-        super.render(graphics, mouseX, mouseY, something)
-        renderer.render(graphics, 50, 50, 100, 200)
+    override fun renderBg(guiGraphics: GuiGraphics, f: Float, i: Int, j: Int) {
+        if(scrWidth > 0) {
+            imageWidth = scrWidth * 4
+            imageHeight = scrHeight * 8
+            renderer.render(guiGraphics, imageX, imageY, imageWidth, imageHeight)
+        }
     }
 
 //    override fun onClose() {
