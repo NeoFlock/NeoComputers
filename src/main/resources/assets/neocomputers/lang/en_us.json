@@ -44,8 +44,8 @@
   "neocomputers.errors.ENOMEM": "missing memory",
   "neocomputers.wlan.range": "Range: %1$s blocks",
   "neocomputers.data.limit": "Memory: %1$s",
-  "neocomputers.gpu.vram": "Video Memory: %1$spx",
-  "neocomputers.disk.spaceused": "Space Used: %1$s / %2$s",
+  "neocomputers.gpu.vram": "Video memory: %1$spx",
+  "neocomputers.disk.spaceused": "Space used: %1$s / %2$s",
   "neocomputers.readonly": "Read-Only",
   "neocomputers.readwrite": "Read-Write",
   "neocomputers.noaddr": "No address assigned",
@@ -57,8 +57,8 @@
   "neocomputers.computer.components": "Components: %1$s / %2$s",
   "neocomputers.memory.capacity": "Capacity: %1$s",
   "neocomputers.arch": "Architecture: %1$s",
-  "neocomputers.eeprom.codeused": "Code Storage: %1$s / %2$s",
-  "neocomputers.eeprom.dataused": "Data Storage: %1$s / %2$s",
-  "neocomputers.tunnel.channel": "Linked Channel: %1$s",
-  "sounds.neocomputers.computer_running": "Computer Fans"
+  "neocomputers.eeprom.codeused": "Code stored: %1$s / %2$s",
+  "neocomputers.eeprom.dataused": "Data stored: %1$s / %2$s",
+  "neocomputers.tunnel.channel": "Linked channel: %1$s",
+  "sounds.neocomputers.computer_running": "Computer fans"
 }
