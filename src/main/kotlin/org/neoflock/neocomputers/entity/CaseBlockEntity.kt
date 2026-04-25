@@ -31,13 +31,15 @@ import org.neoflock.neocomputers.sounds.ComputerRunningSoundInstance
 import org.neoflock.neocomputers.sounds.Sounds
 import org.neoflock.neocomputers.utils.GenericContainer
 import java.time.Duration
+import kotlin.math.max
 import kotlin.math.min
 
 class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEntity(BlockEntities.CASE_ENTITY.get(), blockPos, blockState), MachineEntity, GenericContainer, MenuProvider {
     val stacks: NonNullList<ItemStack> = NonNullList<ItemStack>.withSize(7, ItemStack.EMPTY)
 
     var isOn = false
-    var isDisking = false // TOOD: writing writers and reading readers
+    var diskActivityTime = 0 // TOOD: writing writers and reading readers
+    var networkActivityTime = 0
     var err: String? = null
     var arch = "Lua 5.3"
     var soundInstance: SoundInstance? = null
@@ -50,14 +52,16 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     override fun encodeDownstreamData(packet: FriendlyByteBuf) {
         super.encodeDownstreamData(packet)
         packet.writeBoolean(isOn)
-        packet.writeBoolean(isDisking)
+        packet.writeVarInt(diskActivityTime)
+        packet.writeVarInt(networkActivityTime)
         packet.writeUtf(err ?: "")
     }
 
     override fun syncWithUpstream(packet: FriendlyByteBuf) {
         super.syncWithUpstream(packet)
         setRunning(packet.readBoolean())
-        isDisking = packet.readBoolean()
+        diskActivityTime = packet.readVarInt()
+        networkActivityTime = packet.readVarInt()
         err = packet.readUtf().ifEmpty { null }
     }
 
@@ -219,6 +223,14 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
         return true
     }
 
+    override fun signalDiskActivity(delay: Int) {
+        diskActivityTime = max(delay, diskActivityTime)
+    }
+
+    override fun signalNetworkActivity(delay: Int) {
+        networkActivityTime = max(delay, networkActivityTime)
+    }
+
     override fun getMachineMemoryTotal(): Long = stacks.mapNotNull { (it.item as? ComponentItem)?.getMemoryCapacity(it) }.sum().toLong()
     override fun getMachineMemoryUsed(): Long = 0
     override fun getMachineComponentsUsed(): Long = node.getReachable().size.toLong()
@@ -264,6 +276,8 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
         super.tickNode(level)
         if(!level.isClientSide) {
             if (isRunning()) {
+                if(diskActivityTime > 0) diskActivityTime--
+                if(networkActivityTime > 0) networkActivityTime--
                 if(getMachineComponentsUsed() > getMachineComponentsTotal()) {
                     crash("too many components")
                 }

@@ -28,6 +28,10 @@ interface MachineEntity {
     // the duration is doubled.
     // Architectures should only use short ones.
     fun beepAsync(pattern: String, frequency: Int = 1000, duration: Duration = Duration.ofMillis(200), volume: Double = 1.0): Boolean
+    // Signals that disk activity is happening for at least that delay
+    fun signalDiskActivity(delay: Int)
+    // signal network activity to a machine
+    fun signalNetworkActivity(delay: Int)
 
     fun isRunning(): Boolean
     fun start(): Boolean

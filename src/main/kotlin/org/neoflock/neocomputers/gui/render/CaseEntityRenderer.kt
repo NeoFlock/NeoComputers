@@ -42,7 +42,7 @@ class CaseEntityRenderer(private val context: BlockEntityRendererProvider.Contex
         } else drawLED(buffer, mat.last(), 3F, OFF)
 
         mat.translate(6/16F, 0F, 0F)
-        drawLED(buffer, mat.last(), 2F, if (ent.isDisking) GREEN else OFF)
+        drawLED(buffer, mat.last(), 2F, if (ent.diskActivityTime > 0) GREEN else OFF)
 
         mat.popPose()
 
