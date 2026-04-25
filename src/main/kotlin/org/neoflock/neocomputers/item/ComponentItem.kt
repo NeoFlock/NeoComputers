@@ -17,23 +17,23 @@ interface ComponentItem {
     fun getArchitecturesProvided(itemStack: ItemStack): Set<String> = setOf()
 
     // Component placed, node must now exist
-    fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity, newRole: String) {
+    fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity?, newRole: String) {
         val oldNode = getComponentNode(itemStack)
         if(oldNode != null) Networking.removeNode(oldNode) // did a mod forget to call whenComponentTaken?
         val node = toComponentNode(itemStack, machine) ?: return
         Networking.addNode(node)
-        machine.getMachineNode().connectTo(node)
+        machine?.getMachineNode()?.connectTo(node)
     }
 
     // Component taken, and thus removed
-    fun whenComponentTaken(itemStack: ItemStack, machine: MachineEntity, previousRole: String) {
+    fun whenComponentTaken(itemStack: ItemStack, machine: MachineEntity?, previousRole: String) {
         val node = getComponentNode(itemStack) ?: return
-        node.disconnectFrom(machine.getMachineNode())
+        // removing disconnects
         Networking.removeNode(node)
     }
 
     // To node, if applicable. Meant to create the node, but not add it, as it will use the itemStack's address to find it again
-    fun toComponentNode(itemStack: ItemStack, machine: MachineEntity): Networking.Node?
+    fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node?
 
     // Gets the node associated to an item, if it exists
     fun getComponentNode(itemStack: ItemStack): Networking.Node? {

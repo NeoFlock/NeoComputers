@@ -13,6 +13,7 @@ abstract class MachineEvent {
 
 data class MachineRedstoneEvent(override val machine: MachineEntity, val side: Direction, val oldValue: Int, val newValue: Int): MachineEvent()
 data class MachinePowerEvent(override val machine: MachineEntity, val nowRunning: Boolean): MachineEvent()
+data class MachineCrashEvent(override val machine: MachineEntity, val error: String): MachineEvent()
 
 interface MachineEntity {
     // Block position of machine, for wireless tech

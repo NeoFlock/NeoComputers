@@ -188,6 +188,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     override fun crash(error: String): Boolean {
         if(isOn) {
             beepAsync("--")
+            sendMachineEvent(MachineCrashEvent(this, error))
         }
         setRunning(false)
         err = error
