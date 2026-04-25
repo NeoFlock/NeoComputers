@@ -37,6 +37,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     val stacks: NonNullList<ItemStack> = NonNullList<ItemStack>.withSize(7, ItemStack.EMPTY)
 
     var isOn = false
+    var isDisking = false // TOOD: writing writers and reading readers
     var err: String? = null
     var arch = "Lua 5.3"
     var soundInstance: SoundInstance? = null
@@ -49,12 +50,14 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     override fun encodeDownstreamData(packet: FriendlyByteBuf) {
         super.encodeDownstreamData(packet)
         packet.writeBoolean(isOn)
+        packet.writeBoolean(isDisking)
         packet.writeUtf(err ?: "")
     }
 
     override fun syncWithUpstream(packet: FriendlyByteBuf) {
         super.syncWithUpstream(packet)
         setRunning(packet.readBoolean())
+        isDisking = packet.readBoolean()
         err = packet.readUtf().ifEmpty { null }
     }
 

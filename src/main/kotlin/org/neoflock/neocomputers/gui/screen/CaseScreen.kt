@@ -23,10 +23,6 @@ import java.util.Optional
 class CaseScreen : GenericContainerScreen<CaseMenu> {
     private val PCB: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/computer.png")
     private val BTN: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/button_power.png")
-//    private val BTN_ENABLED: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/button/power/enabled.png") // gonna do this later
-//    private val BTN_DISABLED: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/button/power/disabled.png")
-//    private val BTN_ENABLED_HOVER: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/button/power/enabled_hover.png")
-//    private val BTN_DISABLED_HOVER: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/power/disabled_hover.png")
 
     private var btn: ImagerButton? = null
     override fun shouldCenterTitle(): Boolean = false
