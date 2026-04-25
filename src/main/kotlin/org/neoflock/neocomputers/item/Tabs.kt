@@ -71,6 +71,7 @@ object Tabs {
                     val codeBuf = ByteBuffer.allocate(code.size)
                     codeBuf.put(code)
                     luaBios.set(DataComponents.LABEL, "Lua BIOS")
+                    luaBios.set(DataComponents.ARCH, "Lua 5.2")
                     luaBios.set(DataComponents.EEPROM_CODE, codeBuf)
                     luaBios.set(DataComponents.EEPROM_CODESIZE, code.size)
                     output.accept(luaBios)

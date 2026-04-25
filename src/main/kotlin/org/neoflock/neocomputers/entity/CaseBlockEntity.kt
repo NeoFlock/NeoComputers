@@ -153,28 +153,29 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
         val archs = getMachineArchitectures()
         // Beep patterns taken from https://github.com/MightyPirates/OpenComputers/blob/571482db88080d56329e8f8cf0db2a90825bf1d7/src/main/scala/li/cil/oc/server/machine/Machine.scala
         if(archs.isEmpty()) {
-            crash("no cpu")
+            crash("@neocomputers.errors.ENOCPU")
             beepAsync("-..")
             return false
         }
         if(getMachineComponentsUsed() > getMachineComponentsTotal()) {
-            crash("too many components")
+            crash("@neocomputers.errors.E2BIG")
             beepAsync("-..")
             return false
         }
-        if(node.energy < 100) {
-            crash("not enough energy")
+        // less than 20% energy is bad
+        if(node.energy < node.energyCapacity/5) {
+            crash("@neocomputers.errors.ENOENJ")
             // we add a beep for the special case where we do have a little bit of energy :P
             if(node.energy > 0) beepAsync("..")
             return false
         }
         if(getMachineMemoryTotal() == 0L) {
-            crash("no memory provided")
+            crash("@neocomputers.errors.ENOMEM")
             beepAsync("-.")
             return false
         }
         if(arch !in archs) {
-            // Just pick one!
+            // Just pick one! TODO: consult EEPROM first
             arch = archs.first()
         }
         beepAsync(".")

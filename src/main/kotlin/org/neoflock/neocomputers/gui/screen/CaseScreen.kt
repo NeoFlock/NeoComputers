@@ -57,18 +57,20 @@ class CaseScreen : GenericContainerScreen<CaseMenu> {
         arch = buf.readUtf()
     }
 
+    fun getErrorComponent(err: String): Component = if(err.startsWith("@")) Component.translatable(err.substring(1)) else Component.literal(err)
+
     fun computeButtonTooltip(): List<Component> {
-        val msgs = mutableListOf(Component.literal("Computer " + if(isOn) "ON" else "OFF").withStyle(if(isOn) ChatFormatting.GREEN else ChatFormatting.RED))
+        val msgs = mutableListOf(Component.translatable(if(isOn) "neocomputers.computer.on" else "neocomputers.computer.off").withStyle(if(isOn) ChatFormatting.GREEN else ChatFormatting.RED))
         if(lastError != null) {
-            msgs.addLast(Component.literal("Error: ").withStyle(ChatFormatting.RED).append(Component.literal(lastError!!)))
+            msgs.addLast(Component.translatable("neocomputers.computer.errorNoMsg").withStyle(ChatFormatting.RED).append(getErrorComponent(lastError!!)))
         }
         if(arch.isNotEmpty()) {
-            msgs.addLast(Component.literal("Architecture: $arch"))
+            msgs.addLast(Component.translatable("neocomputers.arch", arch))
         }
         if(hasShiftDown()) {
-            msgs.addLast(Component.literal("Energy: $energy / $maxEnergy J").withStyle(if(energy < 100) ChatFormatting.RED else ChatFormatting.WHITE))
-            msgs.addLast(Component.literal("Memory: ${Formatting.formatMemory(memory)} / ${Formatting.formatMemory(maxMemory)}"))
-            msgs.addLast(Component.literal("Components: $components / $maxComponents").withStyle(if(components <= maxComponents) ChatFormatting.WHITE else ChatFormatting.RED))
+            msgs.addLast(Component.translatable("neocomputers.computer.energy", energy, maxEnergy).withStyle(if(energy < maxEnergy/5) ChatFormatting.RED else ChatFormatting.WHITE))
+            msgs.addLast(Component.translatable("neocomputers.computer.memory", Formatting.formatMemory(memory), Formatting.formatMemory(maxMemory)))
+            msgs.addLast(Component.translatable("neocomputers.computer.components", components, maxEnergy).withStyle(if(components <= maxComponents) ChatFormatting.WHITE else ChatFormatting.RED))
         }
         return msgs
     }

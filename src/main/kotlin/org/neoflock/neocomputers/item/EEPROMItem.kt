@@ -43,10 +43,14 @@ open class EEPROMItem(val tier: Int, val codeCapacity: Int, val dataCapacity: In
         if(tooltipFlag.isAdvanced) {
             val codeSize = itemStack.get(DataComponents.EEPROM_CODESIZE) ?: 0
             val dataSize = itemStack.get(DataComponents.EEPROM_DATASIZE) ?: 0
+            val arch = itemStack.get(DataComponents.ARCH)
             val addr = itemStack.get(DataComponents.ADDRESS)
             val readonly = itemStack.get(DataComponents.READONLY) ?: false
             val addrComp = if(addr == null) Component.translatable("neocomputers.noaddr") else Component.literal(addr)
             list.addLast(addrComp)
+            if(arch != null) {
+                list.addLast(Component.translatable("neocomputers.arch", arch))
+            }
             list.addLast(Component.translatable("neocomputers.eeprom.codeused", Formatting.formatMemory(codeSize.toLong()),
                 Formatting.formatMemory(codeCapacity.toLong())))
             list.addLast(Component.translatable("neocomputers.eeprom.dataused", Formatting.formatMemory(dataSize.toLong()),

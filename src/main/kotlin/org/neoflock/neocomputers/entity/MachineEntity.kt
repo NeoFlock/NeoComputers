@@ -3,6 +3,7 @@ package org.neoflock.neocomputers.entity
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.world.level.Level
+import net.minecraft.world.phys.Vec3
 import org.neoflock.neocomputers.item.ComponentItem
 import org.neoflock.neocomputers.network.Networking
 import java.time.Duration
@@ -18,6 +19,7 @@ data class MachineCrashEvent(override val machine: MachineEntity, val error: Str
 interface MachineEntity {
     // Block position of machine, for wireless tech
     fun getMachineBlockPosition(): BlockPos
+    fun getMachinePrecisePosition(): Vec3 = getMachineBlockPosition().center
     fun getMachineLevel(): Level
 
     // Pattern can have dots (.), dashes (-) and spaces ( ).
