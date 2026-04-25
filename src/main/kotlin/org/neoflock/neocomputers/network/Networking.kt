@@ -196,7 +196,7 @@ object Networking {
             }
             if(reachability == Visibility.NETWORK) {
                 // absolute cinema
-                val working = mutableSetOf<Node>();
+                val working = HashSet<Node>();
                 val pending = mutableListOf(this);
                 var iterCount = 0;
                 while(iterCount < maxHopCount && pending.isNotEmpty()) {
@@ -246,8 +246,8 @@ object Networking {
         abstract fun receiveWireless(message: Message, emitter: WirelessEndpoint)
     }
 
-    val wirelessNodes = ThreadLocal.withInitial { mutableSetOf<WirelessEndpoint>() }
-    val allNodes = ThreadLocal.withInitial { mutableMapOf<UUID, Node>() }
+    val wirelessNodes = ThreadLocal.withInitial { HashSet<WirelessEndpoint>() }
+    val allNodes = ThreadLocal.withInitial { HashMap<UUID, Node>() }
 
     // node may differ from message.sender in the case of relays,
     // as they might have DIRECT reachability but
@@ -326,7 +326,7 @@ object Networking {
         nodes.forEach { removeNode(it) }
     }
 
-    val channels = ThreadLocal.withInitial { mutableMapOf<String, MutableSet<Node>>() }
+    val channels = ThreadLocal.withInitial { HashMap<String, MutableSet<Node>>() }
 
     fun addToChannel(channel: String, node: Node) {
         val localChannels = channels.get()

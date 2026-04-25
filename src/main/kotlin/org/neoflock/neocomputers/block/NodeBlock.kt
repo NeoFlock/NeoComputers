@@ -12,9 +12,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
-
-import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.EntityBlock
@@ -24,7 +21,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.network.Networking
-import org.neoflock.neocomputers.network.PowerRole
 import java.time.Duration
 
 object NodeSynchronizer {
@@ -118,7 +114,7 @@ object NodeSynchronizer {
         override fun type() = TYPE
     }
 
-    val screenMap = mutableMapOf<ServerPlayer, NodeBlockEntity>()
+    val screenMap = HashMap<ServerPlayer, NodeBlockEntity>()
 
     fun playerScreenClosed(player: ServerPlayer) {
         screenMap.remove(player)
