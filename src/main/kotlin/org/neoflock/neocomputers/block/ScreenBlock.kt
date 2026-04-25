@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.state.StateDefinition
 import net.minecraft.world.level.block.state.properties.BooleanProperty
 import net.minecraft.world.level.block.state.properties.EnumProperty
 import net.minecraft.world.level.block.state.properties.EnumProperty.*
+import net.minecraft.world.level.block.state.properties.IntegerProperty
 import net.minecraft.world.phys.BlockHitResult
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.entity.BlockEntities
@@ -37,12 +38,13 @@ import kotlin.math.max
 
 class ScreenBlock() : NodeBlock() {
     companion object {
-        val FACING: EnumProperty<Direction> = EnumProperty.create<Direction>("facing", Direction::class.java)
+        val FACING_HORIZ: EnumProperty<Direction> = EnumProperty.create<Direction>("facing_horiz", Direction::class.java)
+        val FACING_VERTI: IntegerProperty = IntegerProperty.create("facing_verti", 0, 2) // "Integer" property doesnt accept values below 0, also death to enums, long live magic numbers
         val ENERGY: Long = 5
     }
 
     init {
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH))
+        registerDefaultState(stateDefinition.any().setValue(FACING_HORIZ, Direction.NORTH).setValue(FACING_VERTI, 1))
     }
 
     override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity? {
@@ -83,10 +85,26 @@ class ScreenBlock() : NodeBlock() {
     }
 
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block?, BlockState?>) {
-        builder.add(FACING)
+        builder.add(FACING_HORIZ)
+        builder.add(FACING_VERTI)
     }
 
     override fun getStateForPlacement(context: BlockPlaceContext): BlockState? {
-        return super.getStateForPlacement(context)!!.setValue(FACING, context.nearestLookingDirection.opposite)
+        val horiz = context.horizontalDirection
+        val looking = context.player!!.lookAngle
+
+        val biggest = max(max(abs(looking.y), abs(looking.z)), abs(looking.x))
+
+        return super.getStateForPlacement(context)!!
+            .setValue(FACING_HORIZ, horiz.opposite)
+            .setValue(FACING_VERTI, if (biggest != abs(looking.y)) 1 else if (looking.y < 0) 2 else 0 )
+
+//        val dirs = context.nearestLookingDirections
+//        context.
+//        return when (face) {
+//            Direction.UP -> super.getStateForPlacement(context)!!.setValue(FACING_HORIZ, looking.opposite).setValue(FACING_VERTI, 2)
+//            Direction.DOWN -> super.getStateForPlacement(context)!!.setValue(FACING_HORIZ, looking.opposite).setValue(FACING_VERTI, 0)
+//            else -> super.getStateForPlacement(context)!!.setValue(FACING_HORIZ, looking.opposite).setValue(FACING_VERTI, 1)
+//        }
     }
 }

@@ -1,27 +1,57 @@
 {
   "variants": {
-    "facing=north": {
+    "facing_horiz=north,facing_verti=1": {
       "model": "neocomputers:block/screen"
     },
-    "facing=east": {
+    "facing_horiz=east,facing_verti=1": {
       "model": "neocomputers:block/screen",
       "y": 90
     },
-    "facing=west": {
+    "facing_horiz=west,facing_verti=1": {
       "model": "neocomputers:block/screen",
       "y": -90
     },
-    "facing=south": {
+    "facing_horiz=south,facing_verti=1": {
       "model": "neocomputers:block/screen",
       "y": 180
     },
-    "facing=up": {
+    "facing_horiz=north,facing_verti=0": {
+      "model": "neocomputers:block/screen",
+      "x": 90
+    },
+    "facing_horiz=east,facing_verti=0": {
+      "model": "neocomputers:block/screen",
+      "x": 90,
+      "y": 90
+    },
+    "facing_horiz=west,facing_verti=0": {
+      "model": "neocomputers:block/screen",
+      "x": 90,
+      "y": -90
+    },
+    "facing_horiz=south,facing_verti=0": {
+      "model": "neocomputers:block/screen",
+      "x": 90,
+      "y": 180
+    },
+    "facing_horiz=north,facing_verti=2": {
       "model": "neocomputers:block/screen",
       "x": -90
     },
-    "facing=down": {
+    "facing_horiz=east,facing_verti=2": {
       "model": "neocomputers:block/screen",
-      "x": 90
+      "x": -90,
+      "y": 90
+    },
+    "facing_horiz=west,facing_verti=2": {
+      "model": "neocomputers:block/screen",
+      "x": -90,
+      "y": -90
+    },
+    "facing_horiz=south,facing_verti=2": {
+      "model": "neocomputers:block/screen",
+      "x": -90,
+      "y": 180
     }
   }
 }

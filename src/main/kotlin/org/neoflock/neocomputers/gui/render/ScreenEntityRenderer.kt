@@ -33,30 +33,44 @@ class ScreenEntityRenderer(val context: BlockEntityRendererProvider.Context?) : 
                 .createCompositeState(false))
     }
     override fun render(entity: ScreenEntity, partialTick: Float, mat: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
-        val facing = entity.blockState.getValue(ScreenBlock.FACING)
+        val facing = entity.blockState.getValue(ScreenBlock.FACING_HORIZ)
+        val vert = entity.blockState.getValue(ScreenBlock.FACING_VERTI)-1
 
         mat.pushPose()
-        handleDirection(facing, mat)
+        handleDirection(facing, vert, mat)
         mat.translate(2 / 16f, 2 / 16f, 0.0001f) // am i epstein or am i just retarded
+
+        val width = 3/4F
+        val height = 3/4F
+        val bx = 0F
+        val by = 0F
 
         val rendertype = RENDER_TYPE(ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, entity.bound))
         val buffer = bufferSource.getBuffer(rendertype)
-        buffer.addVertex(mat.last(), 3 / 4f, 0f, 0f).setUv(1f, 1f)
-        buffer.addVertex(mat.last(), 3 / 4f, 3 / 4f, 0f).setUv(1f, 0f)
-        buffer.addVertex(mat.last(), 0f, 3 / 4f, 0f).setUv(0f, 0f)
-        buffer.addVertex(mat.last(), 0f, 0f, 0f).setUv(0f, 1f)
+        buffer.addVertex(mat.last(), bx+width, by, 0f).setUv(1f, 1f)
+        buffer.addVertex(mat.last(), bx+width, by+height, 0f).setUv(1f, 0f)
+        buffer.addVertex(mat.last(), bx, by+height, 0f).setUv(0f, 0f)
+        buffer.addVertex(mat.last(), bx, by, 0f).setUv(0f, 1f)
 
         mat.popPose()
     }
 
-    private fun handleDirection(facing: Direction, mat: PoseStack) { // TODO: separate up and down from cardinal directions
+    private fun handleDirection(facing: Direction, vert: Int, mat: PoseStack) { // TODO: separate up and down from cardinal directions
+//        mat.mulPose(Axis.XN.rotationDegrees(vert.toFloat()*90F))
+//        if (vert==0) {
+//            mat.mulPose(Axis.YP.rotationDegrees(90F))
+//            return
+//        }
         when (facing) {
             Direction.SOUTH -> { mat.translate(0F, 0F, 1F) }
             Direction.EAST -> { mat.mulPose(Axis.YP.rotationDegrees(90F)); mat.translate(-1F, 0F, 1F) }
             Direction.WEST -> { mat.mulPose(Axis.YN.rotationDegrees(90F)); }
             Direction.NORTH -> {mat.mulPose(Axis.YP.rotationDegrees(180F)); mat.translate(-1F, 0F, 0F) }
-            Direction.UP -> { mat.mulPose(Axis.XN.rotationDegrees(90F)); mat.mulPose(Axis.ZP.rotationDegrees(180F)); mat.translate(-1F, 0F, 1F) } // idek
-            Direction.DOWN -> { mat.mulPose(Axis.XP.rotationDegrees(90F)); mat.mulPose(Axis.ZN.rotationDegrees(180F)); mat.translate(-1F, -1F, 0F) }
+            else -> {}
+//            Direction.UP -> { mat.mulPose(Axis.XN.rotationDegrees(90F)); mat.mulPose(Axis.ZP.rotationDegrees(180F)); mat.translate(-1F, 0F, 1F) } // idek
+//            Direction.DOWN -> { mat.mulPose(Axis.XP.rotationDegrees(90F)); mat.mulPose(Axis.ZN.rotationDegrees(180F)); mat.translate(-1F, -1F, 0F) }
         }
+        mat.mulPose(Axis.XN.rotationDegrees(vert*90F))
+        mat.translate(0F, if (vert==-1) -1F else 0F, if (vert==1) 1F else 0F)
     }
 }

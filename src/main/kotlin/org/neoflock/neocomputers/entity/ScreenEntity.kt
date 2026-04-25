@@ -17,10 +17,9 @@ class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
 
     override val node = Networking.Node()
     var bound = "screen/unbound"
-    var render_on_block = false
 
-    val scrwidth: Short = 160
-    val scrheight: Short = 50
+    val scrwidth: Short = 50
+    val scrheight: Short = 16
 
     private var cleanrenderer: () -> Unit = { }; // TODO: THIS SUCKS, FIND A BETTER WAY
 
@@ -32,7 +31,7 @@ class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
 
     override fun tickNode(level: Level) {
         super.tickNode(level)
-        if (bound == "screen/unbound" && level.isClientSide) { // am i epstein or am i just retarded?
+        if (bound == "screen/unbound") { // am i epstein or am i just retarded?
             createscreenstuffs()
         }
     }
