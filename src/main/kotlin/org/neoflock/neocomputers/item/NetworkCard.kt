@@ -13,13 +13,13 @@ open class NetworkCard(val tier: Int, val maxRange: Int, val isWired: Boolean): 
 
     override fun getComponentTier(itemStack: ItemStack): Int = tier
 
-    override fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity, newRole: String) {
-        ensureHasAddress(itemStack)
+    override fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity?, newRole: String) {
+        if(machine != null) ensureHasAddress(itemStack)
         super.whenComponentPlaced(itemStack, machine, newRole)
     }
 
     // TODO: Modem Component
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
 
     override fun appendHoverText(
         itemStack: ItemStack,

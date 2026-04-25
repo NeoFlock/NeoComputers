@@ -14,13 +14,13 @@ class TunnelCard: Item(Properties().component(DataComponents.TUNNEL_CHANNEL, "cr
 
     override fun getComponentTier(itemStack: ItemStack): Int = 3
 
-    override fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity, newRole: String) {
-        ensureHasAddress(itemStack)
+    override fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity?, newRole: String) {
+        if(machine != null) ensureHasAddress(itemStack)
         super.whenComponentPlaced(itemStack, machine, newRole)
     }
 
     // TODO: Tunnel Component
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
 
     override fun appendHoverText(
         itemStack: ItemStack,

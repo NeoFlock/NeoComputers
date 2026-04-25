@@ -27,12 +27,12 @@ open class EEPROMItem(val tier: Int, val codeCapacity: Int, val dataCapacity: In
 
     override fun getComponentCapacity(itemStack: ItemStack): Int = 0
 
-    override fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity, newRole: String) {
-        ensureHasAddress(itemStack)
+    override fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity?, newRole: String) {
+        if(machine != null) ensureHasAddress(itemStack)
         super.whenComponentPlaced(itemStack, machine, newRole)
     }
 
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
 
     override fun appendHoverText(
         itemStack: ItemStack,

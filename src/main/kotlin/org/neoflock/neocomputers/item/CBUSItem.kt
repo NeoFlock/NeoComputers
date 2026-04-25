@@ -13,7 +13,7 @@ open class CBUSItem(val tier: Int, val maxComponents: Int): Item(Item.Properties
 
     override fun getComponentCapacity(itemStack: ItemStack): Int = maxComponents
 
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
 }
 class CBUS0: CBUSItem(1, 8)
 class CBUS1: CBUSItem(2, 12)

@@ -15,7 +15,7 @@ open class CPUItem(val tier: Int, val maxComponents: Int): Item(Item.Properties(
 
     override fun getArchitecturesProvided(itemStack: ItemStack): Set<String> = setOf("Lua 5.3")
 
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
 }
 
 class CPU0: CPUItem(1, 8)

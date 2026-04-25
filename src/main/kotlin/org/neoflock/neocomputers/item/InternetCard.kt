@@ -14,13 +14,13 @@ class InternetCard: Item(Item.Properties()), ComponentItem {
 
     override fun getComponentTier(itemStack: ItemStack): Int = 1
 
-    override fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity, newRole: String) {
-        ensureHasAddress(itemStack)
+    override fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity?, newRole: String) {
+        if(machine != null) ensureHasAddress(itemStack)
         super.whenComponentPlaced(itemStack, machine, newRole)
     }
 
     // TODO: Internet Component
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
 
     override fun appendHoverText(
         itemStack: ItemStack,

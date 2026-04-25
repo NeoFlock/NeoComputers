@@ -15,13 +15,13 @@ open class GPUCard(val tier: Int, val vram: Long): Item(Properties()), Component
 
     override fun getComponentTier(itemStack: ItemStack): Int = tier
 
-    override fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity, newRole: String) {
-        ensureHasAddress(itemStack)
+    override fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity?, newRole: String) {
+        if(machine != null) ensureHasAddress(itemStack)
         super.whenComponentPlaced(itemStack, machine, newRole)
     }
 
     // TODO: GPU Component
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
 
     override fun appendHoverText(
         itemStack: ItemStack,
