@@ -3,7 +3,8 @@
     "render_type": "minecraft:solid",
     "textures": {
         "cap": "neocomputers:block/cable_cap",
-        "body": "neocomputers:block/cable_body"
+        "body": "neocomputers:block/cable_body",
+        "particle": "neocomputers:block/cable_cap"
     },
     "elements": [
         {

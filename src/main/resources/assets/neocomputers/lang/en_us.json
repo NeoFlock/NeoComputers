@@ -10,6 +10,7 @@
   "block.neocomputers.capacitor": "Small Capacitor",
   "block.neocomputers.capacitor2": "Medium Capacitor",
   "block.neocomputers.capacitor3": "Large Capacitor",
+  "block.neocomputers.cable": "Cable",
   "item.neocomputers.eeprom0": "EEPROM (Tier 1)",
   "item.neocomputers.cpu0": "CPU (Tier 1)",
   "item.neocomputers.cpu1": "CPU (Tier 2)",
