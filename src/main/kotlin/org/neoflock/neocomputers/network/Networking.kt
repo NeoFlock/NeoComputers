@@ -1,7 +1,6 @@
 package org.neoflock.neocomputers.network
 
 import net.minecraft.core.BlockPos
-import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.entity.MachineEvent
 import java.util.UUID
 import kotlin.math.min
@@ -35,226 +34,24 @@ object Networking {
     }
 
 
-    abstract class Message(val sender: Node)
+    abstract class Message(val sender: DeviceNode)
 
-    class ClassicPacket(sender: Node, val src: String, val dst: String, val port: Int, val data: List<Any>, val hopCount: Int) : Message(sender) {
+    class ClassicPacket(sender: DeviceNode, val src: String, val dst: String, val port: Int, val data: List<Any>, val hopCount: Int) : Message(sender) {
         fun hop() = ClassicPacket(sender, src, dst, port, data, hopCount + 1);
     }
 
     // for plugins and shi
-    class ComputerCheckedSignal(sender: Node, val player: String?, val name: String, val data: Array<Any>): Message(sender)
-    class ComputerUncheckedSignal(sender: Node, val name: String, val data: Array<Any>): Message(sender)
-    class ComputerEvent(sender: Node, val machineEvent: MachineEvent): Message(sender)
-
-    open class Node(_address: UUID? = null) {
-        val connections = mutableSetOf<Node>()
-        private var reachableCache: Set<Node>? = null
-        var address = _address ?: UUID.randomUUID()
-
-        open var reachability = Visibility.NETWORK
-        open var powerRole = PowerRole.CONSUMER
-        open var energy: Long = 0
-        open var energyCapacity: Long = 0
-        // give energy, returns how much was actually given
-        // cannot exceed amount specified
-        open fun giveEnergy(amount: Long): Long {
-            val maximum = min(amount, energyCapacity - energy)
-            energy += maximum
-            return maximum
-        }
-        // take energy out, returns how much was actually taken
-        // cannot exceed amount specified
-        open fun withdrawEnergy(amount: Long): Long {
-            val maximum = min(amount, energy)
-            energy -= maximum
-            return maximum
-        }
-
-        fun getChargerNodes(): Set<Node> = getReachable().filter { it.powerRole != PowerRole.CONSUMER }.toSet()
-        fun totalEnergyInConnections(): Long = getChargerNodes().fold(0) { acc, node -> acc + node.energy }
-        fun maxEnergyInConnections(): Long = getChargerNodes().fold(0) { acc, node -> acc + node.energyCapacity }
-
-        // attempts to consume
-        fun consumeEnergy(energy: Long): Boolean {
-            // consumes energy, returns false if not enough
-            val total = totalEnergyInConnections() + this.energy
-            if(energy > total) return false
-
-            var remaining = energy
-            remaining -= withdrawEnergy(remaining)
-            if(remaining <= 0) return true
-
-            for (charger in getChargerNodes()) {
-                if(remaining <= 0) break
-                remaining -= charger.withdrawEnergy(remaining)
-            }
-
-            return true
-        }
-
-        // PLEASE only call if consumer, in the name of all that is holy
-        fun tryToChargeFully() {
-            var remaining = energyCapacity - energy
-            if(remaining <= 0) return
-            for (charger in getChargerNodes()) {
-                if(remaining <= 0) break
-                val amount = charger.withdrawEnergy(remaining)
-                val given = giveEnergy(amount)
-                remaining -= given
-                if(given < amount) {
-                    val delta = amount - given // amount lost while given back
-                    if(charger.giveEnergy(delta) < delta) {
-                        NeoComputers.LOGGER.warn("LOSING ENERGY! Tried giving $delta back to $charger and we're losing our marbles!")
-                    }
-                }
-            }
-        }
-
-        // only call if storage
-        fun balanceStorage() {
-            for(battery in getReachable()) {
-                if(battery.powerRole != PowerRole.STORAGE) continue
-                // its so if for example we have a battery with 2x the capacity
-                // we don't try to even the energy between them since that's just bad
-                // and might pointless delete energy over time
-                val capacityRatio = energyCapacity.toDouble() / battery.energyCapacity
-
-                val meaningfulSurplus = (battery.energy * capacityRatio - energy).toLong()
-
-                if(meaningfulSurplus <= 0) {
-                    // WE'RE greedy (or negligible surplus)? Do nothing
-                    continue
-                }
-
-                // steal from this greedy mf
-                val toSteal = meaningfulSurplus / 2
-                if(toSteal == 0L) continue // broke storahh
-
-                val stolen = battery.withdrawEnergy(toSteal)
-                if(giveEnergy(stolen) < stolen) {
-                    NeoComputers.LOGGER.warn("LOSING ENERGY IN NODE $this!!!! THIS IS REALLY BAD!!!")
-                }
-            }
-        }
-
-        // rob the generators
-        fun stealGeneratorPower() {
-            var remaining = energyCapacity - energy
-
-            for(generator in getReachable()) {
-                if(generator.powerRole != PowerRole.GENERATOR) continue
-                // rob this mf
-                val robbed = generator.withdrawEnergy(remaining)
-                val taken = giveEnergy(robbed)
-                if(taken < robbed) {
-                    NeoComputers.LOGGER.warn("energy caught being DELETED in the big 26")
-                }
-                remaining -= taken
-            }
-        }
-
-        open fun tick() {
-            if(powerRole == PowerRole.CONSUMER) tryToChargeFully()
-            if(powerRole == PowerRole.STORAGE) {
-                stealGeneratorPower()
-                balanceStorage()
-            }
-        }
-        // processes a received message
-        open fun received(message: Message) {}
-
-        // called when a new direct connection is made
-        open fun onConnect(node: Node) {}
-        // called when a direct connection is lost
-        open fun onDisconnect(node: Node) {}
-
-        // called when a new node is added globally
-        open fun onNodeAdded(node: Node) {
-            reachableCache = null;
-        }
-
-        // called when a node is removed globally
-        open fun onNodeRemoved(node: Node) {
-            reachableCache = null;
-        }
-
-        fun getReachable(): Set<Node> {
-            if(reachableCache == null) {
-                reachableCache = computeReachable();
-            }
-            return reachableCache!!;
-        }
-
-        fun invalidateReachableCache() {
-            reachableCache = null
-        }
-
-        fun computeReachable(): Set<Node> {
-            if(reachability == Visibility.NONE) {
-                return setOf();
-            }
-            if(reachability == Visibility.DIRECT) {
-                return connections.minus(this);
-            }
-            if(reachability == Visibility.NETWORK) {
-                // absolute cinema
-                val working = HashSet<Node>();
-                val pending = mutableListOf(this);
-                var iterCount = 0;
-                while(iterCount < maxHopCount && pending.isNotEmpty()) {
-                    iterCount++;
-                    val subnode = pending.removeFirst();
-                    if(subnode in working) continue;
-                    working.add(subnode);
-                    pending.addAll(subnode.connections);
-                }
-                // cannot send to itself!
-                working.remove(this);
-                return working;
-            }
-            throw NotImplementedError("visibility not implemented");
-        }
-
-        fun connectTo(other: Node) {
-            this.directConnectTo(other);
-            other.directConnectTo(this);
-        }
-
-        fun disconnectFrom(other: Node) {
-            this.directDisconnectFrom(other);
-            other.directDisconnectFrom(this);
-        }
-
-        fun directConnectTo(other: Node) {
-            if(other == this) return;
-            if(other in connections) return;
-            connections.add(other);
-            this.onConnect(other);
-        }
-
-        fun directDisconnectFrom(other: Node) {
-            if(other !in connections) return;
-            connections.remove(other);
-            this.onDisconnect(other);
-        }
-    }
-
-    abstract class WirelessEndpoint(address: UUID?) : Node(address) {
-
-        abstract fun getRange(): Double
-        abstract fun getDimension(): Int
-        abstract fun getPosition(): BlockPos
-        // separate from process for simplicity
-        abstract fun receiveWireless(message: Message, emitter: WirelessEndpoint)
-    }
+    class ComputerCheckedSignal(sender: DeviceNode, val player: String?, val name: String, val data: Array<Any>): Message(sender)
+    class ComputerUncheckedSignal(sender: DeviceNode, val name: String, val data: Array<Any>): Message(sender)
+    class ComputerEvent(sender: DeviceNode, val machineEvent: MachineEvent): Message(sender)
 
     val wirelessNodes = ThreadLocal.withInitial { HashSet<WirelessEndpoint>() }
-    val allNodes = ThreadLocal.withInitial { HashMap<UUID, Node>() }
+    val allNodes = ThreadLocal.withInitial { HashMap<UUID, DeviceNode>() }
 
     // node may differ from message.sender in the case of relays,
     // as they might have DIRECT reachability but
-    fun emitMessage(node: Node, message: Message) {
-        node.getReachable().forEach { it.received(message) }
+    fun emitMessage(deviceNode: DeviceNode, message: Message) {
+        deviceNode.getReachable().forEach { it.received(message) }
     }
 
     fun computeRangeAllowedByHardness(src: BlockPos, dst: BlockPos): Double {
@@ -285,69 +82,69 @@ object Networking {
         tickCount++
     }
 
-    fun getNode(address: UUID): Node? = allNodes.get()[address]
+    fun getNode(address: UUID): DeviceNode? = allNodes.get()[address]
 
     // TODO: use setter, more convenient
-    fun changeNodeAddress(node: Node, address: UUID) {
-        if(node.address.equals(address)) return
-        if(node.address !in allNodes.get()) return
-        allNodes.get().remove(node.address)
-        node.address = address
-        allNodes.get()[address] = node
+    fun changeNodeAddress(deviceNode: DeviceNode, address: UUID) {
+        if(deviceNode.address.equals(address)) return
+        if(deviceNode.address !in allNodes.get()) return
+        allNodes.get().remove(deviceNode.address)
+        deviceNode.address = address
+        allNodes.get()[address] = deviceNode
     }
 
-    fun addNode(node: Node) {
-        if(node.address in allNodes.get()) return
-        allNodes.get()[node.address] = node
-        if(node is WirelessEndpoint) {
-            wirelessNodes.get().add(node);
+    fun addNode(deviceNode: DeviceNode) {
+        if(deviceNode.address in allNodes.get()) return
+        allNodes.get()[deviceNode.address] = deviceNode
+        if(deviceNode is WirelessEndpoint) {
+            wirelessNodes.get().add(deviceNode);
         }
         // notify at the end so it is notified of its own creation
-        allNodes.get().forEach { it.value.onNodeAdded(node) }
+        allNodes.get().forEach { it.value.onNodeAdded(deviceNode) }
     }
 
-    fun addNodes(vararg nodes: Node) {
-        nodes.forEach { addNode(it) }
+    fun addNodes(vararg deviceNodes: DeviceNode) {
+        deviceNodes.forEach { addNode(it) }
     }
 
-    fun removeNode(node: Node) {
-        if(node.address !in allNodes.get()) return
-        allNodes.get().forEach { it.value.onNodeRemoved(node) }
+    fun removeNode(deviceNode: DeviceNode) {
+        if(deviceNode.address !in allNodes.get()) return
+        allNodes.get().forEach { it.value.onNodeRemoved(deviceNode) }
         // toList() in order to copy it
-        node.connections.toList().forEach {
-            node.disconnectFrom(it)
+        deviceNode.connections.toList().forEach {
+            deviceNode.disconnectFrom(it)
         }
         // actually remove at the end so it can listen to its own removal
-        allNodes.get().remove(node.address)
-        if(node is WirelessEndpoint) {
-            wirelessNodes.get().remove(node);
+        allNodes.get().remove(deviceNode.address)
+        if(deviceNode is WirelessEndpoint) {
+            wirelessNodes.get().remove(deviceNode);
         }
     }
 
-    fun removeNodes(vararg nodes: Node) {
-        nodes.forEach { removeNode(it) }
+    fun removeNodes(vararg deviceNodes: DeviceNode) {
+        deviceNodes.forEach { removeNode(it) }
     }
 
-    val channels = ThreadLocal.withInitial { HashMap<String, MutableSet<Node>>() }
+    val channels = ThreadLocal.withInitial { HashMap<String, MutableSet<DeviceNode>>() }
 
-    fun addToChannel(channel: String, node: Node) {
+    fun addToChannel(channel: String, deviceNode: DeviceNode) {
         val localChannels = channels.get()
         if(!localChannels.containsKey(channel)) {
             localChannels[channel] = mutableSetOf();
         }
-        localChannels[channel]!!.add(node);
+        localChannels[channel]!!.add(deviceNode);
     }
 
-    fun removeFromChannel(channel: String, node: Node) {
+    fun removeFromChannel(channel: String, deviceNode: DeviceNode) {
         val localChannels = channels.get()
         if(!localChannels.containsKey(channel)) return;
-        localChannels[channel]?.remove(node);
+        localChannels[channel]?.remove(deviceNode);
         if(localChannels[channel].isNullOrEmpty()) {
             localChannels.remove(channel);
         }
     }
 
-    fun emitChannelMessage(starter: Node, channel: String, message: Message) {
+    fun emitChannelMessage(starter: DeviceNode, channel: String, message: Message) {
         val localChannels = channels.get()
         val c = localChannels[channel] ?: return;
         c.forEach { if(it != starter) it.received(message); };

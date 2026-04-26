@@ -7,13 +7,13 @@ import org.neoflock.neocomputers.gui.widget.ComponentRoles
 import org.neoflock.neocomputers.network.Networking
 
 open class CBUSItem(val tier: Int, val maxComponents: Int): Item(Item.Properties()), ComponentItem {
-    override fun getComponentRoles(itemStack: ItemStack): Set<String> = setOf(ComponentRoles.BUS)
+    override fun getComponentRoles(itemStack: ItemStack) = setOf(ComponentRoles.BUS)
 
-    override fun getComponentTier(itemStack: ItemStack): Int = tier
+    override fun getComponentTier(itemStack: ItemStack) = tier
 
-    override fun getComponentCapacity(itemStack: ItemStack): Int = maxComponents
+    override fun getComponentCapacity(itemStack: ItemStack) = maxComponents
 
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?) = null
 }
 class CBUS0: CBUSItem(1, 8)
 class CBUS1: CBUSItem(2, 12)

@@ -20,7 +20,7 @@ class InternetCard: Item(Item.Properties()), ComponentItem {
     }
 
     // TODO: Internet Component
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?) = null
 
     override fun appendHoverText(
         itemStack: ItemStack,

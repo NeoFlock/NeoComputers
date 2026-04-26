@@ -21,7 +21,7 @@ open class RedstoneCard(val tier: Int): Item(Properties()), ComponentItem {
     }
 
     // TODO: Redstone Component
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?) = null
 
     override fun appendHoverText(
         itemStack: ItemStack,

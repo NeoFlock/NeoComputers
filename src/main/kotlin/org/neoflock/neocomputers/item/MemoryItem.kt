@@ -6,6 +6,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
 import org.neoflock.neocomputers.entity.MachineEntity
 import org.neoflock.neocomputers.gui.widget.ComponentRoles
+import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.utils.Formatting
 
@@ -19,7 +20,7 @@ open class MemoryItem(val tier: Int, val capacity: Int): Item(Item.Properties().
     override fun getComponentCapacity(itemStack: ItemStack): Int = 0
 
     // no node for memory
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?) = null
 
     override fun appendHoverText(
         itemStack: ItemStack,

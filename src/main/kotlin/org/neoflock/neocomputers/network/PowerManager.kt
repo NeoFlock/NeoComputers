@@ -15,23 +15,23 @@ object PowerManager {
         //? if fabric {
         EnergyStorage.SIDED.registerForBlockEntity({
             entity, dir -> object : EnergyStorage {
-                override fun getAmount() = entity.node.energy
-                override fun getCapacity() = entity.node.energyCapacity
-                override fun supportsExtraction() = entity.node.powerRole != PowerRole.CONSUMER && entity.node.energyCapacity > 0
-                override fun supportsInsertion() = entity.node.powerRole != PowerRole.GENERATOR
+                override fun getAmount() = entity.deviceNode.energy
+                override fun getCapacity() = entity.deviceNode.energyCapacity
+                override fun supportsExtraction() = entity.deviceNode.powerRole != PowerRole.CONSUMER && entity.deviceNode.energyCapacity > 0
+                override fun supportsInsertion() = entity.deviceNode.powerRole != PowerRole.GENERATOR
                 override fun extract(maxAmount: Long, transaction: TransactionContext?): Long {
-                    if(entity.node.powerRole == PowerRole.CONSUMER) return 0
-                    val taken = entity.node.withdrawEnergy(maxAmount)
+                    if(entity.deviceNode.powerRole == PowerRole.CONSUMER) return 0
+                    val taken = entity.deviceNode.withdrawEnergy(maxAmount)
                     transaction?.addCloseCallback {
-                        ctx, res -> if(res.wasAborted() || !res.wasCommitted()) entity.node.giveEnergy(taken)
+                        ctx, res -> if(res.wasAborted() || !res.wasCommitted()) entity.deviceNode.giveEnergy(taken)
                     }
                     return taken
                 }
                 override fun insert(maxAmount: Long, transaction: TransactionContext?): Long {
-                    if(entity.node.powerRole == PowerRole.GENERATOR) return 0
-                    val given = entity.node.giveEnergy(maxAmount)
+                    if(entity.deviceNode.powerRole == PowerRole.GENERATOR) return 0
+                    val given = entity.deviceNode.giveEnergy(maxAmount)
                     transaction?.addCloseCallback { ctx, res ->
-                        if (res.wasAborted() || !res.wasCommitted()) entity.node.withdrawEnergy(given)
+                        if (res.wasAborted() || !res.wasCommitted()) entity.deviceNode.withdrawEnergy(given)
                     }
                     return given
                 }

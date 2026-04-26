@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.network.Networking
+import org.neoflock.neocomputers.network.DeviceNode
 import java.time.Duration
 
 object NodeSynchronizer {
@@ -148,30 +149,30 @@ object NodeSynchronizer {
 }
 
 abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: BlockPos, blockState: BlockState) : BlockEntity(blockEntityType, blockPos, blockState) {
-    abstract val node: Networking.Node
+    abstract val deviceNode: DeviceNode
 
     fun initNetworking(): NodeBlockEntity {
-        Networking.addNode(node)
+        Networking.addNode(deviceNode)
         invalidateNodeState()
         return this
     }
 
     // runs on the server, meant to encode state to send to all players
     open fun encodeDownstreamData(packet: FriendlyByteBuf) {
-        packet.writeUUID(node.address)
-        packet.writeLong(node.energy)
-        packet.writeLong(node.energyCapacity)
-        packet.writeEnum(node.reachability)
-        packet.writeEnum(node.powerRole)
+        packet.writeUUID(deviceNode.address)
+        packet.writeLong(deviceNode.energy)
+        packet.writeLong(deviceNode.energyCapacity)
+        packet.writeEnum(deviceNode.reachability)
+        packet.writeEnum(deviceNode.powerRole)
     }
 
     // runs on the client, meant to decode server state packets to synchronize client state
     open fun syncWithUpstream(packet: FriendlyByteBuf) {
-        Networking.changeNodeAddress(node, packet.readUUID())
-        node.energy = packet.readLong()
-        node.energyCapacity = packet.readLong()
-        node.reachability = packet.readEnum(node.reachability.javaClass)
-        node.powerRole = packet.readEnum(node.powerRole.javaClass)
+        Networking.changeNodeAddress(deviceNode, packet.readUUID())
+        deviceNode.energy = packet.readLong()
+        deviceNode.energyCapacity = packet.readLong()
+        deviceNode.reachability = packet.readEnum(deviceNode.reachability.javaClass)
+        deviceNode.powerRole = packet.readEnum(deviceNode.powerRole.javaClass)
     }
 
     // Encodes data meant for the associated screen of a player
@@ -223,7 +224,7 @@ abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: Bl
         if(!stateIsDirty) return
         stateIsDirty = false
         computeEdges().forEach {
-            node.connectTo(it.node)
+            deviceNode.connectTo(it.deviceNode)
         }
     }
 
@@ -235,7 +236,7 @@ abstract class NodeBlockEntity(blockEntityType: BlockEntityType<*>, blockPos: Bl
 
     override fun setRemoved() {
         super.setRemoved()
-        Networking.removeNode(node)
+        Networking.removeNode(deviceNode)
     }
 
     override fun clearRemoved() {
@@ -259,7 +260,7 @@ abstract class NodeBlock(properties: Properties = Properties.of()): BaseBlock(pr
         return object : BlockEntityTicker<T> {
             override fun tick(level: Level, blockPos: BlockPos, blockState: BlockState, blockEntity: T) {
                 if(blockEntity !is NodeBlockEntity) return
-                if(Networking.getNode(blockEntity.node.address) == null) blockEntity.initNetworking()
+                if(Networking.getNode(blockEntity.deviceNode.address) == null) blockEntity.initNetworking()
                 blockEntity.tickNode(level)
             }
         }

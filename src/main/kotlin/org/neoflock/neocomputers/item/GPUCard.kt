@@ -21,7 +21,7 @@ open class GPUCard(val tier: Int, val vram: Long): Item(Properties()), Component
     }
 
     // TODO: GPU Component
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?) = null
 
     override fun appendHoverText(
         itemStack: ItemStack,
