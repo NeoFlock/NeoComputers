@@ -135,12 +135,12 @@ open class DeviceNode(_address: UUID? = null) {
 
     // called when a new node is added globally
     open fun onNodeAdded(deviceNode: DeviceNode) {
-        reachableCache = null;
+        invalidateReachableCache()
     }
 
     // called when a node is removed globally
     open fun onNodeRemoved(deviceNode: DeviceNode) {
-        reachableCache = null;
+        invalidateReachableCache()
     }
 
     fun getReachable(): Set<DeviceNode> {
@@ -150,7 +150,7 @@ open class DeviceNode(_address: UUID? = null) {
         return reachableCache!!;
     }
 
-    fun invalidateReachableCache() {
+    open fun invalidateReachableCache() {
         reachableCache = null
     }
 
