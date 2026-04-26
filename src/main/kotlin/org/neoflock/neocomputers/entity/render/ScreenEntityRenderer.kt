@@ -1,25 +1,19 @@
-package org.neoflock.neocomputers.gui.render
+package org.neoflock.neocomputers.entity.render
 
-import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.PoseStack
-import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.blaze3d.vertex.VertexFormat
 import com.mojang.math.Axis
-import net.minecraft.client.renderer.GameRenderer
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.RenderStateShard
 import net.minecraft.client.renderer.RenderType
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
-import net.minecraft.client.renderer.blockentity.ChestRenderer
 import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.level.block.state.properties.EnumProperty
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.ScreenBlock
 import org.neoflock.neocomputers.entity.ScreenEntity
-
 
 class ScreenEntityRenderer(val context: BlockEntityRendererProvider.Context?) : BlockEntityRenderer<ScreenEntity> { // TODO: FORGE
     val RENDER_TYPE: (ResourceLocation) -> RenderType = { t: ResourceLocation ->

@@ -72,7 +72,7 @@ class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
 
     private fun createscreenstuffs() {
         bound = "screen/"+node.address.toString().replace("-", "_")
-        NeoComputers.LOGGER.info(bound)
+//        NeoComputers.LOGGER.info(bound)
         if (level!!.isClientSide) {
             var renderer = BufferRenderer(ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, bound), textBuf)
             renderer.drawBuffer()

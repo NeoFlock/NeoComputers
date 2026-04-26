@@ -42,42 +42,48 @@ object BlockEntities {
 
     val SCREEN_ENTITY: RegistrySupplier<BlockEntityType<ScreenEntity>> = BLOCKENTITIES.register("screen") {
         BlockEntityType(
-            ::ScreenEntity, mutableSetOf(Blocks.SCREEN_BLOCK.get()), BullshitFix()
+            ::ScreenEntity, setOf(Blocks.SCREEN_BLOCK.get()), BullshitFix()
         )
     }
     val CAPACITOR_ENTITY: RegistrySupplier<BlockEntityType<CapacitorEntityTier1>> = BLOCKENTITIES.register("capacitor") {
         BlockEntityType(
-            ::CapacitorEntityTier1, mutableSetOf(Blocks.CAPACITOR_BLOCK.get()), BullshitFix()
+            ::CapacitorEntityTier1, setOf(Blocks.CAPACITOR_BLOCK.get()), BullshitFix()
         )
     }
     val CAPACITOR2_ENTITY: RegistrySupplier<BlockEntityType<CapacitorEntityTier2>> = BLOCKENTITIES.register("capacitor2") {
         BlockEntityType(
-            ::CapacitorEntityTier2, mutableSetOf(Blocks.CAPACITOR_BLOCK2.get()), BullshitFix()
+            ::CapacitorEntityTier2, setOf(Blocks.CAPACITOR_BLOCK2.get()), BullshitFix()
         )
     }
     val CAPACITOR3_ENTITY: RegistrySupplier<BlockEntityType<CapacitorEntityTier3>> = BLOCKENTITIES.register("capacitor3") {
         BlockEntityType(
-            ::CapacitorEntityTier3, mutableSetOf(Blocks.CAPACITOR_BLOCK3.get()), BullshitFix()
+            ::CapacitorEntityTier3, setOf(Blocks.CAPACITOR_BLOCK3.get()), BullshitFix()
         )
     }
     val SOLARGEN_ENTITY: RegistrySupplier<BlockEntityType<SolarGeneratorBlockEntity>> = BLOCKENTITIES.register("solargen") {
         BlockEntityType(
-            ::SolarGeneratorBlockEntity, mutableSetOf(Blocks.SOLARGEN_BLOCK.get()), BullshitFix()
+            ::SolarGeneratorBlockEntity, setOf(Blocks.SOLARGEN_BLOCK.get()), BullshitFix()
         )
     }
     val COMBUSTGEN_ENTITY: RegistrySupplier<BlockEntityType<CombustionGeneratorBlockEntity>> = BLOCKENTITIES.register("combustgen") {
         BlockEntityType(
-            ::CombustionGeneratorBlockEntity, mutableSetOf(Blocks.COMBUSTGEN_BLOCK.get()), BullshitFix()
+            ::CombustionGeneratorBlockEntity, setOf(Blocks.COMBUSTGEN_BLOCK.get()), BullshitFix()
         )
     }
     val REDSTONEIO_ENTITY: RegistrySupplier<BlockEntityType<CombustionGeneratorBlockEntity>> = BLOCKENTITIES.register("redio") {
         BlockEntityType(
-            ::CombustionGeneratorBlockEntity, mutableSetOf(Blocks.REDSTONEIO_BLOCK.get()), BullshitFix()
+            ::CombustionGeneratorBlockEntity, setOf(Blocks.REDSTONEIO_BLOCK.get()), BullshitFix()
         )
     }
     val CASE_ENTITY: RegistrySupplier<BlockEntityType<CaseBlockEntity>> = BLOCKENTITIES.register("case") {
         BlockEntityType(
-            ::CaseBlockEntity, mutableSetOf(Blocks.CASE_BLOCK.get()), BullshitFix()
+            ::CaseBlockEntity, setOf(Blocks.CASE_BLOCK.get()), BullshitFix()
+        )
+    }
+
+    val CABLE_ENTITY: RegistrySupplier<BlockEntityType<CableEntity>> = BLOCKENTITIES.register("cable") {
+        BlockEntityType(
+            ::CableEntity, setOf(Blocks.CABLE_BLOCK.get()), BullshitFix()
         )
     }
 

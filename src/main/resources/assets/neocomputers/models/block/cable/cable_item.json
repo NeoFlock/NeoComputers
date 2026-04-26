@@ -1,0 +1,44 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:solid",
+  "textures": {
+    "cap": "neocomputers:block/cable_cap",
+    "body": "neocomputers:block/cable_body"
+  },
+  "elements": [
+    {
+      "from": [6, -2, 6],
+      "to": [10, 18, 10],
+      "faces": {
+        "east": { "uv":  [0,0,5,16], "texture": "#body" },
+        "west": { "uv":  [0,0,5,16], "texture": "#body" },
+        "north": { "uv":  [0,0,5,16], "texture": "#body" },
+        "south": { "uv":  [0,0,5,16], "texture": "#body" },
+        "up": { "uv":  [0,0,5,16], "texture": "#body" },
+        "down": { "uv":  [0,0,5,16], "texture": "#body" }
+      }
+    },
+    {
+      "from": [4, -3, 4],
+      "to": [12, -2, 12],
+      "faces": {
+        "east": { "uv":  [0,0,4,4], "texture": "#cap" },
+        "west": { "uv":  [0,0,4,4], "texture": "#cap" },
+        "up": { "uv":  [0,0,4,4], "texture": "#cap" },
+        "down": { "uv":  [4, 4, 12, 12], "texture": "#cap" },
+        "north": { "uv":  [0,0,4,4], "texture": "#cap"}
+      }
+    },
+    {
+      "from": [4, 18, 4],
+      "to": [12, 19, 12],
+      "faces": {
+        "east": { "uv":  [0,0,4,4], "texture": "#cap" },
+        "west": { "uv":  [0,0,4,4], "texture": "#cap" },
+        "up": { "uv":  [4, 4, 12, 12], "texture": "#cap" },
+        "down": { "uv":  [0,0,4,4], "texture": "#cap" },
+        "north": { "uv":  [0,0,4,4], "texture": "#cap"}
+      }
+    }
+  ]
+}

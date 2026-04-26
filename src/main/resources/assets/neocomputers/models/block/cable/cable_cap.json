@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:solid",
+  "textures": {
+    "cap": "neocomputers:block/cable_cap"
+  },
+  "elements": [
+    {
+      "from": [6, 6, 5],
+      "to": [10, 10, 6],
+      "faces": {
+        "east": { "uv":  [0,0,4,4], "texture": "#cap" },
+        "west": { "uv":  [0,0,4,4], "texture": "#cap" },
+        "up": { "uv":  [0,0,4,4], "texture": "#cap" },
+        "down": { "uv":  [0,0,4,4], "texture": "#cap" },
+        "north": { "uv":  [6, 6, 10, 10], "texture": "#cap"}
+      }
+    }
+  ]
+}
+

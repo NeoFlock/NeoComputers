@@ -1,0 +1,94 @@
+{
+    "multipart": [
+        { "apply":  { "model":  "neocomputers:block/cable/cable_center" }},
+        { "when":  { "south":  true },
+        "apply":  { "model":  "neocomputers:block/cable/cable_connection" }},
+        { "when":  { "east":  true},
+        "apply":  { "model":  "neocomputers:block/cable/cable_connection", "y": -90}},
+        { "when":  { "west":  true },
+        "apply":  { "model":  "neocomputers:block/cable/cable_connection", "y": 90}},
+        { "when":  { "north":  true },
+        "apply":  { "model":  "neocomputers:block/cable/cable_connection", "y": 180}},
+        { "when":  { "up":  true },
+        "apply":  { "model":  "neocomputers:block/cable/cable_connection", "x": 90}},
+        { "when":  { "down":  true },
+        "apply":  { "model":  "neocomputers:block/cable/cable_connection", "x": -90}},
+        {
+            "when": {
+                "south":  false,
+                "north":  false,
+                "east":  false,
+                "west":  false,
+                "up":  false,
+                "down":  false
+            },
+            "apply": { "model":  "neocomputers:block/cable/cable_caps" }
+        },
+        {
+            "when": {
+                "south":  true,
+                "north":  false,
+                "east":  false,
+                "west":  false,
+                "up":  false,
+                "down":  false
+            },
+            "apply": { "model":  "neocomputers:block/cable/cable_cap" }
+        },
+        {
+            "when": {
+                "south":  false,
+                "north":  true,
+                "east":  false,
+                "west":  false,
+                "up":  false,
+                "down":  false
+            },
+            "apply": { "model":  "neocomputers:block/cable/cable_cap", "y": 180 }
+        },
+        {
+            "when": {
+                "south":  false,
+                "north":  false,
+                "east":  true,
+                "west":  false,
+                "up":  false,
+                "down":  false
+            },
+            "apply": { "model":  "neocomputers:block/cable/cable_cap", "y": -90 }
+        },
+        {
+            "when": {
+                "south":  false,
+                "north":  false,
+                "east":  false,
+                "west":  true,
+                "up":  false,
+                "down":  false
+            },
+            "apply": { "model":  "neocomputers:block/cable/cable_cap", "y": 90 }
+        },
+        {
+            "when": {
+                "south":  false,
+                "north":  false,
+                "east":  false,
+                "west":  false,
+                "up":  true,
+                "down":  false
+            },
+            "apply": { "model":  "neocomputers:block/cable/cable_cap", "x": 90 }
+        },
+        {
+            "when": {
+                "south":  false,
+                "north":  false,
+                "east":  false,
+                "west":  false,
+                "up":  false,
+                "down":  true
+            },
+            "apply": { "model":  "neocomputers:block/cable/cable_cap", "x": -90 }
+        }
+    ]
+}

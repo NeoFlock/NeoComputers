@@ -1,3 +1,4 @@
 accessWidener v2 named
 
 accessible method net/minecraft/world/level/block/entity/BlockEntityType <init> (Lnet/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier;Ljava/util/Set;)V
+accessible field net/minecraft/core/Direction$Plane faces [Lnet/minecraft/core/Direction;

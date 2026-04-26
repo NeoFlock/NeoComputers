@@ -1,4 +1,4 @@
-package org.neoflock.neocomputers.gui.render
+package org.neoflock.neocomputers.entity.render
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.PoseStack
@@ -11,11 +11,11 @@ import net.minecraft.client.renderer.RenderType
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 import net.minecraft.core.Direction
-import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.CaseBlock
 import org.neoflock.neocomputers.entity.CaseBlockEntity
 
-class CaseEntityRenderer(private val context: BlockEntityRendererProvider.Context?) : BlockEntityRenderer<CaseBlockEntity>{
+class CaseEntityRenderer(private val context: BlockEntityRendererProvider.Context?) :
+    BlockEntityRenderer<CaseBlockEntity> {
 
     val OFF = 0xFF5F855E.toInt()
     val GREEN = 0xFF4EDC5E.toInt()
