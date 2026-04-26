@@ -1,6 +1,8 @@
 package org.neoflock.neocomputers.entity;
 
 import net.minecraft.core.BlockPos
+import net.minecraft.core.HolderLookup
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
@@ -11,29 +13,55 @@ import org.neoflock.neocomputers.block.NodeBlockEntity
 import org.neoflock.neocomputers.gui.buffer.BufferRenderer
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.PowerRole
+import org.neoflock.neocomputers.utils.GPUChar
+import org.neoflock.neocomputers.utils.TextBuffer
 
 class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
     NodeBlockEntity(BlockEntities.SCREEN_ENTITY.get(), blockPos, blockState) {
 
-    override val node = Networking.Node()
+    override val node = object : Networking.Node() {
+        override fun received(message: Networking.Message) {
+            super.received(message)
+            if(message is Networking.ComputerEvent) {
+                // return if not directly connected
+                if(message.sender !in this.connections) return
+                val mEnv = message.machineEvent
+                NeoComputers.LOGGER.info("Got message $mEnv!")
+                if(mEnv is MachinePowerEvent) {
+                    if(mEnv.nowRunning) {
+                        textBuf.set(0, 0, address.toString())
+                    } else {
+                        textBuf.fill(0, 0, textBuf.width, textBuf.height, GPUChar(' '))
+                    }
+                }
+            }
+        }
+    }
     var bound = "screen/unbound"
 
-    val scrwidth: Short = 50
-    val scrheight: Short = 16
+    val textBuf = TextBuffer(50, 16)
 
     private var cleanrenderer: () -> Unit = { }; // TODO: THIS SUCKS, FIND A BETTER WAY
 
+    override fun encodeDownstreamData(packet: FriendlyByteBuf) {
+        super.encodeDownstreamData(packet)
+        textBuf.encodeContents(packet)
+    }
+
+    override fun syncWithUpstream(packet: FriendlyByteBuf) {
+        super.syncWithUpstream(packet)
+        textBuf.decodeContents(packet)
+    }
+
     override fun encodeScreenData(player: ServerPlayer, packet: FriendlyByteBuf) {
         super.encodeScreenData(player, packet)
-        packet.writeShort(scrwidth.toInt())
-        packet.writeShort(scrheight.toInt())
+        textBuf.encodeContents(packet)
     }
 
     override fun tickNode(level: Level) {
         super.tickNode(level)
-        if (bound == "screen/unbound") { // am i epstein or am i just retarded?
-            createscreenstuffs()
-        }
+        cleanrenderer()
+        createscreenstuffs()
     }
 
     override fun setRemoved() {
@@ -46,15 +74,7 @@ class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
         bound = "screen/"+node.address.toString().replace("-", "_")
         NeoComputers.LOGGER.info(bound)
         if (level!!.isClientSide) {
-            var buffer: MutableList<BufferRenderer.GPUChar> = mutableListOf()
-            for(char in node.address.toString()) {
-                buffer.add(BufferRenderer.GPUChar(char))
-            }
-            for (i in 0..((scrwidth*scrheight)-36)) {
-                buffer.add(BufferRenderer.GPUChar(' '))
-            }
-
-            var renderer: BufferRenderer = BufferRenderer(scrwidth.toInt(), scrheight.toInt(), ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, bound), buffer)
+            var renderer = BufferRenderer(ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, bound), textBuf)
             renderer.drawBuffer()
             cleanrenderer = { renderer.clean() }
         }

@@ -16,18 +16,17 @@ import org.neoflock.neocomputers.gui.buffer.BufferRenderer
 import org.neoflock.neocomputers.gui.menu.ScreenMenu
 import org.neoflock.neocomputers.gui.render.ScreenRenderer
 import org.neoflock.neocomputers.utils.GenericContainerScreen
+import org.neoflock.neocomputers.utils.TextBuffer
 import kotlin.math.min
 
 class ScreenScreen : GenericContainerScreen<ScreenMenu>{
     private var renderer: ScreenRenderer = ScreenRenderer();
 
-    var scrWidth: Short = 0
-    var scrHeight: Short = 0
+    var textBuf = TextBuffer(0, 0)
 
     override fun processScreenStatePacket(buf: FriendlyByteBuf) {
         super.processScreenStatePacket(buf)
-        scrWidth = buf.readShort()
-        scrHeight = buf.readShort()
+        textBuf.decodeContents(buf)
     }
 
     constructor(abstractContainerMenu: ScreenMenu, inventory: Inventory, component: Component) : super(abstractContainerMenu, inventory, component) {
@@ -38,9 +37,9 @@ class ScreenScreen : GenericContainerScreen<ScreenMenu>{
         this.inventoryLabelX = Int.MAX_VALUE
     }
     override fun renderBg(guiGraphics: GuiGraphics, f: Float, i: Int, j: Int) {
-        if(scrWidth > 0) {
-            imageWidth = scrWidth * 4
-            imageHeight = scrHeight * 8
+        if(textBuf.width > 0) {
+            imageWidth = textBuf.width * 4
+            imageHeight = textBuf.height * 8
             renderer.render(guiGraphics, imageX, imageY, imageWidth, imageHeight)
         }
     }

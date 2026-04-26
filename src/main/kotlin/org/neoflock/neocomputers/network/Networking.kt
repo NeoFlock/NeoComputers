@@ -2,6 +2,7 @@ package org.neoflock.neocomputers.network
 
 import net.minecraft.core.BlockPos
 import org.neoflock.neocomputers.NeoComputers
+import org.neoflock.neocomputers.entity.MachineEvent
 import java.util.UUID
 import kotlin.math.min
 import kotlin.math.pow
@@ -43,6 +44,7 @@ object Networking {
     // for plugins and shi
     class ComputerCheckedSignal(sender: Node, val player: String?, val name: String, val data: Array<Any>): Message(sender)
     class ComputerUncheckedSignal(sender: Node, val name: String, val data: Array<Any>): Message(sender)
+    class ComputerEvent(sender: Node, val machineEvent: MachineEvent): Message(sender)
 
     open class Node(_address: UUID? = null) {
         val connections = mutableSetOf<Node>()

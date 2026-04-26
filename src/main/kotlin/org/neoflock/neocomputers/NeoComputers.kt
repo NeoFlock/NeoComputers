@@ -65,15 +65,6 @@ object NeoComputers {
             }
             ClientLifecycleEvent.CLIENT_STARTED.register {
                 FontProvider.load(ResourceLocation.fromNamespaceAndPath(MODID, "font/unscii.hex"))
-                ScreenRenderer.genUnboundTex();
-
-                var buffer: MutableList<BufferRenderer.GPUChar> = mutableListOf(BufferRenderer.GPUChar('h'), BufferRenderer.GPUChar('i'))
-                for (i in 0..398) {
-                    buffer.add(BufferRenderer.GPUChar(' '))
-                }
-
-                var renderer: BufferRenderer = BufferRenderer(20, 20, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "screen/test"), buffer)
-                renderer.drawBuffer()
             }
 
             ClientLifecycleEvent.CLIENT_STOPPING.register {

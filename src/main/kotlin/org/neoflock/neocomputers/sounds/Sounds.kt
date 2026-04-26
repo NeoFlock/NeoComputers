@@ -99,7 +99,6 @@ object Sounds {
         fun checkDone(): Boolean {
             if(dead) return true
             if(AL10.alGetSourcei(source, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) return false
-            NeoComputers.LOGGER.info("sound buffer stopped")
             dead = true
             AL10.alDeleteSources(source)
             AL10.alDeleteBuffers(buffer)
@@ -146,10 +145,6 @@ object Sounds {
             }
         }
         finalBuf.rewind()
-        val l = mutableListOf<Int>()
-        while(finalBuf.hasRemaining()) l.addLast(finalBuf.get().toInt())
-        finalBuf.rewind()
-        NeoComputers.LOGGER.info("$l")
 
         val sound = CustomSoundBuffer()
         val soundErr = sound.start(pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(), finalBuf, gain.toFloat())

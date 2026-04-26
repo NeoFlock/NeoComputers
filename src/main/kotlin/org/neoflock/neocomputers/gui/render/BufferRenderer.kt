@@ -7,16 +7,18 @@ import net.minecraft.client.renderer.texture.TextureManager
 import net.minecraft.resources.ResourceLocation
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.utils.FontProvider
+import org.neoflock.neocomputers.utils.GPUChar
+import org.neoflock.neocomputers.utils.TextBuffer
 import java.io.File
 import kotlin.experimental.and
 import kotlin.experimental.xor
 
-class BufferRenderer(private var width: Int, private var height: Int, private var id: ResourceLocation, private var buffer: MutableList<GPUChar>) { // TODO: NN buffer
+class BufferRenderer(private var id: ResourceLocation, private var buffer: TextBuffer) { // TODO: NN buffer
     val CHARW = 8
     val CHARH = 16
 
-    private var texwidth: Int = width*CHARW;
-    private var texheight: Int = height*CHARH;
+    private var texwidth: Int = buffer.width*CHARW;
+    private var texheight: Int = buffer.height*CHARH;
     private var image: NativeImage = NativeImage(texwidth, texheight, true); // idk what the boolean is
     private var tex: DynamicTexture = DynamicTexture(image)
 
@@ -46,9 +48,9 @@ class BufferRenderer(private var width: Int, private var height: Int, private va
     }
 
     fun drawBuffer() {
-        for (i in 0..<width) {
-            for (j in 0..<height) {
-                var char: GPUChar = get(i, j)
+        for (i in 0..<buffer.width) {
+            for (j in 0..<buffer.height) {
+                var char: GPUChar = buffer.get(i, j)
                 var x = i*CHARW
                 var y = j*CHARH
                 image.fillRect(x, y, CHARW, CHARH, (0xFF000000+char.bg).toInt())
@@ -57,17 +59,10 @@ class BufferRenderer(private var width: Int, private var height: Int, private va
         }
         tex.upload()
     }
-    
-    fun get(x: Int, y: Int) = buffer[y*width+x]
-    fun set(x: Int, y: Int, c: GPUChar) {
-        buffer[y*width+x] = c
-    }
 
     fun clean() {
         Minecraft.getInstance().textureManager.release(this.id)
         image.close()
         tex.close()
     }
-
-    data class GPUChar(val c: Char, val fg: Int =0xFFFFFF, val bg: Int = 0) // all is bgr
 }

@@ -112,6 +112,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
                 item.onMachineEvent(it, this, event)
             }
         }
+        Networking.emitMessage(node, Networking.ComputerEvent(node, event))
     }
 
     fun onRedstoneSignalChanged(dir: Direction, oldValue: Int, newValue: Int) {
@@ -147,7 +148,6 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
             return
         }
         // Server-side stuff!!
-        world.onBlockStateChange(blockPos, blockState, blockState)
         sendMachineEvent(MachinePowerEvent(this, isOn))
     }
 
