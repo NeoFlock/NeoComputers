@@ -4,38 +4,35 @@ import net.minecraft.client.player.LocalPlayer
 import net.minecraft.core.BlockPos
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.network.chat.ChatType
 import net.minecraft.network.chat.OutgoingChatMessage
 import net.minecraft.network.chat.PlayerChatMessage
-import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.item.Item
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.BlockHitResult
 import org.neoflock.neocomputers.entity.BlockEntities
-import org.neoflock.neocomputers.network.Networking
+import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.PowerRole
 import kotlin.math.min
 
 open class CapacitorEntity(val capacity: Long, type: BlockEntityType<*>, pos: BlockPos, state: BlockState) : NodeBlockEntity(type, pos, state) {
 
-    override val node = object : Networking.Node() {
+    override val deviceNode = object : DeviceNode() {
         override var powerRole = PowerRole.STORAGE
         override var energyCapacity: Long = capacity
     }
 
     override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
         super.loadAdditional(compoundTag, provider)
-        node.energy = min(compoundTag.getLong("energy"), node.energyCapacity)
+        deviceNode.energy = min(compoundTag.getLong("energy"), deviceNode.energyCapacity)
     }
 
     override fun saveAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
         super.saveAdditional(compoundTag, provider)
-        compoundTag.putLong("energy", node.energy)
+        compoundTag.putLong("energy", deviceNode.energy)
     }
 }
 
@@ -65,8 +62,8 @@ class CapacitorBlock(val tier: Int) : NodeBlock()  {
             val p = player as LocalPlayer
             val ent = level.getBlockEntity(blockPos)
             if(ent is CapacitorEntity) {
-                if(p.isCrouching) ent.node.giveEnergy(1)
-                val msg = PlayerChatMessage.system("energy: ${ent.node.energy} / ${ent.capacity} (${ent.computeEdges().size} edges, ${ent.node.getReachable().size} connected)")
+                if(p.isCrouching) ent.deviceNode.giveEnergy(1)
+                val msg = PlayerChatMessage.system("energy: ${ent.deviceNode.energy} / ${ent.capacity} (${ent.computeEdges().size} edges, ${ent.deviceNode.getReachable().size} connected)")
                 p.sendSystemMessage(OutgoingChatMessage.create(msg).content())
             }
         }

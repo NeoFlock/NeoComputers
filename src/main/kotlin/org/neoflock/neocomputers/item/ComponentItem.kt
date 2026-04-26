@@ -3,6 +3,7 @@ package org.neoflock.neocomputers.item
 import net.minecraft.world.item.ItemStack
 import org.neoflock.neocomputers.entity.MachineEntity
 import org.neoflock.neocomputers.entity.MachineEvent
+import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.Networking
 import java.util.UUID
 
@@ -33,10 +34,10 @@ interface ComponentItem {
     }
 
     // To node, if applicable. Meant to create the node, but not add it, as it will use the itemStack's address to find it again
-    fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node?
+    fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): DeviceNode?
 
     // Gets the node associated to an item, if it exists
-    fun getComponentNode(itemStack: ItemStack): Networking.Node? {
+    fun getComponentNode(itemStack: ItemStack): DeviceNode? {
         val address = itemStack.get(DataComponents.ADDRESS) ?: return null
         val uuid = UUID.fromString(address) ?: return null
         return Networking.getNode(uuid)

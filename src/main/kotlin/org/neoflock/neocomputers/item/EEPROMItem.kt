@@ -32,7 +32,7 @@ open class EEPROMItem(val tier: Int, val codeCapacity: Int, val dataCapacity: In
         super.whenComponentPlaced(itemStack, machine, newRole)
     }
 
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?) = null
 
     override fun appendHoverText(
         itemStack: ItemStack,

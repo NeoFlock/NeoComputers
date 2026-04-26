@@ -22,7 +22,7 @@ open class DataCard(val tier: Int, val limit: Long): Item(Properties()), Compone
     }
 
     // TODO: Modem Component
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?) = null
 
     override fun appendHoverText(
         itemStack: ItemStack,

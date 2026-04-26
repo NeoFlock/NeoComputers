@@ -25,6 +25,7 @@ import org.neoflock.neocomputers.block.NodeSynchronizer
 import org.neoflock.neocomputers.block.dirToIdx
 import org.neoflock.neocomputers.gui.menu.CaseMenu
 import org.neoflock.neocomputers.item.ComponentItem
+import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.PowerRole
 import org.neoflock.neocomputers.sounds.ComputerRunningSoundInstance
@@ -44,7 +45,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     var arch = "Lua 5.3"
     var soundInstance: SoundInstance? = null
 
-    override val node = object : Networking.Node() {
+    override val deviceNode = object : DeviceNode() {
         override var powerRole = PowerRole.CONSUMER
         override var energyCapacity: Long = 500
     }
@@ -79,8 +80,8 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
         super.encodeScreenData(player, packet)
         packet.writeBoolean(isOn)
         packet.writeByteArray((err ?: "").encodeToByteArray())
-        packet.writeLong(node.energy)
-        packet.writeLong(node.energyCapacity)
+        packet.writeLong(deviceNode.energy)
+        packet.writeLong(deviceNode.energyCapacity)
         packet.writeLong(getMachineMemoryUsed())
         packet.writeLong(getMachineMemoryTotal())
         packet.writeLong(getMachineComponentsUsed())
@@ -112,12 +113,12 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
                 item.onMachineEvent(it, this, event)
             }
         }
-        Networking.emitMessage(node, Networking.ComputerEvent(node, event))
+        Networking.emitMessage(deviceNode, Networking.ComputerEvent(deviceNode, event))
     }
 
     fun onRedstoneSignalChanged(dir: Direction, oldValue: Int, newValue: Int) {
         sendMachineEvent(MachineRedstoneEvent(this, dir, oldValue, newValue))
-        Networking.emitMessage(node, Networking.ComputerUncheckedSignal(node, "redstone_changed", arrayOf(node.address.toString(), dirToIdx(dir), oldValue, newValue)))
+        Networking.emitMessage(deviceNode, Networking.ComputerUncheckedSignal(deviceNode, "redstone_changed", arrayOf(deviceNode.address.toString(), dirToIdx(dir), oldValue, newValue)))
         NeoComputers.LOGGER.info("redstone in direction ${dir.name} changed from $oldValue to $newValue")
         if(oldValue == 0) {
             // Rising edge
@@ -133,7 +134,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
 
     fun setRunning(value: Boolean) {
         if(isOn == value) return
-        NeoComputers.LOGGER.info("[${node.address}] Going from $isOn to $value")
+        NeoComputers.LOGGER.info("[${deviceNode.address}] Going from $isOn to $value")
         isOn = value
         val world = level ?: return
         blockState?.setValue(CaseBlock.COMPUTER_RUNNING, isOn)
@@ -167,10 +168,10 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
             return false
         }
         // less than 20% energy is bad
-        if(node.energy < node.energyCapacity/5) {
+        if(deviceNode.energy < deviceNode.energyCapacity/5) {
             crash("@neocomputers.errors.ENOENJ")
             // we add a beep for the special case where we do have a little bit of energy :P
-            if(node.energy > 0) beepAsync("..")
+            if(deviceNode.energy > 0) beepAsync("..")
             return false
         }
         if(getMachineMemoryTotal() == 0L) {
@@ -205,7 +206,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
 
     override fun getLastError(): String? = err
 
-    override fun getMachineNode(): Networking.Node = node
+    override fun getMachineNode() = deviceNode
 
     override fun getRedstoneInput(direction: Direction): Int = redstoneIn[dirToIdx(direction)]
 
@@ -233,7 +234,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
 
     override fun getMachineMemoryTotal(): Long = stacks.mapNotNull { (it.item as? ComponentItem)?.getMemoryCapacity(it) }.sum().toLong()
     override fun getMachineMemoryUsed(): Long = 0
-    override fun getMachineComponentsUsed(): Long = node.getReachable().size.toLong()
+    override fun getMachineComponentsUsed(): Long = deviceNode.getReachable().size.toLong()
     override fun getMachineComponentsTotal(): Long = stacks.mapNotNull { (it.item as? ComponentItem)?.getComponentCapacity(it) }.sum().toLong()
     override fun getMachineArchitecture() = arch
     override fun getMachineArchitectures() = stacks.mapNotNull { (it.item as? ComponentItem)?.getArchitecturesProvided(it) }.flatten().toSet()
@@ -252,14 +253,14 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
 
     override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
         super.loadAdditional(compoundTag, provider)
-        node.energy = min(node.energyCapacity, compoundTag.getLong("energy"))
+        deviceNode.energy = min(deviceNode.energyCapacity, compoundTag.getLong("energy"))
         //isOn = compoundTag.getBoolean("powerOn")
         ContainerHelper.loadAllItems(compoundTag, getItems(), provider)
     }
 
     override fun saveAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
         super.saveAdditional(compoundTag, provider)
-        compoundTag.putLong("energy", node.energy)
+        compoundTag.putLong("energy", deviceNode.energy)
         //compoundTag.putBoolean("powerOn", isOn)
         ContainerHelper.saveAllItems(compoundTag, getItems(), provider)
     }
@@ -278,11 +279,12 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
             if (isRunning()) {
                 if(diskActivityTime > 0) diskActivityTime--
                 if(networkActivityTime > 0) networkActivityTime--
-                if(getMachineComponentsUsed() > getMachineComponentsTotal()) {
-                    crash("too many components")
-                }
-                if (!node.consumeEnergy(1)) {
-                    crash("out of energy")
+                if(getMachineArchitectures().isEmpty()) {
+                    crash("@neocomputers.errors.ENOCPU")
+                } else if(getMachineComponentsUsed() > getMachineComponentsTotal()) {
+                    crash("@neocomputers.errors.E2BIG")
+                } else if (!deviceNode.consumeEnergy(1)) {
+                    crash("@neocomputers.errors.ENOENJ")
                 }
             }
         }

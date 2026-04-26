@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.block.CombustionGeneratorBlock
 import org.neoflock.neocomputers.block.NodeBlockEntity
 import org.neoflock.neocomputers.gui.menu.CombustionGeneratorMenu
+import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.PowerRole
 import org.neoflock.neocomputers.utils.GenericContainer
@@ -28,7 +29,7 @@ class CombustionGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState)
 
     var burningTimeRemaining: Int = 0
 
-    override val node = object : Networking.Node() {
+    override val deviceNode = object : DeviceNode() {
         override var powerRole = PowerRole.GENERATOR
         override var energyCapacity: Long = 100000
     }
@@ -52,13 +53,13 @@ class CombustionGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState)
         // keep combusting and shi
         if(burningTimeRemaining > 0) {
             burningTimeRemaining--
-            node.giveEnergy(energyPerTick)
+            deviceNode.giveEnergy(energyPerTick)
             setChanged()
             return
         }
 
         // no point
-        if(node.energy >= node.energyCapacity) return;
+        if(deviceNode.energy >= deviceNode.energyCapacity) return;
 
         // :fire:
         val fuel = stacks[0]
@@ -79,20 +80,20 @@ class CombustionGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState)
     }
 
     override fun encodeScreenData(player: ServerPlayer, packet: FriendlyByteBuf) {
-        packet.writeLong(node.energy)
-        packet.writeLong(node.energyCapacity)
+        packet.writeLong(deviceNode.energy)
+        packet.writeLong(deviceNode.energyCapacity)
     }
 
     override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
         super.loadAdditional(compoundTag, provider)
-        node.energy = min(node.energyCapacity, compoundTag.getLong("energy"))
+        deviceNode.energy = min(deviceNode.energyCapacity, compoundTag.getLong("energy"))
         burningTimeRemaining = compoundTag.getInt("burningTimeRemaining")
         ContainerHelper.loadAllItems(compoundTag, getItems(), provider)
     }
 
     override fun saveAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
         super.saveAdditional(compoundTag, provider)
-        compoundTag.putLong("energy", node.energy)
+        compoundTag.putLong("energy", deviceNode.energy)
         compoundTag.putInt("burningTimeRemaining", burningTimeRemaining)
         ContainerHelper.saveAllItems(compoundTag, getItems(), provider)
     }

@@ -19,7 +19,7 @@ open class NetworkCard(val tier: Int, val maxRange: Int, val isWired: Boolean): 
     }
 
     // TODO: Modem Component
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?) = null
 
     override fun appendHoverText(
         itemStack: ItemStack,

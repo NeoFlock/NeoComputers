@@ -20,7 +20,7 @@ class TunnelCard: Item(Properties().component(DataComponents.TUNNEL_CHANNEL, "cr
     }
 
     // TODO: Tunnel Component
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): Networking.Node? = null
+    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?) = null
 
     override fun appendHoverText(
         itemStack: ItemStack,

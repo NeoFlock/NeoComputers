@@ -5,6 +5,7 @@ import net.minecraft.core.Direction
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.Vec3
 import org.neoflock.neocomputers.item.ComponentItem
+import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.Networking
 import java.time.Duration
 
@@ -39,7 +40,7 @@ interface MachineEntity {
     fun crash(error: String): Boolean
     fun getLastError(): String?
 
-    fun getMachineNode(): Networking.Node
+    fun getMachineNode(): DeviceNode
 
     // Some metadata
     fun getMachineMemoryTotal(): Long

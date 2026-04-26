@@ -6,13 +6,14 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.block.NodeBlockEntity
+import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.PowerRole
 
 class SolarGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState) : NodeBlockEntity(BlockEntities.SOLARGEN_ENTITY.get(), blockPos, blockState) {
     val energyPerTick: Long = 50
 
-    override val node = object : Networking.Node() {
+    override val deviceNode = object : DeviceNode() {
         override var powerRole: PowerRole = PowerRole.GENERATOR
         override var energyCapacity: Long = 50000
     }
@@ -21,17 +22,17 @@ class SolarGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState) : No
         super.tickNode(level)
         val l = level
         if(l.isDay) {
-            node.giveEnergy(energyPerTick)
+            deviceNode.giveEnergy(energyPerTick)
         }
     }
 
     override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
         super.loadAdditional(compoundTag, provider)
-        node.energy = compoundTag.getLong("energy")
+        deviceNode.energy = compoundTag.getLong("energy")
     }
 
     override fun saveAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
         super.saveAdditional(compoundTag, provider)
-        compoundTag.putLong("energy", node.energy)
+        compoundTag.putLong("energy", deviceNode.energy)
     }
 }

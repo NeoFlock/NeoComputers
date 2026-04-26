@@ -1,8 +1,6 @@
 package org.neoflock.neocomputers.entity;
 
 import net.minecraft.core.BlockPos
-import net.minecraft.core.HolderLookup
-import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
@@ -11,15 +9,15 @@ import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.NodeBlockEntity
 import org.neoflock.neocomputers.gui.buffer.BufferRenderer
+import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.Networking
-import org.neoflock.neocomputers.network.PowerRole
 import org.neoflock.neocomputers.utils.GPUChar
 import org.neoflock.neocomputers.utils.TextBuffer
 
 class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
     NodeBlockEntity(BlockEntities.SCREEN_ENTITY.get(), blockPos, blockState) {
 
-    override val node = object : Networking.Node() {
+    override val deviceNode = object : DeviceNode() {
         override fun received(message: Networking.Message) {
             super.received(message)
             if(message is Networking.ComputerEvent) {
@@ -71,8 +69,7 @@ class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
     }
 
     private fun createscreenstuffs() {
-        bound = "screen/"+node.address.toString().replace("-", "_")
-//        NeoComputers.LOGGER.info(bound)
+        bound = "screen/"+deviceNode.address.toString().replace("-", "_")
         if (level!!.isClientSide) {
             var renderer = BufferRenderer(ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, bound), textBuf)
             renderer.drawBuffer()

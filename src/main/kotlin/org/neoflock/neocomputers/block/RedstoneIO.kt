@@ -7,14 +7,13 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
-import net.minecraft.world.level.block.RedStoneWireBlock
-import net.minecraft.world.level.block.RedstoneTorchBlock
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.BlockHitResult
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.network.Networking
+import org.neoflock.neocomputers.network.DeviceNode
 
 fun dirToIdx(direction: Direction) = Direction.entries.indexOf(direction)
 
@@ -23,7 +22,7 @@ class RedstoneIOEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnt
     val redstoneOut = Array<Int>(Direction.entries.size) {0}
 
     // TODO: have redstone I/O node for component and shi
-    override val node = object : Networking.Node() {
+    override val deviceNode = object : DeviceNode() {
 
     }
 
@@ -42,7 +41,7 @@ class RedstoneIOEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnt
     }
 
     fun onRedstoneSignalChanged(dir: Direction, oldValue: Int, newValue: Int) {
-        Networking.emitMessage(node, Networking.ComputerUncheckedSignal(node, "redstone_changed", arrayOf(node.address.toString(), dirToIdx(dir), oldValue, newValue)))
+        Networking.emitMessage(deviceNode, Networking.ComputerUncheckedSignal(deviceNode, "redstone_changed", arrayOf(deviceNode.address.toString(), dirToIdx(dir), oldValue, newValue)))
         NeoComputers.LOGGER.info("redstone in direction ${dir.name} changed from $oldValue to $newValue")
     }
 }
