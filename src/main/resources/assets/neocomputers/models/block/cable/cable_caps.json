@@ -2,7 +2,8 @@
   "parent": "minecraft:block/block",
   "render_type": "minecraft:solid",
   "textures": {
-    "cap": "neocomputers:block/cable_cap"
+    "cap": "neocomputers:block/cable_cap",
+    "particle": "neocomputers:block/cable_cap"
   },
   "elements": [
     {
