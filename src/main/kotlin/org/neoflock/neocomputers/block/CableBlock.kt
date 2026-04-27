@@ -24,6 +24,7 @@ import net.minecraft.world.phys.shapes.BooleanOp
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.Shapes
 import net.minecraft.world.phys.shapes.VoxelShape
+import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.entity.CableEntity
 
 class CableBlock() : BaseBlock(Properties.of()), EntityBlock {
@@ -40,23 +41,36 @@ class CableBlock() : BaseBlock(Properties.of()), EntityBlock {
         val MIN = 0.375
         val MAX = 1-MIN
 
-//        val shapeCache: Array<VoxelShape?> = arrayOfNulls(Direction.entries.size*Direction.entries.size*Direction.entries.size*Direction.entries.size*Direction.entries.size*Direction.entries.size)
-//
-//        fun makeShapes() { // screw perf
-//            for (north in arrayOf(false, true)) { // shut up
-//                for (east in arrayOf(false, true)) {
-//                    for (west in arrayOf(false, true)) {
-//                        for (south in arrayOf(false, true)) {
-//                            for (up in arrayOf(false, true)) {
-//                                for (down in arrayOf(false, true)) {
-//                                    val shape = makeShape(north, south, east, west, up, down)
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
+        val shapeCache: Array<VoxelShape?> = arrayOfNulls(Direction.entries.size*Direction.entries.size*Direction.entries.size*Direction.entries.size*Direction.entries.size*Direction.entries.size)
+
+        fun calcIdx(north: Boolean, south: Boolean, east: Boolean, west: Boolean, up: Boolean, down: Boolean): Int {
+            var idx = if (down) 1 else 0
+            idx += 2*(if (up) 1 else 0)
+            idx += 4*(if (west) 1 else 0)
+            idx += 8*(if (east) 1 else 0)
+            idx += 16*(if (south) 1 else 0)
+            idx += 32*(if (north) 1 else 0)
+            return idx
+        }
+
+        fun makeShapes() {
+            NeoComputers.LOGGER.info("[CABLE] recomputing shapes")
+            for (north in arrayOf(false, true)) { // shut up
+                for (south in arrayOf(false, true)) {
+                    for (east in arrayOf(false, true)) {
+                        for (west in arrayOf(false, true)) {
+                            for (up in arrayOf(false, true)) {
+                                for (down in arrayOf(false, true)) {
+                                    val shape = makeShape(north, south, east, west, up, down)
+                                    val idx = calcIdx(north, south, east,west, up, down)
+                                    shapeCache[idx] = shape;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         fun makeShape(north: Boolean, south: Boolean, east: Boolean, west: Boolean, up: Boolean, down: Boolean): VoxelShape {
             var shape = Shapes.box(MIN, MIN, MIN, MAX, MAX, MAX)
@@ -83,7 +97,7 @@ class CableBlock() : BaseBlock(Properties.of()), EntityBlock {
             val ent = level.getBlockEntity(npos)
             val blockState = level.getBlockState(pos)
 
-            return (ent is CableEntity &&
+            return ent is NodeBlockEntity || (ent is CableEntity &&
                     (level.getBlockState(npos).getValue(COLOR).equals(blockState.getValue(COLOR)) ||
                             blockState.getValue(COLOR).equals(DyeColor.LIGHT_GRAY) ||
                             level.getBlockState(npos).getValue(COLOR).equals(DyeColor.LIGHT_GRAY)))
@@ -101,6 +115,7 @@ class CableBlock() : BaseBlock(Properties.of()), EntityBlock {
             .setValue(DOWN, false)
             .setValue(COLOR, DyeColor.LIGHT_GRAY)
         )
+        makeShapes()
     }
 
 
@@ -120,7 +135,9 @@ class CableBlock() : BaseBlock(Properties.of()), EntityBlock {
     }
 
     override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape? {
-        return makeShape(state.getValue(NORTH), state.getValue(SOUTH), state.getValue(EAST), state.getValue(WEST), state.getValue(UP), state.getValue(DOWN))
+        val idx = calcIdx(state.getValue(NORTH), state.getValue(SOUTH), state.getValue(EAST), state.getValue(WEST), state.getValue(UP), state.getValue(DOWN))
+        return shapeCache[idx];
+    //        return makeShape(state.getValue(NORTH), state.getValue(SOUTH), state.getValue(EAST), state.getValue(WEST), state.getValue(UP), state.getValue(DOWN))
     }
 
     override fun neighborChanged(state: BlockState, level: Level, pos: BlockPos, neighborBlock: Block, neighborPos: BlockPos, movedByPiston: Boolean) {

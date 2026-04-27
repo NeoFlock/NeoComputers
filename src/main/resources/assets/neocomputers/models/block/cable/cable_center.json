@@ -2,7 +2,7 @@
     "parent": "minecraft:block/block",
     "render_type": "minecraft:solid",
     "textures": {
-        "body": "neocomputers:block/cable_body"
+        "body": "neocomputers:block/cable_body",
         "particle": "neocomputers:block/cable_cap"
     },
     "elements": [
