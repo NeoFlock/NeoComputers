@@ -3,6 +3,13 @@ package org.neoflock.neocomputers.block
 import net.minecraft.client.renderer.blockentity.PistonHeadRenderer
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.ItemInteractionResult
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.DyeColor
+import net.minecraft.world.item.DyeItem
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
@@ -11,6 +18,8 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.StateDefinition
 import net.minecraft.world.level.block.state.properties.BooleanProperty
+import net.minecraft.world.level.block.state.properties.EnumProperty
+import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.shapes.BooleanOp
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.Shapes
@@ -25,6 +34,8 @@ class CableBlock() : BaseBlock(Properties.of()), EntityBlock {
         val SOUTH = BooleanProperty.create("south")
         val UP = BooleanProperty.create("up")
         val DOWN = BooleanProperty.create("down")
+
+        val COLOR = EnumProperty<DyeColor>.create("color", DyeColor::class.java)
 
         val MIN = 0.375
         val MAX = 1-MIN
@@ -68,6 +79,16 @@ class CableBlock() : BaseBlock(Properties.of()), EntityBlock {
                 Direction.DOWN -> DOWN
             }
         }
+        fun shouldConnect(pos: BlockPos, npos: BlockPos, level: Level): Boolean {
+            val ent = level.getBlockEntity(npos)
+            val blockState = level.getBlockState(pos)
+
+            return (ent is CableEntity &&
+                    (level.getBlockState(npos).getValue(COLOR).equals(blockState.getValue(COLOR)) ||
+                            blockState.getValue(COLOR).equals(DyeColor.LIGHT_GRAY) ||
+                            level.getBlockState(npos).getValue(COLOR).equals(DyeColor.LIGHT_GRAY)))
+//        val state: BlockState? = (ent is CableEntity && (level.getBlockState(neighborPos).getValue(COLOR).equals(state.getValue(COLOR)) || state.getValue(COLOR).equals(DyeColor.LIGHT_GRAY))
+        }
     }
 
     init {
@@ -78,6 +99,7 @@ class CableBlock() : BaseBlock(Properties.of()), EntityBlock {
             .setValue(SOUTH, false)
             .setValue(UP, false)
             .setValue(DOWN, false)
+            .setValue(COLOR, DyeColor.LIGHT_GRAY)
         )
     }
 
@@ -89,7 +111,8 @@ class CableBlock() : BaseBlock(Properties.of()), EntityBlock {
             .add(SOUTH)
             .add(WEST)
             .add(UP)
-            .add(DOWN))
+            .add(DOWN)
+            .add(COLOR))
     }
 
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity? {
@@ -109,7 +132,17 @@ class CableBlock() : BaseBlock(Properties.of()), EntityBlock {
         val diff = pos.subtract(neighborPos)
         val dir = Direction.fromDelta(diff.x, diff.y, diff.z)!!.opposite
         val ent = level.getBlockEntity(neighborPos)
-        val value = ent is NodeBlockEntity || ent is CableEntity
-        level.setBlockAndUpdate(pos, state.setValue(getPropByDirection(dir), value))
+//        val value = ent is NodeBlockEntity || (ent is CableEntity && (level.getBlockState(neighborPos).getValue(COLOR).equals(state.getValue(COLOR)) || state.getValue(COLOR).equals(DyeColor.LIGHT_GRAY)))
+        level.setBlockAndUpdate(pos, state.setValue(getPropByDirection(dir), shouldConnect(pos, neighborPos, level)))
+    }
+
+    override fun useItemOn(stack: ItemStack, state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult? {
+//        return super.useItemOn(stack, state, level, pos, player, hand, hitResult)
+        if (stack.item is DyeItem) {
+            val dyeitem = stack.item as DyeItem
+            level.setBlockAndUpdate(pos, state.setValue(COLOR, dyeitem.dyeColor))
+            return ItemInteractionResult.SUCCESS
+        }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
     }
 }
