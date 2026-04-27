@@ -15,8 +15,6 @@ import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.DeviceNode
 
-fun dirToIdx(direction: Direction) = Direction.entries.indexOf(direction)
-
 class RedstoneIOEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEntity(BlockEntities.REDSTONEIO_ENTITY.get(), blockPos, blockState) {
     val redstoneIn = Array<Int>(Direction.entries.size) {0}
     val redstoneOut = Array<Int>(Direction.entries.size) {0}
@@ -29,7 +27,7 @@ class RedstoneIOEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnt
     fun refetch(dir: Direction) {
         val src = blockPos.offset(dir.stepX, dir.stepY, dir.stepZ)
         val cur = level?.getSignal(src, dir) ?: 0
-        val idx = dirToIdx(dir)
+        val idx = dir.ordinal
         if(redstoneIn[idx] != cur) {
             onRedstoneSignalChanged(dir, redstoneIn[idx], cur)
         }
@@ -41,7 +39,7 @@ class RedstoneIOEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnt
     }
 
     fun onRedstoneSignalChanged(dir: Direction, oldValue: Int, newValue: Int) {
-        Networking.emitMessage(deviceNode, Networking.ComputerUncheckedSignal(deviceNode, "redstone_changed", arrayOf(deviceNode.address.toString(), dirToIdx(dir), oldValue, newValue)))
+        Networking.emitMessage(deviceNode, Networking.ComputerUncheckedSignal(deviceNode, "redstone_changed", arrayOf(deviceNode.address.toString(), dir.ordinal, oldValue, newValue)))
         NeoComputers.LOGGER.info("redstone in direction ${dir.name} changed from $oldValue to $newValue")
     }
 }
@@ -67,7 +65,7 @@ class RedstoneIOBlock(): NodeBlock(Properties.of().isRedstoneConductor { state, 
     ): Int {
         val redstoneIO = getRedstoneIO(blockGetter, blockPos)
         if(redstoneIO != null) {
-            return redstoneIO.redstoneOut[dirToIdx(direction.opposite)]
+            return redstoneIO.redstoneOut[direction.opposite.ordinal]
         }
         return super.getSignal(blockState, blockGetter, blockPos, direction)
     }
@@ -125,7 +123,7 @@ class RedstoneIOBlock(): NodeBlock(Properties.of().isRedstoneConductor { state, 
             val redio = getRedstoneIO(level, blockPos)
             val dir = blockHitResult.direction
             if (redio != null) {
-                val idx = dirToIdx(dir)
+                val idx = dir.ordinal
                 redio.redstoneOut[idx]++
                 redio.redstoneOut[idx] %= 16
                 NeoComputers.LOGGER.info("outputting redstone level ${redio.redstoneOut[idx]} on ${dir.name}")

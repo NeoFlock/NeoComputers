@@ -22,7 +22,6 @@ import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.CaseBlock
 import org.neoflock.neocomputers.block.NodeBlockEntity
 import org.neoflock.neocomputers.block.NodeSynchronizer
-import org.neoflock.neocomputers.block.dirToIdx
 import org.neoflock.neocomputers.gui.menu.CaseMenu
 import org.neoflock.neocomputers.item.ComponentItem
 import org.neoflock.neocomputers.network.DeviceNode
@@ -95,7 +94,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     fun refetchRedstone(dir: Direction) {
         val src = blockPos.offset(dir.stepX, dir.stepY, dir.stepZ)
         val cur = level?.getSignal(src, dir) ?: 0
-        val idx = dirToIdx(dir)
+        val idx = dir.ordinal
         if(redstoneIn[idx] != cur) {
             onRedstoneSignalChanged(dir, redstoneIn[idx], cur)
         }
@@ -118,7 +117,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
 
     fun onRedstoneSignalChanged(dir: Direction, oldValue: Int, newValue: Int) {
         sendMachineEvent(MachineRedstoneEvent(this, dir, oldValue, newValue))
-        Networking.emitMessage(deviceNode, Networking.ComputerUncheckedSignal(deviceNode, "redstone_changed", arrayOf(deviceNode.address.toString(), dirToIdx(dir), oldValue, newValue)))
+        Networking.emitMessage(deviceNode, Networking.ComputerUncheckedSignal(deviceNode, "redstone_changed", arrayOf(deviceNode.address.toString(), dir.ordinal, oldValue, newValue)))
         NeoComputers.LOGGER.info("redstone in direction ${dir.name} changed from $oldValue to $newValue")
         if(oldValue == 0) {
             // Rising edge
@@ -208,12 +207,12 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
 
     override fun getMachineNode() = deviceNode
 
-    override fun getRedstoneInput(direction: Direction): Int = redstoneIn[dirToIdx(direction)]
+    override fun getRedstoneInput(direction: Direction): Int = redstoneIn[direction.ordinal]
 
-    override fun getRedstoneOutput(direction: Direction): Int = redstoneOut[dirToIdx(direction)]
+    override fun getRedstoneOutput(direction: Direction): Int = redstoneOut[direction.ordinal]
 
     override fun setRedstoneOutput(direction: Direction, newValue: Int): Int {
-        val idx = dirToIdx(direction)
+        val idx = direction.ordinal
         val old = redstoneOut[idx]
         redstoneOut[idx] = newValue
         return old

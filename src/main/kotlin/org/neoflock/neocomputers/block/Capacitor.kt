@@ -2,10 +2,12 @@ package org.neoflock.neocomputers.block
 
 import net.minecraft.client.player.LocalPlayer
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.OutgoingChatMessage
 import net.minecraft.network.chat.PlayerChatMessage
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
@@ -18,12 +20,16 @@ import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.PowerRole
 import kotlin.math.min
 
-open class CapacitorEntity(val capacity: Long, type: BlockEntityType<*>, pos: BlockPos, state: BlockState) : NodeBlockEntity(type, pos, state) {
+open class CapacitorEntity(val capacity: Long, type: BlockEntityType<*>, pos: BlockPos, state: BlockState) : DeviceBlockEntity(type, pos, state) {
 
-    override val deviceNode = object : DeviceNode() {
+    val deviceNode = object : DeviceNode() {
         override var powerRole = PowerRole.STORAGE
         override var energyCapacity: Long = capacity
     }
+
+    // TODO: cache list
+    override fun getDeviceNodes() = listOf(deviceNode)
+    override fun getNodeFromSide(directionToRequester: Direction) = deviceNode
 
     override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
         super.loadAdditional(compoundTag, provider)
@@ -58,12 +64,12 @@ class CapacitorBlock(val tier: Int) : NodeBlock()  {
         player: Player,
         blockHitResult: BlockHitResult
     ): InteractionResult {
-        if(level.isClientSide()) {
-            val p = player as LocalPlayer
+        if(!level.isClientSide()) {
+            val p = player as ServerPlayer
             val ent = level.getBlockEntity(blockPos)
             if(ent is CapacitorEntity) {
                 if(p.isCrouching) ent.deviceNode.giveEnergy(1)
-                val msg = PlayerChatMessage.system("energy: ${ent.deviceNode.energy} / ${ent.capacity} (${ent.computeEdges().size} edges, ${ent.deviceNode.getReachable().size} connected)")
+                val msg = PlayerChatMessage.system("energy: ${ent.deviceNode.energy} / ${ent.capacity} (${ent.deviceNode.connections.size} connections, ${ent.deviceNode.getReachable().size} connected)")
                 p.sendSystemMessage(OutgoingChatMessage.create(msg).content())
             }
         }

@@ -64,7 +64,7 @@ class CaseBlock() : NodeBlock(Properties.of().sound(SoundType.METAL).lightLevel(
         blockPos: BlockPos,
         direction: Direction
     ): Int {
-        return getMachine(blockGetter, blockPos).redstoneOut[dirToIdx(direction.opposite)]
+        return getMachine(blockGetter, blockPos).redstoneOut[direction.opposite.ordinal]
     }
 
     override fun onPlace(

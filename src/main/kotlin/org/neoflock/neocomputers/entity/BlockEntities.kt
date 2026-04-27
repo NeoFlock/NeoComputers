@@ -88,9 +88,10 @@ object BlockEntities {
     }
 
     fun registerPowerBlocks() {
-        PowerManager.registerPowerBlockEntity(CAPACITOR_ENTITY.get())
-        PowerManager.registerPowerBlockEntity(CAPACITOR2_ENTITY.get())
-        PowerManager.registerPowerBlockEntity(CAPACITOR3_ENTITY.get())
+        // TODO: function for the new DeviceBlockEntity
+        //PowerManager.registerPowerBlockEntity(CAPACITOR_ENTITY.get())
+        //PowerManager.registerPowerBlockEntity(CAPACITOR2_ENTITY.get())
+        //PowerManager.registerPowerBlockEntity(CAPACITOR3_ENTITY.get())
         PowerManager.registerPowerBlockEntity(SOLARGEN_ENTITY.get())
         PowerManager.registerPowerBlockEntity(COMBUSTGEN_ENTITY.get())
         PowerManager.registerPowerBlockEntity(CASE_ENTITY.get())
