@@ -6,11 +6,9 @@ import net.minecraft.client.renderer.GameRenderer
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.Container
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.level.ItemLike
 import org.neoflock.neocomputers.NeoComputers
-import org.neoflock.neocomputers.entity.MachineEntity
+import org.neoflock.neocomputers.entity.ComponentUser
 import org.neoflock.neocomputers.item.ComponentItem
 
 // Sort of a mis-nomer, does not need to be associated with components specifically
@@ -85,7 +83,7 @@ data class ComponentSlotRequirement(val tier: Int, val role: String) {
 
 // Tier 0 allows ALL tiers, making it completely untiered.
 // Role determines what the role is.
-class ComponentSlot(container: Container, slot: Int, x: Int, y: Int, val machine: MachineEntity?, val requirement: ComponentSlotRequirement): DynamicSlot(container, slot, x, y) {
+class ComponentSlot(container: Container, slot: Int, x: Int, y: Int, val machine: ComponentUser?, val requirement: ComponentSlotRequirement): DynamicSlot(container, slot, x, y) {
     override fun draw(graphics: GuiGraphics, relX: Int, relY: Int, mouseX: Int, mouseY: Int) {
         super.draw(graphics, relX, relY, mouseX, mouseY)
         if(!hasItem()) {

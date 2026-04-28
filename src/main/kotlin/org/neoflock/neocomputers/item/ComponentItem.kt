@@ -1,6 +1,7 @@
 package org.neoflock.neocomputers.item
 
 import net.minecraft.world.item.ItemStack
+import org.neoflock.neocomputers.entity.ComponentUser
 import org.neoflock.neocomputers.entity.MachineEntity
 import org.neoflock.neocomputers.entity.MachineEvent
 import org.neoflock.neocomputers.network.DeviceNode
@@ -18,7 +19,7 @@ interface ComponentItem {
     fun getArchitecturesProvided(itemStack: ItemStack): Set<String> = setOf()
 
     // Component placed, node must now exist
-    fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity?, newRole: String) {
+    fun whenComponentPlaced(itemStack: ItemStack, machine: ComponentUser?, newRole: String) {
         val oldNode = getComponentNode(itemStack)
         if(oldNode != null) Networking.removeNode(oldNode) // did a mod forget to call whenComponentTaken?
         val node = toComponentNode(itemStack, machine) ?: return
@@ -27,14 +28,14 @@ interface ComponentItem {
     }
 
     // Component taken, and thus removed
-    fun whenComponentTaken(itemStack: ItemStack, machine: MachineEntity?, previousRole: String) {
+    fun whenComponentTaken(itemStack: ItemStack, machine: ComponentUser?, previousRole: String) {
         val node = getComponentNode(itemStack) ?: return
         // removing disconnects
         Networking.removeNode(node)
     }
 
     // To node, if applicable. Meant to create the node, but not add it, as it will use the itemStack's address to find it again
-    fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?): DeviceNode?
+    fun toComponentNode(itemStack: ItemStack, machine: ComponentUser?): DeviceNode?
 
     // Gets the node associated to an item, if it exists
     fun getComponentNode(itemStack: ItemStack): DeviceNode? {
@@ -58,4 +59,5 @@ interface RelayUpgrade: ComponentItem {
     fun getRelayInterval(itemStack: ItemStack): Int? = null
     fun getRelayBufferSize(itemStack: ItemStack): Int? = null
     fun getRelayQueueSize(itemStack: ItemStack): Int? = null
+    fun isRelayCompatibleCard(itemStack: ItemStack): Boolean = false
 }

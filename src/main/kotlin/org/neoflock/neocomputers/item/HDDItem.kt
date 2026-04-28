@@ -4,17 +4,15 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
-import org.neoflock.neocomputers.entity.MachineEntity
+import org.neoflock.neocomputers.entity.ComponentUser
 import org.neoflock.neocomputers.gui.widget.ComponentRoles
-import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.utils.Formatting
-import java.util.UUID
 
 fun getDiskProperties(): Item.Properties = Item.Properties()
     .component(DataComponents.LABEL, "")
     .component(DataComponents.READONLY, false)
 
-open class HardDiskItem(val tier: Int, val capacity: Long): Item(getDiskProperties()), ComponentItem {
+open class HardDiskItem(val tier: Int, val capacity: Long, val relayQueueSize: Int): Item(getDiskProperties()), RelayUpgrade {
     override fun getComponentRoles(itemStack: ItemStack): Set<String> = setOf(ComponentRoles.STORAGE)
 
     override fun getComponentTier(itemStack: ItemStack): Int = tier
@@ -23,12 +21,12 @@ open class HardDiskItem(val tier: Int, val capacity: Long): Item(getDiskProperti
 
     override fun getComponentCapacity(itemStack: ItemStack): Int = 0
 
-    override fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity?, newRole: String) {
+    override fun whenComponentPlaced(itemStack: ItemStack, machine: ComponentUser?, newRole: String) {
         if(machine != null) ensureHasAddress(itemStack)
         super.whenComponentPlaced(itemStack, machine, newRole)
     }
 
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?) = null
+    override fun toComponentNode(itemStack: ItemStack, machine: ComponentUser?) = null
 
     override fun appendHoverText(
         itemStack: ItemStack,
@@ -56,8 +54,10 @@ open class HardDiskItem(val tier: Int, val capacity: Long): Item(getDiskProperti
         }
         return super.getName(itemStack)
     }
+
+    override fun getRelayQueueSize(itemStack: ItemStack) = relayQueueSize
 }
 
-class HardDisk0: HardDiskItem(1, 1 shl 20)
-class HardDisk1: HardDiskItem(2, 2 shl 20)
-class HardDisk2: HardDiskItem(3, 4 shl 20)
+class HardDisk0: HardDiskItem(1, 1 shl 20, 30)
+class HardDisk1: HardDiskItem(2, 2 shl 20, 40)
+class HardDisk2: HardDiskItem(3, 4 shl 20, 50)
