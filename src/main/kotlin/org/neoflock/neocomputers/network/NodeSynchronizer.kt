@@ -15,10 +15,12 @@ import org.neoflock.neocomputers.NeoComputers
 import java.time.Duration
 
 object NodeSynchronizer {
+    val MAX_STATE_DISTANCE_ALLOWED = 128
+
     class DeviceBlockStatePayload(var blockPos: BlockPos, var buffers: List<FriendlyByteBuf>): CustomPacketPayload {
         companion object {
-            val NODE_SYNC_ID = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "node_sync")
-            val TYPE = CustomPacketPayload.Type<DeviceBlockStatePayload>(NODE_SYNC_ID)
+            val BLOCKDEV_SYNC_ID = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "blockdev_sync")
+            val TYPE = CustomPacketPayload.Type<DeviceBlockStatePayload>(BLOCKDEV_SYNC_ID)
             val CODEC = object : StreamCodec<RegistryFriendlyByteBuf, DeviceBlockStatePayload> {
                 override fun decode(buf: RegistryFriendlyByteBuf): DeviceBlockStatePayload {
                     val blockPos = buf.readBlockPos()
@@ -38,6 +40,25 @@ object NodeSynchronizer {
                     payload.buffers.forEach {
                         buf.writeByteArray(it.array())
                     }
+                }
+            }
+        }
+
+        override fun type() = TYPE
+    }
+
+    class DeviceBlockStateRequest(var blockPos: BlockPos): CustomPacketPayload {
+        companion object {
+            val BLOCKDEV_REQ_ID = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "blockdev_statereq")
+            val TYPE = CustomPacketPayload.Type<DeviceBlockStateRequest>(BLOCKDEV_REQ_ID)
+            val CODEC = object : StreamCodec<RegistryFriendlyByteBuf, DeviceBlockStateRequest> {
+                override fun decode(buf: RegistryFriendlyByteBuf): DeviceBlockStateRequest {
+                    val blockPos = buf.readBlockPos()
+                    return DeviceBlockStateRequest(blockPos)
+                }
+
+                override fun encode(buf: RegistryFriendlyByteBuf, payload: DeviceBlockStateRequest) {
+                    buf.writeBlockPos(payload.blockPos)
                 }
             }
         }

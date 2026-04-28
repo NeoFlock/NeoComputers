@@ -70,7 +70,7 @@ class CaseScreen : GenericContainerScreen<CaseMenu> {
         if(hasShiftDown()) {
             msgs.addLast(Component.translatable("neocomputers.computer.energy", energy, maxEnergy).withStyle(if(energy < maxEnergy/5) ChatFormatting.RED else ChatFormatting.WHITE))
             msgs.addLast(Component.translatable("neocomputers.computer.memory", Formatting.formatMemory(memory), Formatting.formatMemory(maxMemory)))
-            msgs.addLast(Component.translatable("neocomputers.computer.components", components, maxEnergy).withStyle(if(components <= maxComponents) ChatFormatting.WHITE else ChatFormatting.RED))
+            msgs.addLast(Component.translatable("neocomputers.computer.components", components, maxComponents).withStyle(if(components <= maxComponents) ChatFormatting.WHITE else ChatFormatting.RED))
         }
         return msgs
     }

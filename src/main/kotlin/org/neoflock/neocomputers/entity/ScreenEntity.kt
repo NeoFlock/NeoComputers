@@ -35,9 +35,11 @@ class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
                         textBuf.set(0, 0, address.toString())
                     }
                     isOn = mEnv.nowRunning
+                    markChanged()
                 }
                 if(mEnv is MachineCrashEvent) {
                     lastError = mEnv.error
+                    markChanged()
                 }
             }
         }

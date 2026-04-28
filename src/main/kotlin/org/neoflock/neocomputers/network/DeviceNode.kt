@@ -211,7 +211,7 @@ open class DeviceNode(_address: UUID? = null) {
     // Network synchronization with the NodeSynchronizer
     // TODO: process shi
 
-    var outOfSync = true
+    var outOfSync = false
     fun markChanged() {
         outOfSync = true
     }
@@ -225,6 +225,12 @@ open class DeviceNode(_address: UUID? = null) {
 
     // client-side, meant to bring state forward
     open fun processCommit(buf: FriendlyByteBuf) {}
+}
+
+// Used by the relay
+// If the ComponentItem in the card slot
+interface ConventionalNetworkDevice {
+    fun sendClassicPacket(packet: Networking.ClassicPacket)
 }
 
 abstract class WirelessEndpoint(address: UUID?) : DeviceNode(address) {

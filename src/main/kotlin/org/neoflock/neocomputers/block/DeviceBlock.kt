@@ -2,10 +2,15 @@ package org.neoflock.neocomputers.block
 
 import dev.architectury.networking.NetworkManager
 import io.netty.buffer.Unpooled
+import net.minecraft.client.Minecraft
+import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.core.HolderLookup
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.EntityBlock
@@ -27,6 +32,7 @@ abstract class SingleDeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, 
 abstract class DeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: BlockState): BlockEntity(type, pos, state) {
     val connetionsInDir = MutableList<DeviceNode?>(Direction.entries.size) { null }
     var alreadySetup = false
+    var receivedServerState = false
 
     abstract fun getDeviceNodes(): List<DeviceNode>
 
@@ -36,6 +42,7 @@ abstract class DeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state:
     abstract fun getNodeFromSide(directionToRequester: Direction): DeviceNode?
 
     open fun processCommits(commits: Iterable<FriendlyByteBuf>) {
+        receivedServerState = true
         val devs = getDeviceNodes()
         for (buf in commits) {
             val idx = buf.readVarInt()
@@ -89,31 +96,70 @@ abstract class DeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state:
     }
 
     open fun sendCommitsToClient(level: Level) {
-        if(level is ServerLevel) {
-            // synchronization!
-            val commits = mutableListOf<FriendlyByteBuf>()
-            val devs = getDeviceNodes()
-            for((i, dev) in devs.withIndex()) {
-                // TODO: use dev.outOfSync to only set commits if something changed, and allow client to request the commits (securely)
+        if(level !is ServerLevel) return
+        // synchronization!
+        val commits = mutableListOf<FriendlyByteBuf>()
+        val devs = getDeviceNodes()
+        for((i, dev) in devs.withIndex()) {
+            if(dev.outOfSync) {
                 dev.outOfSync = false
                 val buf = FriendlyByteBuf(Unpooled.buffer())
                 buf.writeVarInt(i)
                 dev.writeFullStateCommit(buf)
                 commits.addLast(buf)
             }
-            if(commits.isNotEmpty()) {
-                level.players().forEach {
-                    val dist = it.position().distanceTo(blockPos.center)
-                    if(dist < 100) NetworkManager.sendToPlayer(it, NodeSynchronizer.DeviceBlockStatePayload(blockPos, commits))
-                }
+        }
+        if(commits.isNotEmpty()) {
+            level.players().forEach {
+                val dist = it.position().distanceTo(blockPos.center)
+                if(dist < 100) NetworkManager.sendToPlayer(it, NodeSynchronizer.DeviceBlockStatePayload(blockPos, commits))
             }
         }
+    }
+
+    open fun sendStateToPlayer(player: ServerPlayer) {
+        val world = level!!
+        if(world !is ServerLevel) return
+        // synchronization!
+        val commits = mutableListOf<FriendlyByteBuf>()
+        val devs = getDeviceNodes()
+        for((i, dev) in devs.withIndex()) {
+            val buf = FriendlyByteBuf(Unpooled.buffer())
+            buf.writeVarInt(i)
+            dev.writeFullStateCommit(buf)
+            commits.addLast(buf)
+        }
+        if(commits.isNotEmpty()) {
+            world.players().forEach {
+                val dist = it.position().distanceTo(blockPos.center)
+                if(dist <= NodeSynchronizer.MAX_STATE_DISTANCE_ALLOWED) NetworkManager.sendToPlayer(it, NodeSynchronizer.DeviceBlockStatePayload(blockPos, commits))
+            }
+        }
+    }
+
+    open fun requestServerState() {
+        // no point
+        if(receivedServerState) return
+        // we're the server bro :sob:
+        if(level?.isClientSide != true) return
+        val player = Minecraft.getInstance().player ?: return
+        // we assume the player will just reject, so we save on bandwidth
+        if(player.position().distanceTo(blockPos.center) > NodeSynchronizer.MAX_STATE_DISTANCE_ALLOWED) return
+        NetworkManager.sendToServer(NodeSynchronizer.DeviceBlockStateRequest(blockPos))
     }
 
     override fun setRemoved() {
         super.setRemoved()
         alreadySetup = false
         Networking.removeNodes(getDeviceNodes())
+    }
+
+    override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
+        super.loadAdditional(tag, registries)
+        for (node in getDeviceNodes()) {
+            node.markChanged()
+        }
+        receivedServerState = false
     }
 }
 
@@ -128,6 +174,9 @@ abstract class DeviceBlock(properties: Properties = Properties.of()): BaseBlock(
                 if(blockEntity !is DeviceBlockEntity) return
                 blockEntity.tickDevice(level)
                 blockEntity.sendCommitsToClient(level)
+                if(level.isClientSide) {
+                    blockEntity.requestServerState()
+                }
             }
         }
     }

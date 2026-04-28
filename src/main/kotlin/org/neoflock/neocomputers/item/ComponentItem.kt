@@ -52,3 +52,10 @@ interface ComponentItem {
 
     fun onMachineEvent(itemStack: ItemStack, machine: MachineEntity, event: MachineEvent) {}
 }
+
+// A special ComponentItem which specifies upgrades specific to the relay
+interface RelayUpgrade: ComponentItem {
+    fun getRelayInterval(itemStack: ItemStack): Int? = null
+    fun getRelayBufferSize(itemStack: ItemStack): Int? = null
+    fun getRelayQueueSize(itemStack: ItemStack): Int? = null
+}

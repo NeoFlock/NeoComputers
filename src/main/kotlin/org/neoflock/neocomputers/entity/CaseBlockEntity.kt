@@ -152,6 +152,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceB
 
     fun setRunning(value: Boolean) {
         if(isOn == value) return
+        deviceNode.markChanged()
         NeoComputers.LOGGER.info("[${deviceNode.address}] Going from $isOn to $value")
         isOn = value
         val world = level ?: return

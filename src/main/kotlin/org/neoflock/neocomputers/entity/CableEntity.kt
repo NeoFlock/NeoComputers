@@ -21,6 +21,11 @@ class CableEntity(pos: BlockPos, state: BlockState) : SingleDeviceBlockEntity(Bl
         return
     }
 
+    override fun requestServerState() {
+        // no state, we don't bother
+        return
+    }
+
     override fun getNodeFromSide(directionToRequester: Direction): DeviceNode? {
         if(CableBlock.shouldConnect(blockPos, blockPos.relative(directionToRequester), level!!)) {
             return deviceNode

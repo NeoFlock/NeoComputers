@@ -111,6 +111,19 @@ object NeoComputers {
                     }
                 }
             })
+
+            NetworkManager.registerReceiver(NetworkManager.c2s(),NodeSynchronizer.DeviceBlockStateRequest.TYPE, NodeSynchronizer.DeviceBlockStateRequest.CODEC, {
+                    packet, ctx ->
+                val player = ctx.player
+                val level = player.level()
+                val dist = packet.blockPos.center.distanceTo(player.position())
+                if(player is ServerPlayer && dist <= NodeSynchronizer.MAX_STATE_DISTANCE_ALLOWED) {
+                    val ent = level.getBlockEntity(packet.blockPos)
+                    if(ent is DeviceBlockEntity) {
+                        ent.sendStateToPlayer(player)
+                    }
+                }
+            })
         }
 
         // we have to do this because the datagen task runs in the physical server
