@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.BlockHitResult
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.network.DeviceNode
+import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.PowerRole
 import kotlin.math.min
 

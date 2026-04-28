@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "up": "neocomputers:block/relay_top",
+    "down": "neocomputers:block/screen_bottom",
+    "north": "neocomputers:block/relay_side",
+    "south": "neocomputers:block/relay_side",
+    "east": "neocomputers:block/relay_side",
+    "west": "neocomputers:block/relay_side",
+    "particle": "neocomputers:block/case_top"
+  }
+}
