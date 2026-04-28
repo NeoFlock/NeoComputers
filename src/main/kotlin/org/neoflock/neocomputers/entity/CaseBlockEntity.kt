@@ -106,6 +106,13 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceB
                 }
             }
         }
+
+        override fun received(message: Networking.Message) {
+            super.received(message)
+            if(message is Networking.ClassicPacket) {
+                NeoComputers.LOGGER.info("machine $address got $message")
+            }
+        }
     }
 
     val redstoneIn = Array(Direction.entries.size) {0}
@@ -170,6 +177,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceB
         }
         // Server-side stuff!!
         sendMachineEvent(MachinePowerEvent(this, isOn))
+        Networking.emitMessage(deviceNode, Networking.ClassicPacket(deviceNode, deviceNode.address.toString(), "fuck you", 1, listOf(), 0))
     }
 
     override fun start(): Boolean {

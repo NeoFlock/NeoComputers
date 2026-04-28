@@ -67,7 +67,7 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
         override fun received(message: Networking.Message) {
             super.received(message)
             if(message.sender == this) return
-            if(message is Networking.ClassicPacket && message.hopCount <= 5 && queue.size < computeRelayCapacity()) {
+            if(message is Networking.ClassicPacket && message.hopCount < 5 && queue.size < computeRelayCapacity()) {
                 queue.addLast(message)
             }
         }
@@ -103,7 +103,7 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
             if(connection is ConventionalNetworkDevice) {
                 connection.sendClassicPacket(hopped)
             } else {
-                Networking.emitMessage(connection, hopped)
+                Networking.emitMessage(connection, hopped, setOf(deviceNode))
             }
         }
     }

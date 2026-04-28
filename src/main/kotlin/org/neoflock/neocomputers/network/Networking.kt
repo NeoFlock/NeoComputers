@@ -50,8 +50,8 @@ object Networking {
 
     // node may differ from message.sender in the case of relays,
     // as they might have DIRECT reachability but
-    fun emitMessage(deviceNode: DeviceNode, message: Message) {
-        deviceNode.getReachable().forEach { it.received(message) }
+    fun emitMessage(deviceNode: DeviceNode, message: Message, exclude: Set<DeviceNode> = setOf()) {
+        deviceNode.getReachable().forEach { if(it !in exclude) it.received(message) }
     }
 
     fun computeRangeAllowedByHardness(src: BlockPos, dst: BlockPos): Double {
