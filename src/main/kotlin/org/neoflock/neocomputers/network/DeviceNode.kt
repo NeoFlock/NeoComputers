@@ -2,6 +2,7 @@ package org.neoflock.neocomputers.network
 
 import net.minecraft.core.BlockPos
 import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.server.level.ServerPlayer
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.network.Networking.Message
 import org.neoflock.neocomputers.network.Networking.Visibility
@@ -215,7 +216,8 @@ open class DeviceNode(_address: UUID? = null) {
         outOfSync = true
     }
 
-    open fun encodeScreenData(buf: FriendlyByteBuf) {}
+    open fun encodeScreenData(player: ServerPlayer, buf: FriendlyByteBuf) {}
+    open fun processScreenInteraction(player: ServerPlayer, buf: FriendlyByteBuf) {}
 
     // Meant to write the entire state as a single commit
     // for clients which say they have no fucking idea what the server is storing

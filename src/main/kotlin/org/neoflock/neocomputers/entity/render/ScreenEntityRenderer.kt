@@ -27,6 +27,7 @@ class ScreenEntityRenderer(val context: BlockEntityRendererProvider.Context?) : 
                 .createCompositeState(false))
     }
     override fun render(entity: ScreenEntity, partialTick: Float, mat: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        if(!entity.isOn && entity.lastError == null) return
         val facing = entity.blockState.getValue(ScreenBlock.FACING_HORIZ)
         val vert = entity.blockState.getValue(ScreenBlock.FACING_VERTI)-1
 

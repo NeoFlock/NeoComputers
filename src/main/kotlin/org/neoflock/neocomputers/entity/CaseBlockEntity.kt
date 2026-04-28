@@ -20,8 +20,7 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.CaseBlock
-import org.neoflock.neocomputers.block.NodeBlockEntity
-import org.neoflock.neocomputers.block.NodeSynchronizer
+import org.neoflock.neocomputers.block.SingleDeviceBlockEntity
 import org.neoflock.neocomputers.gui.menu.CaseMenu
 import org.neoflock.neocomputers.item.ComponentItem
 import org.neoflock.neocomputers.network.DeviceNode
@@ -33,8 +32,10 @@ import org.neoflock.neocomputers.utils.GenericContainer
 import java.time.Duration
 import kotlin.math.max
 import kotlin.math.min
+import org.neoflock.neocomputers.network.NodeSynchronizer
+import kotlin.text.ifEmpty
 
-class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEntity(BlockEntities.CASE_ENTITY.get(), blockPos, blockState), MachineEntity, GenericContainer, MenuProvider {
+class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlockEntity(BlockEntities.CASE_ENTITY.get(), blockPos, blockState), MachineEntity, GenericContainer, MenuProvider {
     val stacks: NonNullList<ItemStack> = NonNullList<ItemStack>.withSize(7, ItemStack.EMPTY)
 
     var isOn = false
@@ -47,45 +48,63 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     override val deviceNode = object : DeviceNode() {
         override var powerRole = PowerRole.CONSUMER
         override var energyCapacity: Long = 500
-    }
 
-    override fun encodeDownstreamData(packet: FriendlyByteBuf) {
-        super.encodeDownstreamData(packet)
-        packet.writeBoolean(isOn)
-        packet.writeVarInt(diskActivityTime)
-        packet.writeVarInt(networkActivityTime)
-        packet.writeUtf(err ?: "")
-    }
-
-    override fun syncWithUpstream(packet: FriendlyByteBuf) {
-        super.syncWithUpstream(packet)
-        setRunning(packet.readBoolean())
-        diskActivityTime = packet.readVarInt()
-        networkActivityTime = packet.readVarInt()
-        err = packet.readUtf().ifEmpty { null }
-    }
-
-    override fun processScreenInteraction(player: ServerPlayer, packet: FriendlyByteBuf) {
-        val c = packet.readByte().toInt()
-        if(c == 0x01) {
-            start()
+        override fun writeFullStateCommit(buf: FriendlyByteBuf) {
+            super.writeFullStateCommit(buf)
+            buf.writeUUID(address)
+            buf.writeBoolean(isOn)
+            buf.writeVarInt(diskActivityTime)
+            buf.writeVarInt(networkActivityTime)
+            buf.writeUtf(err ?: "")
         }
-        if(c == 0x02) {
-            stop()
-        }
-    }
 
-    override fun encodeScreenData(player: ServerPlayer, packet: FriendlyByteBuf) {
-        super.encodeScreenData(player, packet)
-        packet.writeBoolean(isOn)
-        packet.writeByteArray((err ?: "").encodeToByteArray())
-        packet.writeLong(deviceNode.energy)
-        packet.writeLong(deviceNode.energyCapacity)
-        packet.writeLong(getMachineMemoryUsed())
-        packet.writeLong(getMachineMemoryTotal())
-        packet.writeLong(getMachineComponentsUsed())
-        packet.writeLong(getMachineComponentsTotal())
-        packet.writeUtf(arch)
+        override fun processCommit(buf: FriendlyByteBuf) {
+            super.processCommit(buf)
+            Networking.changeNodeAddress(this, buf.readUUID())
+            setRunning(buf.readBoolean())
+            diskActivityTime = buf.readVarInt()
+            networkActivityTime = buf.readVarInt()
+            err = buf.readUtf().ifEmpty { null }
+        }
+
+        override fun processScreenInteraction(player: ServerPlayer, buf: FriendlyByteBuf) {
+            super.processScreenInteraction(player, buf)
+            val c = buf.readByte().toInt()
+            if(c == 0x01) {
+                start()
+            }
+            if(c == 0x02) {
+                stop()
+            }
+        }
+
+        override fun encodeScreenData(player: ServerPlayer, buf: FriendlyByteBuf) {
+            super.encodeScreenData(player, buf)
+            buf.writeBoolean(isOn)
+            buf.writeByteArray((err ?: "").encodeToByteArray())
+            buf.writeLong(energy)
+            buf.writeLong(energyCapacity)
+            buf.writeLong(getMachineMemoryUsed())
+            buf.writeLong(getMachineMemoryTotal())
+            buf.writeLong(getMachineComponentsUsed())
+            buf.writeLong(getMachineComponentsTotal())
+            buf.writeUtf(arch)
+        }
+
+        override fun tick() {
+            super.tick()
+            if (isRunning()) {
+                if(diskActivityTime > 0) diskActivityTime--
+                if(networkActivityTime > 0) networkActivityTime--
+                if(getMachineArchitectures().isEmpty()) {
+                    crash("@neocomputers.errors.ENOCPU")
+                } else if(getMachineComponentsUsed() > getMachineComponentsTotal()) {
+                    crash("@neocomputers.errors.E2BIG")
+                } else if (!consumeEnergy(1)) {
+                    crash("@neocomputers.errors.ENOENJ")
+                }
+            }
+        }
     }
 
     val redstoneIn = Array(Direction.entries.size) {0}
@@ -154,9 +173,9 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     override fun start(): Boolean {
         if(isOn) return true
         err = null
-        val archs = getMachineArchitectures()
+        val architectures = getMachineArchitectures()
         // Beep patterns taken from https://github.com/MightyPirates/OpenComputers/blob/571482db88080d56329e8f8cf0db2a90825bf1d7/src/main/scala/li/cil/oc/server/machine/Machine.scala
-        if(archs.isEmpty()) {
+        if(architectures.isEmpty()) {
             crash("@neocomputers.errors.ENOCPU")
             beepAsync("-..")
             return false
@@ -178,9 +197,9 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
             beepAsync("-.")
             return false
         }
-        if(arch !in archs) {
+        if(arch !in architectures) {
             // Just pick one! TODO: consult EEPROM first
-            arch = archs.first()
+            arch = architectures.first()
         }
         beepAsync(".")
         setRunning(true)
@@ -194,10 +213,8 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     }
 
     override fun crash(error: String): Boolean {
-        if(isOn) {
-            beepAsync("--")
-            sendMachineEvent(MachineCrashEvent(this, error))
-        }
+        beepAsync("--")
+        sendMachineEvent(MachineCrashEvent(this, error))
         setRunning(false)
         err = error
         return true
@@ -270,22 +287,5 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnti
     override fun setRemoved() {
         setRunning(false)
         super.setRemoved()
-    }
-
-    override fun tickNode(level: Level) {
-        super.tickNode(level)
-        if(!level.isClientSide) {
-            if (isRunning()) {
-                if(diskActivityTime > 0) diskActivityTime--
-                if(networkActivityTime > 0) networkActivityTime--
-                if(getMachineArchitectures().isEmpty()) {
-                    crash("@neocomputers.errors.ENOCPU")
-                } else if(getMachineComponentsUsed() > getMachineComponentsTotal()) {
-                    crash("@neocomputers.errors.E2BIG")
-                } else if (!deviceNode.consumeEnergy(1)) {
-                    crash("@neocomputers.errors.ENOENJ")
-                }
-            }
-        }
     }
 }

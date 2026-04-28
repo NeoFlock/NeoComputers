@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.inventory.tooltip.TooltipComponent
 import net.minecraft.world.phys.Vec3
 import org.neoflock.neocomputers.NeoComputers
-import org.neoflock.neocomputers.block.NodeSynchronizer
+import org.neoflock.neocomputers.network.NodeSynchronizer
 import org.neoflock.neocomputers.gui.menu.CaseMenu
 import org.neoflock.neocomputers.gui.widget.ButtonSprites
 import org.neoflock.neocomputers.gui.widget.ImagerButton

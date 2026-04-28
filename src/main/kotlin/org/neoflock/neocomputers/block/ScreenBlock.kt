@@ -26,23 +26,19 @@ import org.neoflock.neocomputers.entity.ScreenEntity
 import org.neoflock.neocomputers.gui.menu.ScreenMenu
 import kotlin.math.abs
 import kotlin.math.max
+import org.neoflock.neocomputers.network.NodeSynchronizer
 
-class ScreenBlock() : NodeBlock() {
+class ScreenBlock() : DeviceBlock() {
     companion object {
         val FACING_HORIZ: EnumProperty<Direction> = EnumProperty.create<Direction>("facing_horiz", Direction::class.java)
         val FACING_VERTI: IntegerProperty = IntegerProperty.create("facing_verti", 0, 2) // "Integer" property doesnt accept values below 0, also death to enums, long live magic numbers
-        val ENERGY: Long = 5
     }
 
     init {
         registerDefaultState(stateDefinition.any().setValue(FACING_HORIZ, Direction.NORTH).setValue(FACING_VERTI, 1))
     }
 
-    override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity? {
-        val scr = ScreenEntity(blockPos, blockState)
-        scr.initNetworking()
-        return scr
-    }
+    override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState) = ScreenEntity(blockPos, blockState)
 
     override fun useWithoutItem(
         blockState: BlockState,
@@ -52,14 +48,9 @@ class ScreenBlock() : NodeBlock() {
         blockHitResult: BlockHitResult
     ): InteractionResult {
         if(!level.isClientSide) {
-            val screenState = level.getBlockEntity(blockPos, BlockEntities.SCREEN_ENTITY.get()).get()
-            if(!screenState.deviceNode.consumeEnergy(ENERGY)) {
-                player.sendSystemMessage(Component.literal("Not enough power."))
-                return InteractionResult.SUCCESS
-            };
             val sp = player as ServerPlayer
             val ent = level.getBlockEntity(blockPos, BlockEntities.SCREEN_ENTITY.get()).get()
-            NodeSynchronizer.registerPlayerScreen(sp, ent)
+            NodeSynchronizer.registerPlayerScreen(sp, ent.deviceNode)
             MenuRegistry.openExtendedMenu(sp, object : ExtendedMenuProvider {
                 override fun getDisplayName(): Component = Component.literal("SCREEEEEN!")
                 override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu {

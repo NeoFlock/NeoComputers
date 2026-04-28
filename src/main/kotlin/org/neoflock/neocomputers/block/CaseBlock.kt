@@ -31,9 +31,10 @@ import org.neoflock.neocomputers.block.CombustionGeneratorBlock.Companion.COMBUS
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.entity.CaseBlockEntity
 import org.neoflock.neocomputers.entity.MachineEntity
+import org.neoflock.neocomputers.network.NodeSynchronizer
 import org.neoflock.neocomputers.sounds.Sounds
 
-class CaseBlock() : NodeBlock(Properties.of().sound(SoundType.METAL).lightLevel(CaseBlock::getLuminance)) { // placeholder stuff
+class CaseBlock() : DeviceBlock(Properties.of().sound(SoundType.METAL).lightLevel(CaseBlock::getLuminance)) { // placeholder stuff
     companion object {
         val FACING: EnumProperty<Direction> = EnumProperty.create<Direction>("facing", Direction::class.java)
         val COMPUTER_RUNNING = BooleanProperty.create("running")!!
@@ -47,7 +48,7 @@ class CaseBlock() : NodeBlock(Properties.of().sound(SoundType.METAL).lightLevel(
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(COMPUTER_RUNNING, false))
     }
 
-    override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState) = CaseBlockEntity(blockPos, blockState).initNetworking()
+    override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState) = CaseBlockEntity(blockPos, blockState)
 
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block?, BlockState?>) {
         builder.add(COMPUTER_RUNNING)
@@ -115,7 +116,7 @@ class CaseBlock() : NodeBlock(Properties.of().sound(SoundType.METAL).lightLevel(
             } else {
                 // Open menu
                 MenuRegistry.openMenu(player as ServerPlayer, ent)
-                NodeSynchronizer.registerPlayerScreen(player, ent)
+                NodeSynchronizer.registerPlayerScreen(player, ent.deviceNode)
             }
         }
         return InteractionResult.SUCCESS

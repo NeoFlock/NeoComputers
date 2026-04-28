@@ -26,14 +26,10 @@ class BufferRenderer(private var id: ResourceLocation, private var buffer: TextB
         Minecraft.getInstance().textureManager.register(this.id, tex)
     }
 
-    fun dump(path: String) {
-        image.writeToFile(File(path))
-        NeoComputers.LOGGER.info("DUMPED!!!")
+    fun toRGBA(color: Int): Int {
+        // Minecaft lies, its AGBR
+        return java.lang.Integer.reverseBytes((color.toLong() * 256 + 0xFF).toInt())
     }
-
-//    fun toRGBA(color: Int): Int {
-//        return color.shl(8).or(0xFF)
-//    }
 
     fun drawGlyph(x: Int, y: Int, c: Char, fg: Int) {
         var glyph: ArrayList<Byte> = FontProvider.map[c]!!
@@ -42,7 +38,7 @@ class BufferRenderer(private var id: ResourceLocation, private var buffer: TextB
             for (i in 0..<CHARW) {
                 // var pixel = ((glyph[j] and ((1 shl (CHARW - i - 1)).toByte())).toInt()) ushr (CHARW - i - 1) // retardation
                 var pixel = (glyph[j] and (0b10000000 ushr i).toByte()).toInt()
-                if (pixel > 0) image.setPixelRGBA(x+i, y+j, 0xFF000000.toInt()+fg)
+                if (pixel > 0) image.setPixelRGBA(x+i, y+j, toRGBA(fg))
             }
         }
     }
@@ -53,7 +49,7 @@ class BufferRenderer(private var id: ResourceLocation, private var buffer: TextB
                 var char: GPUChar = buffer.get(i, j)
                 var x = i*CHARW
                 var y = j*CHARH
-                image.fillRect(x, y, CHARW, CHARH, (0xFF000000+char.bg).toInt())
+                image.fillRect(x, y, CHARW, CHARH, toRGBA(char.bg))
                 if (char.c != ' ' && char.c != '\u0000') drawGlyph(x, y, char.c, char.fg) 
             }
         }

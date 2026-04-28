@@ -1,6 +1,7 @@
 package org.neoflock.neocomputers.entity
 
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
 import net.minecraft.core.HolderLookup
 import net.minecraft.core.NonNullList
 import net.minecraft.nbt.CompoundTag
@@ -15,16 +16,15 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.block.CombustionGeneratorBlock
-import org.neoflock.neocomputers.block.NodeBlockEntity
+import org.neoflock.neocomputers.block.SingleDeviceBlockEntity
 import org.neoflock.neocomputers.gui.menu.CombustionGeneratorMenu
 import org.neoflock.neocomputers.network.DeviceNode
-import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.PowerRole
 import org.neoflock.neocomputers.utils.GenericContainer
 import org.neoflock.neocomputers.utils.ContainerUtils
 import kotlin.math.min
 
-class CombustionGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState) : NodeBlockEntity(BlockEntities.COMBUSTGEN_ENTITY.get(), blockPos, blockState), GenericContainer, MenuProvider {
+class CombustionGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState) : SingleDeviceBlockEntity(BlockEntities.COMBUSTGEN_ENTITY.get(), blockPos, blockState), GenericContainer, MenuProvider {
     val energyPerTick: Long = 50
 
     var burningTimeRemaining: Int = 0
@@ -32,6 +32,11 @@ class CombustionGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState)
     override val deviceNode = object : DeviceNode() {
         override var powerRole = PowerRole.GENERATOR
         override var energyCapacity: Long = 100000
+
+        override fun encodeScreenData(player: ServerPlayer, buf: FriendlyByteBuf) {
+            buf.writeLong(energy)
+            buf.writeLong(energyCapacity)
+        }
     }
 
     val stacks: NonNullList<ItemStack> = NonNullList<ItemStack>.withSize(1, ItemStack.EMPTY)
@@ -46,8 +51,8 @@ class CombustionGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState)
         return !this.isRemoved
     }
 
-    override fun tickNode(level: Level) {
-        super.tickNode(level)
+    override fun tickDevice(level: Level) {
+        super.tickDevice(level)
         // TODO: give us a block state tag for active
 
         // keep combusting and shi
@@ -77,11 +82,6 @@ class CombustionGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState)
     override fun setChanged() {
         super.setChanged()
         level?.setBlockAndUpdate(blockPos, blockState.setValue(CombustionGeneratorBlock.COMBUSTGEN_ACTIVE, burningTimeRemaining > 0))
-    }
-
-    override fun encodeScreenData(player: ServerPlayer, packet: FriendlyByteBuf) {
-        packet.writeLong(deviceNode.energy)
-        packet.writeLong(deviceNode.energyCapacity)
     }
 
     override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {

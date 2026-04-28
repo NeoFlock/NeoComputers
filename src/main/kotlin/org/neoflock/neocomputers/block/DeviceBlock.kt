@@ -1,7 +1,11 @@
 package org.neoflock.neocomputers.block
 
+import dev.architectury.networking.NetworkManager
+import io.netty.buffer.Unpooled
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.EntityBlock
@@ -11,9 +15,18 @@ import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.Networking
+import org.neoflock.neocomputers.network.NodeSynchronizer
+
+abstract class SingleDeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: BlockState): DeviceBlockEntity(type, pos, state) {
+    abstract val deviceNode: DeviceNode
+
+    override fun getDeviceNodes() = listOf(deviceNode)
+    override fun getNodeFromSide(directionToRequester: Direction): DeviceNode? = deviceNode
+}
 
 abstract class DeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: BlockState): BlockEntity(type, pos, state) {
-    val connetionsInDir = MutableList(Direction.entries.size) { HashSet<DeviceNode>() }
+    val connetionsInDir = MutableList<DeviceNode?>(Direction.entries.size) { null }
+    var alreadySetup = false
 
     abstract fun getDeviceNodes(): List<DeviceNode>
 
@@ -22,57 +35,85 @@ abstract class DeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state:
     // so it is Direction.UP if we asked from the one on the top side.
     abstract fun getNodeFromSide(directionToRequester: Direction): DeviceNode?
 
+    open fun processCommits(commits: Iterable<FriendlyByteBuf>) {
+        val devs = getDeviceNodes()
+        for (buf in commits) {
+            val idx = buf.readVarInt()
+            if(idx >= 0 && idx < devs.size) {
+                devs[idx].processCommit(buf)
+            }
+        }
+    }
+
     open fun initNetworking(): DeviceBlockEntity {
-        getDeviceNodes().forEach { Networking.addNode(it) }
-        Direction.entries.forEach { handleConnectionsFor(it) }
+        if(hasLevel()) {
+            alreadySetup = true
+            Networking.addNodes(getDeviceNodes())
+            Direction.entries.forEach { handleConnectionsFor(it) }
+        }
         return this
     }
 
-    open fun getCurrentlyConnectedNodesIn(direction: Direction): HashSet<DeviceNode> {
+    // Cables are 1 node
+    open fun getCurrentlyConnectedNodeIn(direction: Direction): DeviceNode? {
         val ent = level?.getBlockEntity(blockPos.relative(direction))
-        val connected = HashSet<DeviceNode>()
         if(ent is DeviceBlockEntity) {
-            val node = ent.getNodeFromSide(direction.opposite)
-            if(node != null) connected.add(node)
+            return ent.getNodeFromSide(direction.opposite)
         }
-        return connected
+        return null
     }
-
-    // TODO: rethink this shi so sharing a node on 2 different sides doesn't make connections require mutually exclusive conditions
-    // TODO: actually like, rethink the whole class so far
 
     open fun handleConnectionsFor(direction: Direction) {
         // refuse connections on no node to reduce CPU load
         val node = getNodeFromSide(direction.opposite) ?: return
         val old = connetionsInDir[direction.ordinal]
-        val now = getCurrentlyConnectedNodesIn(direction)
+        val now = getCurrentlyConnectedNodeIn(direction)
 
-        // TODO: optimize this hellscape
-
-        val toKill = HashSet<DeviceNode>()
-        old.forEach {
-            if(it !in now) toKill.add(it)
-        }
-        toKill.forEach { node.disconnectFrom(it) }
-        now.forEach {
-            if(it !in old) node.connectTo(it)
+        if(old?.address != now?.address) {
+            if(old != null) node.disconnectFrom(old)
+            if(now != null) node.connectTo(now)
         }
         connetionsInDir[direction.ordinal] = now
     }
 
     // TODO: optimize this sometime before our test computers melt
-    open fun tickDevice() {
+    open fun tickDevice(level: Level) {
         // Handles device connections and sync here
 
-        // Process connections
-        Direction.entries.forEach {
-            handleConnectionsFor(it)
+        // we do it like this because stinky MC will call stuff before world is fully setup
+        // and then not notify us of neighbour changes
+        // this is because MC is considered shit
+        if(!alreadySetup) {
+            initNetworking()
+        }
+    }
+
+    open fun sendCommitsToClient(level: Level) {
+        if(level is ServerLevel) {
+            // synchronization!
+            val commits = mutableListOf<FriendlyByteBuf>()
+            val devs = getDeviceNodes()
+            for((i, dev) in devs.withIndex()) {
+                // TODO: use dev.outOfSync to only set commits if something changed, and allow client to request the commits (securely)
+                dev.outOfSync = false
+                val buf = FriendlyByteBuf(Unpooled.buffer())
+                buf.writeVarInt(i)
+                dev.writeFullStateCommit(buf)
+                commits.addLast(buf)
+            }
+            if(commits.isNotEmpty()) {
+                level.players().forEach {
+                    val dist = it.position().distanceTo(blockPos.center)
+                    if(dist < 100) NetworkManager.sendToPlayer(it, NodeSynchronizer.DeviceBlockStatePayload(blockPos, commits))
+                }
+            }
         }
     }
 
     override fun setRemoved() {
         super.setRemoved()
-        getDeviceNodes().forEach { Networking.removeNode(it) }
+        alreadySetup = false
+        Networking.removeNodes(getDeviceNodes())
     }
 }
 
@@ -85,7 +126,8 @@ abstract class DeviceBlock(properties: Properties = Properties.of()): BaseBlock(
         return object : BlockEntityTicker<T> {
             override fun tick(level: Level, blockPos: BlockPos, blockState: BlockState, blockEntity: T & Any) {
                 if(blockEntity !is DeviceBlockEntity) return
-                blockEntity.tickDevice()
+                blockEntity.tickDevice(level)
+                blockEntity.sendCommitsToClient(level)
             }
         }
     }

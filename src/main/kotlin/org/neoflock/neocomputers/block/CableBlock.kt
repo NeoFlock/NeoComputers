@@ -27,7 +27,7 @@ import net.minecraft.world.phys.shapes.VoxelShape
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.entity.CableEntity
 
-class CableBlock() : BaseBlock(Properties.of()), EntityBlock {
+class CableBlock() : DeviceBlock(Properties.of()), EntityBlock {
     companion object {
         val NORTH = BooleanProperty.create("north")
         val EAST = BooleanProperty.create("east")
@@ -96,12 +96,20 @@ class CableBlock() : BaseBlock(Properties.of()), EntityBlock {
         fun shouldConnect(pos: BlockPos, npos: BlockPos, level: Level): Boolean {
             val ent = level.getBlockEntity(npos)
             val blockState = level.getBlockState(pos)
+            val theirState = level.getBlockState(npos)
 
-            return ent is NodeBlockEntity || (ent is CableEntity &&
-                    (level.getBlockState(npos).getValue(COLOR).equals(blockState.getValue(COLOR)) ||
-                            blockState.getValue(COLOR).equals(DyeColor.LIGHT_GRAY) ||
-                            level.getBlockState(npos).getValue(COLOR).equals(DyeColor.LIGHT_GRAY)))
-//        val state: BlockState? = (ent is CableEntity && (level.getBlockState(neighborPos).getValue(COLOR).equals(state.getValue(COLOR)) || state.getValue(COLOR).equals(DyeColor.LIGHT_GRAY))
+            val universal = DyeColor.LIGHT_GRAY
+            if(ent is CableEntity) {
+                val ourColor = blockState.getValue(COLOR)
+                val theirColor = theirState.getValue(COLOR)
+
+                if(ourColor.equals(universal)) return true
+                if(theirColor.equals(universal)) return true
+                if(ourColor.equals(theirColor)) return true
+                return false
+            }
+
+            return ent is DeviceBlockEntity
         }
     }
 
@@ -130,9 +138,7 @@ class CableBlock() : BaseBlock(Properties.of()), EntityBlock {
             .add(COLOR))
     }
 
-    override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity? {
-        return CableEntity(pos, state)
-    }
+    override fun newBlockEntity(pos: BlockPos, state: BlockState) = CableEntity(pos, state)
 
     override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape? {
         val idx = calcIdx(state.getValue(NORTH), state.getValue(SOUTH), state.getValue(EAST), state.getValue(WEST), state.getValue(UP), state.getValue(DOWN))

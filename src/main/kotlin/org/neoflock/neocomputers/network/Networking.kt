@@ -85,12 +85,14 @@ object Networking {
     fun getNode(address: UUID): DeviceNode? = allNodes.get()[address]
 
     // TODO: use setter, more convenient
-    fun changeNodeAddress(deviceNode: DeviceNode, address: UUID) {
-        if(deviceNode.address.equals(address)) return
-        if(deviceNode.address !in allNodes.get()) return
+    fun changeNodeAddress(deviceNode: DeviceNode, address: UUID): Boolean {
+        if(deviceNode.address.equals(address)) return false
+        if(deviceNode.address !in allNodes.get()) return false
+        if(address in allNodes.get()) return false
         allNodes.get().remove(deviceNode.address)
         deviceNode.address = address
         allNodes.get()[address] = deviceNode
+        return true
     }
 
     fun addNode(deviceNode: DeviceNode) {
@@ -103,12 +105,17 @@ object Networking {
         allNodes.get().forEach { it.value.onNodeAdded(deviceNode) }
     }
 
-    fun addNodes(vararg deviceNodes: DeviceNode) {
+    fun addNodes(deviceNodes: Iterable<DeviceNode>) {
         deviceNodes.forEach { addNode(it) }
+    }
+
+    fun addNodes(vararg deviceNodes: DeviceNode) {
+        addNodes(deviceNodes.asIterable())
     }
 
     fun removeNode(deviceNode: DeviceNode) {
         if(deviceNode.address !in allNodes.get()) return
+        NodeSynchronizer.nodeErased(deviceNode)
         allNodes.get().forEach { it.value.onNodeRemoved(deviceNode) }
         // toList() in order to copy it
         deviceNode.connections.toList().forEach {
@@ -121,8 +128,12 @@ object Networking {
         }
     }
 
-    fun removeNodes(vararg deviceNodes: DeviceNode) {
+    fun removeNodes(deviceNodes: Iterable<DeviceNode>) {
         deviceNodes.forEach { removeNode(it) }
+    }
+
+    fun removeNodes(vararg deviceNodes: DeviceNode) {
+        removeNodes(deviceNodes.asIterable())
     }
 
     val channels = ThreadLocal.withInitial { HashMap<String, MutableSet<DeviceNode>>() }

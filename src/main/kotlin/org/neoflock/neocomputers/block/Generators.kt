@@ -23,13 +23,14 @@ import net.minecraft.world.phys.BlockHitResult
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.entity.SolarGeneratorBlockEntity
 import org.neoflock.neocomputers.entity.CombustionGeneratorBlockEntity
+import org.neoflock.neocomputers.network.NodeSynchronizer
 
-class SolarGeneratorBlock : NodeBlock(), EntityBlock {
-    override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity = SolarGeneratorBlockEntity(blockPos, blockState).initNetworking()
+class SolarGeneratorBlock : DeviceBlock(), EntityBlock {
+    override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity = SolarGeneratorBlockEntity(blockPos, blockState)
 }
 
 // TODO: make it glow when burning
-class CombustionGeneratorBlock : NodeBlock, EntityBlock {
+class CombustionGeneratorBlock : DeviceBlock, EntityBlock {
     companion object {
         val COMBUSTGEN_ACTIVE = BooleanProperty.create("active")
 
@@ -42,7 +43,7 @@ class CombustionGeneratorBlock : NodeBlock, EntityBlock {
         registerDefaultState(defaultBlockState().setValue(COMBUSTGEN_ACTIVE, false))
     }
 
-    override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity = CombustionGeneratorBlockEntity(blockPos, blockState).initNetworking()
+    override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity = CombustionGeneratorBlockEntity(blockPos, blockState)
 
     override fun useWithoutItem(
         blockState: BlockState,
@@ -54,7 +55,7 @@ class CombustionGeneratorBlock : NodeBlock, EntityBlock {
         if(!level.isClientSide()) {
             val sp = player as ServerPlayer
             val ent = level.getBlockEntity(blockPos, BlockEntities.COMBUSTGEN_ENTITY.get()).get()
-            NodeSynchronizer.registerPlayerScreen(sp, ent)
+            NodeSynchronizer.registerPlayerScreen(sp, ent.deviceNode)
             MenuRegistry.openMenu(sp, ent)
         }
         return InteractionResult.SUCCESS

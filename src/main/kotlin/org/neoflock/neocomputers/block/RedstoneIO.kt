@@ -15,7 +15,7 @@ import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.DeviceNode
 
-class RedstoneIOEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEntity(BlockEntities.REDSTONEIO_ENTITY.get(), blockPos, blockState) {
+class RedstoneIOEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlockEntity(BlockEntities.REDSTONEIO_ENTITY.get(), blockPos, blockState) {
     val redstoneIn = Array<Int>(Direction.entries.size) {0}
     val redstoneOut = Array<Int>(Direction.entries.size) {0}
 
@@ -44,7 +44,7 @@ class RedstoneIOEntity(blockPos: BlockPos, blockState: BlockState): NodeBlockEnt
     }
 }
 
-class RedstoneIOBlock(): NodeBlock(Properties.of().isRedstoneConductor { state, getter, pos -> true }) {
+class RedstoneIOBlock(): DeviceBlock(Properties.of().isRedstoneConductor { state, getter, pos -> true }) {
     override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity = RedstoneIOEntity(blockPos, blockState)
 
     fun getRedstoneIO(level: BlockGetter, blockPos: BlockPos): RedstoneIOEntity? {

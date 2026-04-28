@@ -1,7 +1,5 @@
 package org.neoflock.neocomputers
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.VertexFormat
 import dev.architectury.event.events.client.ClientLifecycleEvent
 import dev.architectury.event.events.common.LifecycleEvent
 import dev.architectury.event.events.common.PlayerEvent
@@ -15,24 +13,20 @@ import org.neoflock.neocomputers.gui.menu.Menus
 import dev.architectury.utils.Env
 import dev.architectury.utils.EnvExecutor
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.RenderStateShard
-import net.minecraft.client.renderer.RenderType
 import net.minecraft.server.level.ServerPlayer
-import org.neoflock.neocomputers.block.NodeBlockEntity
-import org.neoflock.neocomputers.block.NodeSynchronizer
-import org.neoflock.neocomputers.gui.buffer.BufferRenderer
+import org.neoflock.neocomputers.block.DeviceBlockEntity
 import org.neoflock.neocomputers.gui.render.ScreenRenderer
 import org.neoflock.neocomputers.gui.widget.ComponentRoles
-import org.neoflock.neocomputers.item.GPUCard
 import org.neoflock.neocomputers.item.Items
 import org.neoflock.neocomputers.item.Tabs
+import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.Networking
+import org.neoflock.neocomputers.network.NodeSynchronizer
 import org.neoflock.neocomputers.sounds.Sounds
 import org.neoflock.neocomputers.utils.FontProvider
 import org.neoflock.neocomputers.utils.GenericContainerScreen
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.nio.Buffer
 
 object NeoComputers {
     const val MODID: String = "neocomputers"
@@ -58,7 +52,7 @@ object NeoComputers {
         Tabs.TABS.register()
         Sounds.SOUNDS.register()
         ComponentRoles.mapDefaultTextures()
-        // i dont know why architectury wants two lambdas but whatever
+        // I don't know why architectury wants two lambdas but whatever
         EnvExecutor.runInEnv(Env.CLIENT) {{
             ClientLifecycleEvent.CLIENT_SETUP.register {
                 Menus.registerScreens()
@@ -87,7 +81,7 @@ object NeoComputers {
             Networking.channels.remove()
         }
 
-        ClientLifecycleEvent.CLIENT_STARTED.register {
+        ClientLifecycleEvent.CLIENT_SETUP.register {
             Networking.allNodes.remove()
             Networking.wirelessNodes.remove()
             Networking.channels.remove()
@@ -111,19 +105,22 @@ object NeoComputers {
                     packet, ctx ->
                 val player = ctx.player
                 if(player is ServerPlayer) {
-                    NodeSynchronizer.screenMap[player]?.processScreenInteraction(player, packet.buffer)
+                    val ent = NodeSynchronizer.screenMap[player]
+                    if(ent is DeviceNode) {
+                        ent.processScreenInteraction(player, packet.buffer)
+                    }
                 }
             })
         }
 
         // we have to do this because the datagen task runs in the physical server
         EnvExecutor.runInEnv(Env.CLIENT) {{
-            NetworkManager.registerReceiver(NetworkManager.s2c(),NodeSynchronizer.StatePayload.TYPE, NodeSynchronizer.StatePayload.CODEC, {
+            NetworkManager.registerReceiver(NetworkManager.s2c(),NodeSynchronizer.DeviceBlockStatePayload.TYPE, NodeSynchronizer.DeviceBlockStatePayload.CODEC, {
                     packet, ctx ->
                 val level = ctx.player.level()
                 val ent = level.getBlockEntity(packet.blockPos)
-                if(ent is NodeBlockEntity) {
-                    ent.syncWithUpstream(packet.buffer)
+                if(ent is DeviceBlockEntity) {
+                    ent.processCommits(packet.buffers)
                 }
             })
 
@@ -143,7 +140,7 @@ object NeoComputers {
         }}
         EnvExecutor.runInEnv(Env.SERVER) {{
             // https://github.com/architectury/architectury-api/issues/518
-            NetworkManager.registerS2CPayloadType(NodeSynchronizer.StatePayload.TYPE, NodeSynchronizer.StatePayload.CODEC)
+            NetworkManager.registerS2CPayloadType(NodeSynchronizer.DeviceBlockStatePayload.TYPE, NodeSynchronizer.DeviceBlockStatePayload.CODEC)
             NetworkManager.registerS2CPayloadType(NodeSynchronizer.ScreenPayload.TYPE, NodeSynchronizer.ScreenPayload.CODEC)
             NetworkManager.registerS2CPayloadType(NodeSynchronizer.BeepDataPayload.TYPE, NodeSynchronizer.BeepDataPayload.CODEC)
         }}

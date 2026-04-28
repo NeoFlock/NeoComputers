@@ -1,9 +1,10 @@
 package org.neoflock.neocomputers.network
 
 import net.minecraft.world.level.block.entity.BlockEntityType
+import org.neoflock.neocomputers.block.DeviceBlockEntity
 //? if fabric {
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext
-import org.neoflock.neocomputers.block.NodeBlockEntity
+import net.minecraft.core.Direction
 import team.reborn.energy.api.EnergyStorage;
 //?}
 
@@ -11,31 +12,34 @@ import team.reborn.energy.api.EnergyStorage;
 // the NodeBlockEntity and Node given us a way to get power from a block, we just
 // need to tell mods how to do it as well
 object PowerManager {
-    fun<T: NodeBlockEntity> registerPowerBlockEntity(blockEntityType: BlockEntityType<T>) {
+    fun<T: DeviceBlockEntity> registerPowerDevice(blockEntityType: BlockEntityType<T>) {
         //? if fabric {
         EnergyStorage.SIDED.registerForBlockEntity({
-            entity, dir -> object : EnergyStorage {
-                override fun getAmount() = entity.deviceNode.energy
-                override fun getCapacity() = entity.deviceNode.energyCapacity
-                override fun supportsExtraction() = entity.deviceNode.powerRole != PowerRole.CONSUMER && entity.deviceNode.energyCapacity > 0
-                override fun supportsInsertion() = entity.deviceNode.powerRole != PowerRole.GENERATOR
-                override fun extract(maxAmount: Long, transaction: TransactionContext?): Long {
-                    if(entity.deviceNode.powerRole == PowerRole.CONSUMER) return 0
-                    val taken = entity.deviceNode.withdrawEnergy(maxAmount)
-                    transaction?.addCloseCallback {
-                        ctx, res -> if(res.wasAborted() || !res.wasCommitted()) entity.deviceNode.giveEnergy(taken)
+                // TODO: as this is currently written, if the node instance changes and the mod cached the conversion, we're boned. Consider fixing it.
+                entity, dir ->
+                val node = entity.getNodeFromSide(dir ?: Direction.UP)
+                if(node == null) null else object : EnergyStorage {
+                    override fun getAmount() = node.energy
+                    override fun getCapacity() = node.energyCapacity
+                    override fun supportsExtraction() = node.powerRole != PowerRole.CONSUMER && node.energyCapacity > 0
+                    override fun supportsInsertion() = node.powerRole != PowerRole.GENERATOR
+                    override fun extract(maxAmount: Long, transaction: TransactionContext?): Long {
+                        if(node.powerRole == PowerRole.CONSUMER) return 0
+                        val taken = node.withdrawEnergy(maxAmount)
+                        transaction?.addCloseCallback {
+                                ctx, res -> if(res.wasAborted() || !res.wasCommitted()) node.giveEnergy(taken)
+                        }
+                        return taken
                     }
-                    return taken
-                }
-                override fun insert(maxAmount: Long, transaction: TransactionContext?): Long {
-                    if(entity.deviceNode.powerRole == PowerRole.GENERATOR) return 0
-                    val given = entity.deviceNode.giveEnergy(maxAmount)
-                    transaction?.addCloseCallback { ctx, res ->
-                        if (res.wasAborted() || !res.wasCommitted()) entity.deviceNode.withdrawEnergy(given)
+                    override fun insert(maxAmount: Long, transaction: TransactionContext?): Long {
+                        if(node.powerRole == PowerRole.GENERATOR) return 0
+                        val given = node.giveEnergy(maxAmount)
+                        transaction?.addCloseCallback { ctx, res ->
+                            if (res.wasAborted() || !res.wasCommitted()) node.withdrawEnergy(given)
+                        }
+                        return given
                     }
-                    return given
                 }
-            }
         }, blockEntityType);
         //?}
     }

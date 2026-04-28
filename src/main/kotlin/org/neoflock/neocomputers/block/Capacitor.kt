@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.chat.OutgoingChatMessage
 import net.minecraft.network.chat.PlayerChatMessage
 import net.minecraft.server.level.ServerPlayer
@@ -25,6 +26,16 @@ open class CapacitorEntity(val capacity: Long, type: BlockEntityType<*>, pos: Bl
     val deviceNode = object : DeviceNode() {
         override var powerRole = PowerRole.STORAGE
         override var energyCapacity: Long = capacity
+
+        override fun writeFullStateCommit(buf: FriendlyByteBuf) {
+            super.writeFullStateCommit(buf)
+            buf.writeVarLong(energy)
+        }
+
+        override fun processCommit(buf: FriendlyByteBuf) {
+            super.processCommit(buf)
+            energy = buf.readVarLong()
+        }
     }
 
     // TODO: cache list
@@ -46,7 +57,7 @@ class CapacitorEntityTier1(pos: BlockPos, state: BlockState): CapacitorEntity(20
 class CapacitorEntityTier2(pos: BlockPos, state: BlockState): CapacitorEntity(50000, BlockEntities.CAPACITOR2_ENTITY.get(), pos, state)
 class CapacitorEntityTier3(pos: BlockPos, state: BlockState): CapacitorEntity(100000, BlockEntities.CAPACITOR3_ENTITY.get(), pos, state)
 
-class CapacitorBlock(val tier: Int) : NodeBlock()  {
+class CapacitorBlock(val tier: Int) : DeviceBlock()  {
     override fun newBlockEntity(blockPos: BlockPos, blockState: BlockState): BlockEntity {
         val cap: CapacitorEntity = when(tier) {
             1 -> CapacitorEntityTier1(blockPos, blockState)
@@ -54,7 +65,7 @@ class CapacitorBlock(val tier: Int) : NodeBlock()  {
             3 -> CapacitorEntityTier3(blockPos, blockState)
             else -> throw UnsupportedOperationException("unsupported tier: $tier")
         }
-        return cap.initNetworking()
+        return cap
     }
 
     override fun useWithoutItem(
@@ -64,13 +75,12 @@ class CapacitorBlock(val tier: Int) : NodeBlock()  {
         player: Player,
         blockHitResult: BlockHitResult
     ): InteractionResult {
-        if(!level.isClientSide()) {
-            val p = player as ServerPlayer
+        if(level.isClientSide()) {
             val ent = level.getBlockEntity(blockPos)
             if(ent is CapacitorEntity) {
-                if(p.isCrouching) ent.deviceNode.giveEnergy(1)
-                val msg = PlayerChatMessage.system("energy: ${ent.deviceNode.energy} / ${ent.capacity} (${ent.deviceNode.connections.size} connections, ${ent.deviceNode.getReachable().size} connected)")
-                p.sendSystemMessage(OutgoingChatMessage.create(msg).content())
+                if(player.isCrouching) ent.deviceNode.giveEnergy(1)
+                val msg = PlayerChatMessage.system("energy: ${ent.deviceNode.energy} / ${ent.capacity} (${ent.deviceNode.connections.size} connections, ${ent.deviceNode.getReachable().size} reachable)")
+                player.sendSystemMessage(OutgoingChatMessage.create(msg).content())
             }
         }
         return InteractionResult.SUCCESS

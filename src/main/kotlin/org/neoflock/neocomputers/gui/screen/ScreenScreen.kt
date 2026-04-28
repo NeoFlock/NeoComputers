@@ -24,6 +24,8 @@ class ScreenScreen : GenericContainerScreen<ScreenMenu>{
 
     var textBuf = TextBuffer(0, 0)
 
+    override fun shouldCenterTitle(): Boolean = false
+
     override fun processScreenStatePacket(buf: FriendlyByteBuf) {
         super.processScreenStatePacket(buf)
         textBuf.decodeContents(buf)
