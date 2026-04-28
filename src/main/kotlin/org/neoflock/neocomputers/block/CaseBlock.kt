@@ -59,6 +59,8 @@ class CaseBlock() : DeviceBlock(Properties.of().sound(SoundType.METAL).lightLeve
         return level.getBlockEntity(blockPos) as CaseBlockEntity
     }
 
+    override fun isSignalSource(state: BlockState): Boolean = true
+
     override fun getSignal(
         blockState: BlockState,
         blockGetter: BlockGetter,
