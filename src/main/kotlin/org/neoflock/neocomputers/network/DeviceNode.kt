@@ -1,8 +1,9 @@
 package org.neoflock.neocomputers.network
 
-import net.minecraft.core.BlockPos
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.level.Level
+import net.minecraft.world.phys.Vec3
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.network.Networking.Message
 import org.neoflock.neocomputers.network.Networking.Visibility
@@ -155,9 +156,16 @@ open class DeviceNode(_address: UUID? = null) {
         reachableCache = null
     }
 
+    // Returns a subset of connections, for a subset of direct
+    // meant for things like drives which dont want to accidentally fuse networks
+    open fun getPreferredFew() = setOf<DeviceNode>()
+
     fun computeReachable(): Set<DeviceNode> {
         if(reachability == Visibility.NONE) {
             return setOf();
+        }
+        if(reachability == Visibility.SOME) {
+            return getPreferredFew()
         }
         if(reachability == Visibility.DIRECT) {
             return connections.minus(this);
@@ -235,9 +243,10 @@ interface ConventionalNetworkDevice {
 
 abstract class WirelessEndpoint(address: UUID?) : DeviceNode(address) {
 
-    abstract fun getRange(): Double
-    abstract fun getDimension(): Int
-    abstract fun getPosition(): BlockPos
+    abstract fun getEndpointRange(): Double
+    abstract fun getEndpointDimension(): Int
+    abstract fun getEndpointLevel(): Level
+    abstract fun getEndpointPosition(): Vec3
     // separate from process for simplicity
     abstract fun receiveWireless(message: Message, emitter: WirelessEndpoint)
 }

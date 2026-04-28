@@ -1,6 +1,7 @@
 package org.neoflock.neocomputers.network
 
 import net.minecraft.core.BlockPos
+import net.minecraft.world.level.Level
 import org.neoflock.neocomputers.entity.MachineEvent
 import java.util.UUID
 import kotlin.math.min
@@ -27,6 +28,8 @@ object Networking {
     enum class Visibility {
         // only it can see itself
         NONE,
+        // some, as determined by getPreferredFew()
+        SOME,
         // can only see its direct connections
         DIRECT,
         // Can see everything network-wide
@@ -54,26 +57,22 @@ object Networking {
         deviceNode.getReachable().forEach { if(it !in exclude) it.received(message) }
     }
 
-    fun computeRangeAllowedByHardness(src: BlockPos, dst: BlockPos): Double {
+    fun computeRangeAllowedByHardness(level: Level, src: BlockPos, dst: BlockPos): Double {
         return Double.POSITIVE_INFINITY // TODO: math
     }
 
-    fun distanceBetween(a: BlockPos, b: BlockPos): Double {
-        return sqrt((a.x - b.x + a.y - b.y + a.z - b.z).toDouble().pow(2.0));
-    }
-
     fun emitWirelessMessage(starter: WirelessEndpoint, range: Double, message: Message) {
-        val startPos = starter.getPosition();
-        val startDim = starter.getDimension();
-        val range = starter.getRange();
+        val startPos = starter.getEndpointPosition()
+        val startDim = starter.getEndpointDimension()
+        val level = starter.getEndpointLevel()
         wirelessNodes.get().forEach {
-            if(it.getDimension() != startDim) return;
-            val pos = it.getPosition();
-            val d = distanceBetween(startPos, pos);
-            var trueRange = min(it.getRange(), range);
-            trueRange = min(trueRange, computeRangeAllowedByHardness(startPos, pos));
-            if(d > trueRange) return;
-            it.receiveWireless(message, starter);
+            if(it.getEndpointDimension() != startDim) return
+            val pos = it.getEndpointPosition()
+            val d = startPos.distanceTo(pos)
+            var trueRange = min(it.getEndpointRange(), range)
+            trueRange = min(trueRange, computeRangeAllowedByHardness(level, BlockPos.containing(startPos), BlockPos.containing(pos)))
+            if(d > trueRange) return
+            it.receiveWireless(message, starter)
         }
     }
 
