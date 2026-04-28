@@ -12,6 +12,7 @@
   "block.neocomputers.capacitor3": "Large Capacitor",
   "block.neocomputers.case": "Case (Untiered)",
   "block.neocomputers.cable": "Cable",
+  "block.neocomputers.relay": "Relay",
   "item.neocomputers.eeprom0": "EEPROM (Tier 1)",
   "item.neocomputers.cpu0": "CPU (Tier 1)",
   "item.neocomputers.cpu1": "CPU (Tier 2)",

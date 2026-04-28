@@ -13,6 +13,7 @@
   "block.neocomputers.capacitor3": "Condensator Electric Mare",
   "block.neocomputers.case": "Carcasă (fără grad)",
   "block.neocomputers.cable": "Cabluri",
+  "block.neocomputers.relay": "Releu",
   "item.neocomputers.eeprom0": "Memorie Programabilă Electronic (Grad 1)",
   "item.neocomputers.cpu0": "Procesor Central (Grad 1)",
   "item.neocomputers.cpu1": "Procesor Central (Grad 2)",
