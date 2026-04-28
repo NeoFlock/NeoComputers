@@ -1,6 +1,5 @@
 package org.neoflock.neocomputers.block
 
-import net.minecraft.client.player.LocalPlayer
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.HolderLookup
@@ -8,7 +7,6 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.chat.OutgoingChatMessage
 import net.minecraft.network.chat.PlayerChatMessage
-import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
@@ -18,7 +16,6 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.BlockHitResult
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.network.DeviceNode
-import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.PowerRole
 import kotlin.math.min
 
@@ -43,9 +40,9 @@ open class CapacitorEntity(val capacity: Long, type: BlockEntityType<*>, pos: Bl
     override fun getDeviceNodes() = listOf(deviceNode)
     override fun getNodeFromSide(directionToRequester: Direction) = deviceNode
 
-    override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
-        super.loadAdditional(compoundTag, provider)
-        deviceNode.energy = min(compoundTag.getLong("energy"), deviceNode.energyCapacity)
+    override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
+        super.loadAdditional(tag, registries)
+        deviceNode.energy = min(tag.getLong("energy"), deviceNode.energyCapacity)
     }
 
     override fun saveAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {

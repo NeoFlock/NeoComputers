@@ -1,4 +1,4 @@
-package org.neoflock.neocomputers.entity;
+package org.neoflock.neocomputers.entity
 
 import net.minecraft.core.BlockPos
 import net.minecraft.locale.Language
@@ -59,7 +59,7 @@ class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
 
         override fun processCommit(buf: FriendlyByteBuf) {
             super.processCommit(buf)
-            if(Networking.changeNodeAddress(this, buf.readUUID())) createscreenstuffs()
+            if(Networking.changeNodeAddress(this, buf.readUUID())) createScreenTexture()
             isOn = buf.readBoolean()
             lastError = buf.readUtf().ifEmpty { null }
             textBuf.decodeContents(buf)
@@ -69,30 +69,30 @@ class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
 
     val textBuf = TextBuffer(50, 16)
 
-    private var cleanrenderer: () -> Unit = { }; // TODO: THIS SUCKS, FIND A BETTER WAY
+    private var cleanRenderer: () -> Unit = { } // TODO: THIS SUCKS, FIND A BETTER WAY
 
     override fun tickDevice(level: Level) {
         super.tickDevice(level)
-        cleanrenderer()
-        createscreenstuffs()
+        cleanRenderer()
+        createScreenTexture()
     }
 
     override fun setRemoved() {
         super.setRemoved()
         bound = "screen/unbound" // ensure no missing texture is displayed
-        cleanrenderer()
+        cleanRenderer()
     }
 
-    private fun createscreenstuffs() {
+    private fun createScreenTexture() {
         bound = "screen/"+deviceNode.address.toString().replace("-", "_")
         if (level!!.isClientSide) {
             if(lastError == null) {
                 if(!isOn) {
                     textBuf.fill(0, 0, textBuf.width, textBuf.height)
                 }
-                var renderer = BufferRenderer(ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, bound), textBuf)
+                val renderer = BufferRenderer(ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, bound), textBuf)
                 renderer.drawBuffer()
-                cleanrenderer = { renderer.clean() }
+                cleanRenderer = { renderer.clean() }
             } else {
                 var trueError = lastError!!
                 if(trueError.startsWith("@")) {
@@ -105,9 +105,9 @@ class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
                 val bg = 0x2B68A6
                 throwAwayBuf.fill(0, 0, throwAwayBuf.width, throwAwayBuf.height, GPUChar(' ', fg, bg))
                 throwAwayBuf.set((throwAwayBuf.width - trueError.length) / 2, throwAwayBuf.height/2, trueError, fg, bg)
-                var renderer = BufferRenderer(ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, bound), throwAwayBuf)
+                val renderer = BufferRenderer(ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, bound), throwAwayBuf)
                 renderer.drawBuffer()
-                cleanrenderer = { renderer.clean() }
+                cleanRenderer = { renderer.clean() }
             }
         }
     }
