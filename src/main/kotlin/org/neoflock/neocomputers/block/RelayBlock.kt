@@ -119,6 +119,7 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
                 sendQueuedPacket()
             }
         }
+        deviceNode.markChanged()
         val cap = computeRelayCapacity()
         while(queue.size > cap) queue.removeLast()
         active = queue.isNotEmpty()
