@@ -15,6 +15,7 @@ import org.neoflock.neocomputers.block.CapacitorEntity
 import org.neoflock.neocomputers.block.CapacitorEntityTier1
 import org.neoflock.neocomputers.block.CapacitorEntityTier2
 import org.neoflock.neocomputers.block.CapacitorEntityTier3
+import org.neoflock.neocomputers.block.RelayEntity
 import org.neoflock.neocomputers.network.PowerManager
 
 // complete fucking bullshit btw
@@ -84,6 +85,12 @@ object BlockEntities {
     val CABLE_ENTITY: RegistrySupplier<BlockEntityType<CableEntity>> = BLOCKENTITIES.register("cable") {
         BlockEntityType(
             ::CableEntity, setOf(Blocks.CABLE_BLOCK.get()), BullshitFix()
+        )
+    }
+
+    val RELAY_ENTITY: RegistrySupplier<BlockEntityType<RelayEntity>> = BLOCKENTITIES.register("relay") {
+        BlockEntityType(
+            ::RelayEntity, setOf(Blocks.RELAY_BLOCK.get()), BullshitFix()
         )
     }
 

@@ -37,7 +37,7 @@ object Networking {
     abstract class Message(val sender: DeviceNode)
 
     class ClassicPacket(sender: DeviceNode, val src: String, val dst: String, val port: Int, val data: List<Any>, val hopCount: Int) : Message(sender) {
-        fun hop() = ClassicPacket(sender, src, dst, port, data, hopCount + 1);
+        fun hop(sender: DeviceNode) = ClassicPacket(sender, src, dst, port, data, hopCount + 1);
     }
 
     // for plugins and shi

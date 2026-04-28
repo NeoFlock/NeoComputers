@@ -11,7 +11,7 @@ import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.PowerRole
 
 class SolarGeneratorBlockEntity(blockPos: BlockPos, blockState: BlockState) : SingleDeviceBlockEntity(BlockEntities.SOLARGEN_ENTITY.get(), blockPos, blockState) {
-    val energyPerTick: Long = 50
+    val energyPerTick: Long = 10
 
     override val deviceNode = object : DeviceNode() {
         override var powerRole: PowerRole = PowerRole.GENERATOR

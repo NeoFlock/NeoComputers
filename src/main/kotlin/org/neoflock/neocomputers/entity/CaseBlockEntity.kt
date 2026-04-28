@@ -11,6 +11,7 @@ import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
+import net.minecraft.world.Container
 import net.minecraft.world.ContainerHelper
 import net.minecraft.world.MenuProvider
 import net.minecraft.world.entity.player.Inventory
@@ -289,4 +290,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceB
         setRunning(false)
         super.setRemoved()
     }
+
+    override fun canPlaceItem(slot: Int, stack: ItemStack): Boolean = false
+    override fun canTakeItem(target: Container, slot: Int, stack: ItemStack): Boolean = false
 }

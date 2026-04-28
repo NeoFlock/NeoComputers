@@ -4,9 +4,8 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
-import org.neoflock.neocomputers.entity.MachineEntity
+import org.neoflock.neocomputers.entity.ComponentUser
 import org.neoflock.neocomputers.gui.widget.ComponentRoles
-import org.neoflock.neocomputers.network.Networking
 
 class TunnelCard: Item(Properties().component(DataComponents.TUNNEL_CHANNEL, "creative")), ComponentItem {
     // yes, we're counting TUNNEL as a conventional networking card
@@ -14,13 +13,13 @@ class TunnelCard: Item(Properties().component(DataComponents.TUNNEL_CHANNEL, "cr
 
     override fun getComponentTier(itemStack: ItemStack): Int = 3
 
-    override fun whenComponentPlaced(itemStack: ItemStack, machine: MachineEntity?, newRole: String) {
+    override fun whenComponentPlaced(itemStack: ItemStack, machine: ComponentUser?, newRole: String) {
         if(machine != null) ensureHasAddress(itemStack)
         super.whenComponentPlaced(itemStack, machine, newRole)
     }
 
     // TODO: Tunnel Component
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?) = null
+    override fun toComponentNode(itemStack: ItemStack, machine: ComponentUser?) = null
 
     override fun appendHoverText(
         itemStack: ItemStack,

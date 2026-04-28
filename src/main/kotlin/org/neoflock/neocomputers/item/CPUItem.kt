@@ -2,11 +2,10 @@ package org.neoflock.neocomputers.item
 
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
-import org.neoflock.neocomputers.entity.MachineEntity
+import org.neoflock.neocomputers.entity.ComponentUser
 import org.neoflock.neocomputers.gui.widget.ComponentRoles
-import org.neoflock.neocomputers.network.Networking
 
-open class CPUItem(val tier: Int, val maxComponents: Int): Item(Item.Properties()), ComponentItem {
+open class CPUItem(val tier: Int, val maxComponents: Int): Item(Item.Properties()), RelayUpgrade {
     override fun getComponentRoles(itemStack: ItemStack): Set<String> = setOf(ComponentRoles.COMPUTE)
 
     override fun getComponentTier(itemStack: ItemStack): Int = tier
@@ -15,7 +14,9 @@ open class CPUItem(val tier: Int, val maxComponents: Int): Item(Item.Properties(
 
     override fun getArchitecturesProvided(itemStack: ItemStack): Set<String> = setOf("Lua 5.3")
 
-    override fun toComponentNode(itemStack: ItemStack, machine: MachineEntity?) = null
+    override fun toComponentNode(itemStack: ItemStack, machine: ComponentUser?) = null
+
+    override fun getRelayInterval(itemStack: ItemStack) = 4 / tier
 }
 
 class CPU0: CPUItem(1, 8)

@@ -4,9 +4,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.Vec3
-import org.neoflock.neocomputers.item.ComponentItem
 import org.neoflock.neocomputers.network.DeviceNode
-import org.neoflock.neocomputers.network.Networking
 import java.time.Duration
 
 abstract class MachineEvent {
@@ -17,12 +15,16 @@ data class MachineRedstoneEvent(override val machine: MachineEntity, val side: D
 data class MachinePowerEvent(override val machine: MachineEntity, val nowRunning: Boolean): MachineEvent()
 data class MachineCrashEvent(override val machine: MachineEntity, val error: String): MachineEvent()
 
-interface MachineEntity {
+interface ComponentUser {
     // Block position of machine, for wireless tech
     fun getMachineBlockPosition(): BlockPos
     fun getMachinePrecisePosition(): Vec3 = getMachineBlockPosition().center
     fun getMachineLevel(): Level
 
+    fun getMachineNode(): DeviceNode
+}
+
+interface MachineEntity: ComponentUser {
     // Pattern can have dots (.), dashes (-) and spaces ( ).
     // Each character is duration long, and has a 50ms break.
     // For non-short ones, which are typically reserved only for hardware interactions,
@@ -39,8 +41,6 @@ interface MachineEntity {
     fun stop(): Boolean
     fun crash(error: String): Boolean
     fun getLastError(): String?
-
-    fun getMachineNode(): DeviceNode
 
     // Some metadata
     fun getMachineMemoryTotal(): Long
