@@ -25,6 +25,7 @@ import org.neoflock.neocomputers.block.SingleDeviceBlockEntity
 import org.neoflock.neocomputers.gui.menu.CaseMenu
 import org.neoflock.neocomputers.item.ComponentItem
 import org.neoflock.neocomputers.network.DeviceNode
+import org.neoflock.neocomputers.network.NNComponent
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.PowerRole
 import org.neoflock.neocomputers.sounds.ComputerRunningSoundInstance
@@ -113,6 +114,8 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceB
                 NeoComputers.LOGGER.info("machine $address got $message from ${message.sender.address}")
             }
         }
+
+        override fun getComponent() = NNComponent("computer")
     }
 
     val redstoneIn = Array(Direction.entries.size) {0}
@@ -260,7 +263,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceB
 
     override fun getMachineMemoryTotal(): Long = stacks.mapNotNull { (it.item as? ComponentItem)?.getMemoryCapacity(it) }.sum().toLong()
     override fun getMachineMemoryUsed(): Long = 0
-    override fun getMachineComponentsUsed(): Long = deviceNode.getReachable().size.toLong()
+    override fun getMachineComponentsUsed(): Long = deviceNode.getReachable().count { it.getComponent() != null }.toLong()
     override fun getMachineComponentsTotal(): Long = stacks.mapNotNull { (it.item as? ComponentItem)?.getComponentCapacity(it) }.sum().toLong()
     override fun getMachineArchitecture() = arch
     override fun getMachineArchitectures() = stacks.mapNotNull { (it.item as? ComponentItem)?.getArchitecturesProvided(it) }.flatten().toSet()

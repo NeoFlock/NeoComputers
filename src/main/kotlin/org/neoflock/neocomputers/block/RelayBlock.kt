@@ -27,6 +27,7 @@ import org.neoflock.neocomputers.gui.menu.RelayMenu
 import org.neoflock.neocomputers.item.RelayUpgrade
 import org.neoflock.neocomputers.network.ConventionalNetworkDevice
 import org.neoflock.neocomputers.network.DeviceNode
+import org.neoflock.neocomputers.network.NNComponent
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.NodeSynchronizer
 import org.neoflock.neocomputers.utils.GenericContainer
@@ -91,6 +92,8 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
             super.processCommit(buf)
             activityTickLeft = buf.readVarInt()
         }
+
+        override fun getComponent() = NNComponent("relay")
     }
 
     fun sendQueuedPacket() {

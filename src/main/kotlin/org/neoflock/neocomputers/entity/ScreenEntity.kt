@@ -11,6 +11,7 @@ import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.SingleDeviceBlockEntity
 import org.neoflock.neocomputers.gui.buffer.BufferRenderer
 import org.neoflock.neocomputers.network.DeviceNode
+import org.neoflock.neocomputers.network.NNComponent
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.utils.GPUChar
 import org.neoflock.neocomputers.utils.TextBuffer
@@ -64,6 +65,8 @@ class ScreenEntity(blockPos: BlockPos, blockState: BlockState) :
             lastError = buf.readUtf().ifEmpty { null }
             textBuf.decodeContents(buf)
         }
+
+        override fun getComponent() = NNComponent("screen")
     }
     var bound = "screen/unbound"
 

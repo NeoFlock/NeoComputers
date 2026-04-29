@@ -11,6 +11,9 @@ import org.neoflock.neocomputers.network.Networking.maxHopCount
 import java.util.UUID
 import kotlin.math.min
 
+// tmp class until JNI bindings work
+data class NNComponent(val type: String)
+
 open class DeviceNode(_address: UUID? = null) {
     val connections = HashSet<DeviceNode>()
     private var reachableCache: Set<DeviceNode>? = null
@@ -235,6 +238,8 @@ open class DeviceNode(_address: UUID? = null) {
 
     // client-side, meant to bring state forward
     open fun processCommit(buf: FriendlyByteBuf) {}
+
+    open fun getComponent(): NNComponent? = null
 }
 
 // Used by the relay
