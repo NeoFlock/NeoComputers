@@ -38,6 +38,9 @@ class CableEntity(pos: BlockPos, state: BlockState) : SingleDeviceBlockEntity(Bl
         for (dir in Direction.entries) {
             val ent = level!!.getBlockEntity(blockPos.relative(dir))
             level!!.setBlockAndUpdate(blockPos, blockState.setValue(getPropByDirection(dir), CableBlock.shouldConnect(blockPos, blockPos.relative(dir), level!!)))
+            if(ent is CableEntity) {
+                ent.connectionsAreDirty = true
+            }
         }
     }
 }

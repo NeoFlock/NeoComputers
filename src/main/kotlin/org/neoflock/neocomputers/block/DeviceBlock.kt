@@ -33,6 +33,7 @@ abstract class DeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state:
     val connetionsInDir = MutableList<DeviceNode?>(Direction.entries.size) { null }
     var alreadySetup = false
     var receivedServerState = false
+    var connectionsAreDirty = false
 
     abstract fun getDeviceNodes(): List<DeviceNode>
 
@@ -92,6 +93,10 @@ abstract class DeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state:
         // this is because MC is considered shit
         if(!alreadySetup) {
             initNetworking()
+        }
+        if(connectionsAreDirty) {
+            connectionsAreDirty = false
+            Direction.entries.forEach { handleConnectionsFor(it) }
         }
     }
 
