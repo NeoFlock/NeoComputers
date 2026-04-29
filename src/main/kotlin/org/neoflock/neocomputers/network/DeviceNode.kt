@@ -184,6 +184,8 @@ open class DeviceNode(_address: UUID? = null) {
                     pending.addAll(subnode.connections)
                 } else if(subnode.reachability == Visibility.DIRECT) {
                     working.addAll(subnode.connections)
+                } else if(subnode.reachability == Visibility.SOME) {
+                    pending.addAll(subnode.getPreferredFew())
                 }
             }
             // cannot send to itself!
