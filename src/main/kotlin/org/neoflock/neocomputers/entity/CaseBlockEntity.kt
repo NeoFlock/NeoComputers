@@ -110,7 +110,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceB
         override fun received(message: Networking.Message) {
             super.received(message)
             if(message is Networking.ClassicPacket) {
-                NeoComputers.LOGGER.info("machine $address got $message")
+                NeoComputers.LOGGER.info("machine $address got $message from ${message.sender.address}")
             }
         }
     }
@@ -177,7 +177,7 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceB
         }
         // Server-side stuff!!
         sendMachineEvent(MachinePowerEvent(this, isOn))
-        Networking.emitMessage(deviceNode, Networking.ClassicPacket(deviceNode, deviceNode.address.toString(), "fuck you", 1, listOf(), 0))
+        Networking.emitMessage(deviceNode, Networking.ClassicPacket(deviceNode, deviceNode.address.toString(), null, 1, listOf(), 0))
     }
 
     override fun start(): Boolean {
@@ -277,11 +277,11 @@ class CaseBlockEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceB
 
     override fun stillValid(player: Player): Boolean = !this.isRemoved
 
-    override fun loadAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {
-        super.loadAdditional(compoundTag, provider)
-        deviceNode.energy = min(deviceNode.energyCapacity, compoundTag.getLong("energy"))
+    override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
+        super.loadAdditional(tag, registries)
+        deviceNode.energy = min(deviceNode.energyCapacity, tag.getLong("energy"))
         //isOn = compoundTag.getBoolean("powerOn")
-        ContainerHelper.loadAllItems(compoundTag, getItems(), provider)
+        ContainerHelper.loadAllItems(tag, getItems(), registries)
     }
 
     override fun saveAdditional(compoundTag: CompoundTag, provider: HolderLookup.Provider) {

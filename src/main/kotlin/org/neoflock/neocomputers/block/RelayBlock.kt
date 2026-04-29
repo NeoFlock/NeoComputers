@@ -59,7 +59,7 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
     fun computeRelayCapacity(): Int = computeRelayBufferSize() + computeRelayQueueSize()
 
     val queue = mutableListOf<Networking.ClassicPacket>()
-    var active = false
+    var activityTickLeft = 0
     var ticksUntilQueue = 0
 
     override val deviceNode = object : DeviceNode() {
@@ -69,6 +69,8 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
             if(message.sender == this) return
             if(message is Networking.ClassicPacket && message.hopCount < 5 && queue.size < computeRelayCapacity()) {
                 queue.addLast(message)
+                activityTickLeft = 20
+                markChanged()
             }
         }
 
@@ -82,12 +84,12 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
 
         override fun writeFullStateCommit(buf: FriendlyByteBuf) {
             super.writeFullStateCommit(buf)
-            buf.writeBoolean(active)
+            buf.writeVarInt(activityTickLeft)
         }
 
         override fun processCommit(buf: FriendlyByteBuf) {
             super.processCommit(buf)
-            active = buf.readBoolean()
+            activityTickLeft = buf.readVarInt()
         }
     }
 
@@ -97,7 +99,7 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
 
         for(connection in deviceNode.connections) {
             // skip unwanted loopback
-            if(connection !in pack.sender.getReachable()) continue
+            if(connection in pack.sender.getReachable()) continue
             val hopped = pack.hop(pack.sender)
 
             if(connection is ConventionalNetworkDevice) {
@@ -111,6 +113,10 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
     override fun tickDevice(level: Level) {
         super.tickDevice(level)
         if(level !is ServerLevel) return
+        if(activityTickLeft > 0) {
+            activityTickLeft--
+            deviceNode.markChanged()
+        }
         ticksUntilQueue--
         if(ticksUntilQueue <= 0) {
             ticksUntilQueue = computeRelayInterval()
@@ -122,7 +128,6 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
         deviceNode.markChanged()
         val cap = computeRelayCapacity()
         while(queue.size > cap) queue.removeLast()
-        active = queue.isNotEmpty()
     }
 
     override fun getMachineBlockPosition() = blockPos!!
