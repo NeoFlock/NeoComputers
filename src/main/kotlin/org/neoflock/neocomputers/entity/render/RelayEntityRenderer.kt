@@ -36,7 +36,7 @@ class RelayEntityRenderer(val context: BlockEntityRendererProvider.Context?): Bl
         packedLight: Int,
         packedOverlay: Int
     ) {
-        //if(blockEntity.activityTickLeft == 0) return
+        if(blockEntity.activityTickLeft == 0) return
 
         val alpha = min((blockEntity.activityTickLeft.toFloat() * 255 / 20).toInt(), 255)
 
