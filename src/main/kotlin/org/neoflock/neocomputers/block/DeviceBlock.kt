@@ -33,7 +33,7 @@ abstract class DeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state:
     val connetionsInDir = MutableList<DeviceNode?>(Direction.entries.size) { null }
     var alreadySetup = false
     var receivedServerState = false
-    var connectionsAreDirty = false
+    var connectionsAreDirty = true
 
     abstract fun getDeviceNodes(): List<DeviceNode>
 
@@ -191,6 +191,7 @@ abstract class DeviceBlock(properties: Properties = Properties.of()): BaseBlock(
         val ent = level.getBlockEntity(pos)
         if(ent is DeviceBlockEntity) {
             ent.initNetworking()
+            ent.connectionsAreDirty = true
         }
     }
 

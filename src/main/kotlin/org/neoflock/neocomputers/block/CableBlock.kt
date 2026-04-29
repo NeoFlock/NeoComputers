@@ -152,6 +152,7 @@ class CableBlock() : DeviceBlock(Properties.of()), EntityBlock {
 //            val ent = level.getBlockEntity(blockPos.relative(dir))
 //            level.setBlockAndUpdate(blockPos, blockState.setValue(getPropByDirection(dir), (ent is NodeBlockEntity || ent is CableEntity)))
 //        }
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston)
         val diff = pos.subtract(neighborPos)
         val dir = Direction.fromDelta(diff.x, diff.y, diff.z)!!.opposite
         val ent = level.getBlockEntity(neighborPos)
