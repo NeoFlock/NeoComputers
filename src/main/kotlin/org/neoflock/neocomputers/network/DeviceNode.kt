@@ -150,9 +150,9 @@ open class DeviceNode(_address: UUID? = null) {
 
     fun getReachable(): Set<DeviceNode> {
         if(reachableCache == null) {
-            reachableCache = computeReachable();
+            reachableCache = computeReachable()
         }
-        return reachableCache!!;
+        return reachableCache!!
     }
 
     open fun invalidateReachableCache() {
@@ -165,21 +165,21 @@ open class DeviceNode(_address: UUID? = null) {
 
     fun computeReachable(): Set<DeviceNode> {
         if(reachability == Visibility.NONE) {
-            return setOf();
+            return setOf()
         }
         if(reachability == Visibility.SOME) {
             return getPreferredFew()
         }
         if(reachability == Visibility.DIRECT) {
-            return connections.minus(this);
+            return connections.minus(this)
         }
         if(reachability == Visibility.NETWORK) {
             // absolute cinema
-            val working = HashSet<DeviceNode>();
-            val pending = mutableListOf(this);
-            var iterCount = 0;
+            val working = HashSet<DeviceNode>()
+            val pending = mutableListOf(this)
+            var iterCount = 0
             while(iterCount < maxHopCount && pending.isNotEmpty()) {
-                iterCount++;
+                iterCount++
                 val subnode = pending.removeFirst()
                 if(subnode in working) continue
                 working.add(subnode)
@@ -192,20 +192,20 @@ open class DeviceNode(_address: UUID? = null) {
                 }
             }
             // cannot send to itself!
-            working.remove(this);
-            return working;
+            working.remove(this)
+            return working
         }
-        throw NotImplementedError("visibility not implemented");
+        throw NotImplementedError("visibility not implemented")
     }
 
     fun connectTo(other: DeviceNode) {
-        this.directConnectTo(other);
-        other.directConnectTo(this);
+        this.directConnectTo(other)
+        other.directConnectTo(this)
     }
 
     fun disconnectFrom(other: DeviceNode) {
-        this.directDisconnectFrom(other);
-        other.directDisconnectFrom(this);
+        this.directDisconnectFrom(other)
+        other.directDisconnectFrom(this)
     }
 
     fun directConnectTo(other: DeviceNode) {
