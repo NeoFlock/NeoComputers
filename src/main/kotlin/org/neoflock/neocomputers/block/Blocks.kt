@@ -35,6 +35,7 @@ object Blocks {
     val REDSTONEIO_BLOCK: RegistrySupplier<Block> = BaseBlock.register("redio") { RedstoneIOBlock() }
     val CABLE_BLOCK: RegistrySupplier<Block> = BaseBlock.register("cable") { CableBlock() }
     val RELAY_BLOCK: RegistrySupplier<Block> = BaseBlock.register("relay") { RelayBlock() }
+    val ROBOT_BLOCK: RegistrySupplier<Block> = BaseBlock.register("robot") { BaseBlock(BlockBehaviour.Properties.of().noOcclusion()) }
 
     fun registerBlockItems() {
         BLOCKS.forEach(Consumer { sup: RegistrySupplier<Block> ->

@@ -32,7 +32,7 @@
 //
 //// this totally could have been done with datagen, why do i do this
 //public class CableModel implements BakedModel, UnbakedModel, FabricBakedModel {
-////    private TextureAtlasSprite sprite = Minecraft
+//    private TextureAtlasSprite sprite = Minecraft
 ////    TextureAtlasSprite sprite = atlas.apply(new Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.withDefaultNamespace("block/furnace_top")));
 //
 //    private float MIN = 6/16F;

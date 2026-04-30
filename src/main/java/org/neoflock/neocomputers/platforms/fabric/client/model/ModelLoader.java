@@ -1,24 +1,23 @@
 package org.neoflock.neocomputers.platforms.fabric.client.model;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import org.neoflock.neocomputers.NeoComputers;
+import org.neoflock.neocomputers.block.model.RobotModel;
 
 public class ModelLoader implements ModelLoadingPlugin {
-    public static final ResourceLocation CABLE = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "cable");
+    public static final ResourceLocation ROBOT = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "robot");
 
     @Override
     public void onInitializeModelLoader(Context pluginContext) {
         pluginContext.modifyModelOnLoad().register((original, context) -> {
-//           final ModelResourceLocation id = context.topLevelId();
-//////           if (id != null && id.id().getNamespace().equals(NeoComputers.MODID)) NeoComputers.INSTANCE.getLOGGER().info("{} {} {}", id.id().getNamespace(), id.id().getPath(), id.id().getPath().equals(CABLE.id().getPath()));
-//           if (id != null && id.id().equals(CABLE)) {
-//////               NeoComputers.INSTANCE.getLOGGER().error("DOING CABLEEEEEEE");
-//               original.
-//           } else {
-//               return original;
-//           }
+           final ModelResourceLocation id = context.topLevelId();
+           if (id != null && id.id().equals(ROBOT)) {
+////               NeoComputers.INSTANCE.getLOGGER().error("DOING CABLEEEEEEE");
+               return new FabricModelWrapper(new RobotModel());
+           }
             return original;
         });
     }
