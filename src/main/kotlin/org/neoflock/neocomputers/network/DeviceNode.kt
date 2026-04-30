@@ -209,16 +209,18 @@ open class DeviceNode(_address: UUID? = null) {
     }
 
     fun directConnectTo(other: DeviceNode) {
-        if(other == this) return;
-        if(other in connections) return;
-        connections.add(other);
-        this.onConnect(other);
+        if(other == this) return
+        if(other in connections) return
+        connections.add(other)
+        this.onConnect(other)
+        invalidateReachableCache()
     }
 
     fun directDisconnectFrom(other: DeviceNode) {
-        if(other !in connections) return;
-        connections.remove(other);
-        this.onDisconnect(other);
+        if(other !in connections) return
+        connections.remove(other)
+        this.onDisconnect(other)
+        invalidateReachableCache()
     }
 
     // Network synchronization with the NodeSynchronizer

@@ -165,6 +165,10 @@ class CableBlock() : DeviceBlock(Properties.of()), EntityBlock {
         if (stack.item is DyeItem) {
             val dyeitem = stack.item as DyeItem
             level.setBlockAndUpdate(pos, state.setValue(COLOR, dyeitem.dyeColor))
+            val ent = level.getBlockEntity(pos)
+            if(ent is CableEntity) {
+                ent.connectionsAreDirty = true
+            }
             return ItemInteractionResult.SUCCESS
         }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION

@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.BlockHitResult
+import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.NodeSynchronizer
@@ -35,6 +36,7 @@ abstract class SingleDeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, 
 
 abstract class DeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: BlockState): BlockEntity(type, pos, state) {
     val connetionsInDir = MutableList<DeviceNode?>(Direction.entries.size) { null }
+    val nodesInDir = MutableList<DeviceNode?>(Direction.entries.size) { null }
     var alreadySetup = false
     var receivedServerState = false
     var connectionsAreDirty = true
@@ -77,11 +79,22 @@ abstract class DeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state:
 
     open fun handleConnectionsFor(direction: Direction) {
         // refuse connections on no node to reduce CPU load
-        val node = getNodeFromSide(direction) ?: return
+        val node = getNodeFromSide(direction)
+        val oldNode = nodesInDir[direction.ordinal]
+        nodesInDir[direction.ordinal] = node
         val old = connetionsInDir[direction.ordinal]
         val now = getCurrentlyConnectedNodeIn(direction)
+        if(node == null) {
+            if(old != null) oldNode?.disconnectFrom(old)
+            if(now != null) oldNode?.disconnectFrom(now)
+            return
+        }
+        if(oldNode != null && oldNode.address != node.address) {
+            if(old != null) oldNode.disconnectFrom(old)
+            if(now != null) oldNode.disconnectFrom(now)
+        }
 
-        if(old?.address != now?.address) {
+        if(old?.address != now?.address || oldNode == null) {
             if(old != null) node.disconnectFrom(old)
             if(now != null) node.connectTo(now)
         }
