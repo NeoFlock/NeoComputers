@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.ContainerHelper
+import net.minecraft.world.Containers
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.MenuProvider
 import net.minecraft.world.entity.player.Inventory
@@ -60,6 +61,7 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
     fun computeRelayCapacity(): Int = computeRelayBufferSize() + computeRelayQueueSize()
 
     val queue = mutableListOf<Networking.ClassicPacket>()
+    val justReceived = mutableListOf<Networking.ClassicPacket>()
     var activityTickLeft = 0
     var ticksUntilQueue = 0
 
@@ -68,8 +70,8 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
         override fun received(message: Networking.Message) {
             super.received(message)
             if(message.sender == this) return
-            if(message is Networking.ClassicPacket && message.hopCount < 5 && queue.size < computeRelayCapacity()) {
-                queue.addLast(message)
+            if(message is Networking.ClassicPacket && message.hopCount < 5 && (queue.size + justReceived.size) < computeRelayCapacity()) {
+                justReceived.addLast(message)
                 activityTickLeft = 20
                 markChanged()
             }
@@ -80,7 +82,7 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
             buf.writeVarInt(computeRelayInterval())
             buf.writeVarInt(computeRelayBufferSize())
             buf.writeVarInt(computeRelayQueueSize())
-            buf.writeVarInt(queue.size)
+            buf.writeVarInt(queue.size + justReceived.size)
         }
 
         override fun writeFullStateCommit(buf: FriendlyByteBuf) {
@@ -120,6 +122,10 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
             activityTickLeft--
             deviceNode.markChanged()
         }
+        queue.addAll(justReceived)
+        justReceived.clear()
+        val cap = computeRelayCapacity()
+        while(queue.size > cap) queue.removeLast()
         ticksUntilQueue--
         if(ticksUntilQueue <= 0) {
             ticksUntilQueue = computeRelayInterval()
@@ -129,8 +135,6 @@ class RelayEntity(blockPos: BlockPos, blockState: BlockState): SingleDeviceBlock
             }
         }
         deviceNode.markChanged()
-        val cap = computeRelayCapacity()
-        while(queue.size > cap) queue.removeLast()
     }
 
     override fun getMachineBlockPosition() = blockPos!!
@@ -175,5 +179,16 @@ class RelayBlock: DeviceBlock(Properties.of().sound(SoundType.METAL)) {
             NodeSynchronizer.registerPlayerScreen(player, ent.deviceNode)
         }
         return InteractionResult.SUCCESS
+    }
+
+    override fun onRemove(
+        blockState: BlockState,
+        level: Level,
+        blockPos: BlockPos,
+        blockState2: BlockState,
+        bl: Boolean
+    ) {
+        Containers.dropContentsOnDestroy(blockState, blockState2, level, blockPos)
+        super.onRemove(blockState, level, blockPos, blockState2, bl)
     }
 }
