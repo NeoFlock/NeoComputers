@@ -9,8 +9,11 @@ import net.minecraft.core.Direction
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.EntityBlock
@@ -18,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityTicker
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.BlockHitResult
 import org.neoflock.neocomputers.network.DeviceNode
 import org.neoflock.neocomputers.network.Networking
 import org.neoflock.neocomputers.network.NodeSynchronizer
@@ -73,7 +77,7 @@ abstract class DeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state:
 
     open fun handleConnectionsFor(direction: Direction) {
         // refuse connections on no node to reduce CPU load
-        val node = getNodeFromSide(direction.opposite) ?: return
+        val node = getNodeFromSide(direction) ?: return
         val old = connetionsInDir[direction.ordinal]
         val now = getCurrentlyConnectedNodeIn(direction)
 
@@ -81,12 +85,16 @@ abstract class DeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state:
             if(old != null) node.disconnectFrom(old)
             if(now != null) node.connectTo(now)
         }
+        // bullshit hack
+        if(now != null) {
+            node.connectTo(now)
+        }
         connetionsInDir[direction.ordinal] = now
     }
 
     // TODO: optimize this sometime before our test computers melt
     open fun tickDevice(level: Level) {
-        // Handles device connections and sync here
+        // Handles device connections
 
         // we do it like this because stinky MC will call stuff before world is fully setup
         // and then not notify us of neighbour changes
@@ -164,6 +172,7 @@ abstract class DeviceBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state:
         for (node in getDeviceNodes()) {
             node.markChanged()
         }
+        connectionsAreDirty = true
         receivedServerState = false
     }
 }
@@ -193,6 +202,26 @@ abstract class DeviceBlock(properties: Properties = Properties.of()): BaseBlock(
             ent.initNetworking()
             ent.connectionsAreDirty = true
         }
+    }
+
+    override fun useWithoutItem(
+        state: BlockState,
+        level: Level,
+        pos: BlockPos,
+        player: Player,
+        hitResult: BlockHitResult
+    ): InteractionResult? {
+        val ent = level.getBlockEntity(pos)
+        if(ent is DeviceBlockEntity && player is ServerPlayer) {
+            val dir = hitResult.direction
+            val node = ent.getNodeFromSide(dir)
+            if(node == null) {
+                player.sendSystemMessage(Component.literal("no node for dir $dir"))
+            } else {
+                player.sendSystemMessage(Component.literal("dir: $dir, address: ${node.address}, connections: ${node.connections.joinToString(", ")}"))
+            }
+        }
+        return super.useWithoutItem(state, level, pos, player, hitResult)
     }
 
     override fun neighborChanged(

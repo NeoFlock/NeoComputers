@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.state.BlockState
 import org.neoflock.neocomputers.block.CableBlock
 import org.neoflock.neocomputers.block.CableBlock.Companion.COLOR
 import org.neoflock.neocomputers.block.CableBlock.Companion.getPropByDirection
+import org.neoflock.neocomputers.block.DeviceBlockEntity
 import org.neoflock.neocomputers.block.SingleDeviceBlockEntity
 import org.neoflock.neocomputers.network.DeviceNode
 
@@ -38,7 +39,7 @@ class CableEntity(pos: BlockPos, state: BlockState) : SingleDeviceBlockEntity(Bl
         for (dir in Direction.entries) {
             val ent = level!!.getBlockEntity(blockPos.relative(dir))
             level!!.setBlockAndUpdate(blockPos, blockState.setValue(getPropByDirection(dir), CableBlock.shouldConnect(blockPos, blockPos.relative(dir), level!!)))
-            if(ent is CableEntity) {
+            if(ent is DeviceBlockEntity) {
                 ent.connectionsAreDirty = true
             }
         }
