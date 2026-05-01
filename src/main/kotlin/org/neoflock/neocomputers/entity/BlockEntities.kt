@@ -94,6 +94,12 @@ object BlockEntities {
         )
     }
 
+    val ROBOT_ENTITY: RegistrySupplier<BlockEntityType<RobotEntity>> = BLOCKENTITIES.register("robot") {
+        BlockEntityType(
+            ::RobotEntity, setOf(Blocks.ROBOT_BLOCK.get()), BullshitFix()
+        )
+    }
+
     fun registerPowerBlocks() {
         PowerManager.registerPowerDevice(CAPACITOR_ENTITY.get())
         PowerManager.registerPowerDevice(CAPACITOR2_ENTITY.get())

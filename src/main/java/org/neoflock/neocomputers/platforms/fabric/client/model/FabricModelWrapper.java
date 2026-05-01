@@ -49,7 +49,7 @@ public class FabricModelWrapper implements FabricBakedModel, UnbakedModel {
 
     @Override
     public @Nullable BakedModel bake(ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState state) {
-        model.bake(baker, spriteGetter, state);
+        model.bake(spriteGetter, state);
         return model;
     }
 }

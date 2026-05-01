@@ -15,6 +15,7 @@ import org.neoflock.neocomputers.block.CableBlock;
 import org.neoflock.neocomputers.entity.BlockEntities;
 import org.neoflock.neocomputers.entity.render.CaseEntityRenderer;
 import org.neoflock.neocomputers.entity.render.RelayEntityRenderer;
+import org.neoflock.neocomputers.entity.render.RobotEntityRenderer;
 import org.neoflock.neocomputers.entity.render.ScreenEntityRenderer;
 import org.neoflock.neocomputers.item.Items;
 import org.neoflock.neocomputers.platforms.fabric.client.model.ModelLoader;
@@ -26,6 +27,7 @@ public class NeoComputersFabricClient implements ClientModInitializer {
         BlockEntityRenderers.register(BlockEntities.INSTANCE.getSCREEN_ENTITY().get(), ScreenEntityRenderer::new);
         BlockEntityRenderers.register(BlockEntities.INSTANCE.getCASE_ENTITY().get(), CaseEntityRenderer::new);
         BlockEntityRenderers.register(BlockEntities.INSTANCE.getRELAY_ENTITY().get(), RelayEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntities.INSTANCE.getROBOT_ENTITY().get(), RobotEntityRenderer::new);
 
         ColorProviderRegistry.BLOCK.register((state, world, pos, index) -> {
             if (index == 0) {

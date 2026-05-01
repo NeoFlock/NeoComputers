@@ -8,14 +8,13 @@ import org.neoflock.neocomputers.NeoComputers;
 import org.neoflock.neocomputers.block.model.RobotModel;
 
 public class ModelLoader implements ModelLoadingPlugin {
-    public static final ResourceLocation ROBOT = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "robot");
+    public static final ResourceLocation ROBOT = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "block/robot");
 
     @Override
     public void onInitializeModelLoader(Context pluginContext) {
         pluginContext.modifyModelOnLoad().register((original, context) -> {
            final ModelResourceLocation id = context.topLevelId();
            if (id != null && id.id().equals(ROBOT)) {
-////               NeoComputers.INSTANCE.getLOGGER().error("DOING CABLEEEEEEE");
                return new FabricModelWrapper(new RobotModel());
            }
             return original;

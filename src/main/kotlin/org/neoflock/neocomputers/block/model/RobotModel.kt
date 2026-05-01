@@ -23,14 +23,11 @@ class RobotModel() : AbstractModel() {
     val size = 0.4f
     val l = 0.5f-size;
     val h = 0.5f+size;
-    override fun getDependencies(): Collection<ResourceLocation?> = listOf()
-
-    override fun resolveParents(resolver: Function<ResourceLocation?, UnbakedModel?>) { }
 
     //    override fun bake(atlas: (ResourceLocation) -> TextureAtlasSprite) {
-    override fun bake(baker: ModelBaker, atlas: Function<Material?, TextureAtlasSprite?>, state: ModelState): BakedModel? {
+    override fun bake(atlas: Function<Material?, TextureAtlasSprite?>, state: ModelState): BakedModel {
         NeoComputers.LOGGER.info("baking")
-        val sprite = atlas.apply(Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "block/robot")))!!
+        val sprite = atlas.apply(Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "robot")))!!
         var verts: SchizoConsumer = SchizoConsumer()
 
         // top pyramid, enjoy reading this schizo mess

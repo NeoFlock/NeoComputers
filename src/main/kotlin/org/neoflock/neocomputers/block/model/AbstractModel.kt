@@ -19,7 +19,7 @@ import net.minecraft.util.RandomSource
 import net.minecraft.world.level.block.state.BlockState
 import java.util.function.Function
 
-abstract class AbstractModel : BakedModel, UnbakedModel {
+abstract class AbstractModel : BakedModel {
     val atlas = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS)
     var baker: ModelBaker? = null;
     var mesh: Map<Direction, List<BakedQuad>> = mapOf(
@@ -47,7 +47,7 @@ abstract class AbstractModel : BakedModel, UnbakedModel {
         return atlas.apply(particle())
     }
 
-//    abstract fun bake(atlas: (ResourceLocation) -> TextureAtlasSprite)
+    abstract fun bake(atlas: Function<Material?, TextureAtlasSprite?>, state: ModelState): BakedModel
 
     abstract fun particle(): ResourceLocation
 
