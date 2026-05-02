@@ -30,8 +30,6 @@ object Networking {
         NONE,
         // some, as determined by getPreferredFew()
         SOME,
-        // can only see its direct connections
-        DIRECT,
         // Can see everything network-wide
         NETWORK,
     }

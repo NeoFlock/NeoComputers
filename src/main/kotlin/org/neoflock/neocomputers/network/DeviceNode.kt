@@ -40,6 +40,10 @@ open class DeviceNode(_address: UUID? = null) {
         return maximum
     }
 
+    val boundNetworks = HashSet<LocalNetwork>()
+    // meaningless except visibility is NETWORK, where there can only be one
+    fun getPrimaryNetwork() = boundNetworks.firstOrNull()
+
     fun getChargerNodes(): Set<DeviceNode> = getReachable().filter { it.powerRole != PowerRole.CONSUMER }.toSet()
     fun totalEnergyInConnections(): Long = getChargerNodes().fold(0) { acc, node -> acc + node.energy }
     fun maxEnergyInConnections(): Long = getChargerNodes().fold(0) { acc, node -> acc + node.energyCapacity }
@@ -170,9 +174,6 @@ open class DeviceNode(_address: UUID? = null) {
         if(reachability == Visibility.SOME) {
             return getPreferredFew()
         }
-        if(reachability == Visibility.DIRECT) {
-            return connections.minus(this)
-        }
         if(reachability == Visibility.NETWORK) {
             // absolute cinema
             val working = HashSet<DeviceNode>()
@@ -185,8 +186,6 @@ open class DeviceNode(_address: UUID? = null) {
                 working.add(subnode)
                 if(subnode.reachability == Visibility.NETWORK) {
                     pending.addAll(subnode.connections)
-                } else if(subnode.reachability == Visibility.DIRECT) {
-                    working.addAll(subnode.connections)
                 } else if(subnode.reachability == Visibility.SOME) {
                     pending.addAll(subnode.getPreferredFew())
                 }
