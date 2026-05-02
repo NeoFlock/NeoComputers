@@ -24,10 +24,10 @@ class RobotModel() : AbstractModel() {
     val l = 0.5f-size;
     val h = 0.5f+size;
 
-    //    override fun bake(atlas: (ResourceLocation) -> TextureAtlasSprite) {
-    override fun bake(atlas: Function<Material?, TextureAtlasSprite?>, state: ModelState): BakedModel {
-        NeoComputers.LOGGER.info("baking")
-        val sprite = atlas.apply(Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "robot")))!!
+    override fun bake(atlas: (Material) -> TextureAtlasSprite) {
+//    override fun bake(atlas: Function<Material?, TextureAtlasSprite?>, state: ModelState): BakedModel {
+        val sprite = atlas(Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "block/robot")))
+//        val sprite = atlas.apply(Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "robot")))!!
         var verts: SchizoConsumer = SchizoConsumer()
 
         // top pyramid, enjoy reading this schizo mess
@@ -56,7 +56,6 @@ class RobotModel() : AbstractModel() {
 
 
         this.mesh = verts.mesh
-        return this
     }
 
     fun bakeTri(verts: SchizoConsumer, normal: Direction, sprite: TextureAtlasSprite, lx: Float,  lz: Float, rx: Float,  rz: Float, dy: Float, uy: Float, lu: Float, lv: Float, ru: Float, rv: Float) {

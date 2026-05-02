@@ -17,6 +17,7 @@ import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.RandomSource
 import net.minecraft.world.level.block.state.BlockState
+import org.neoflock.neocomputers.NeoComputers
 import java.util.function.Function
 
 abstract class AbstractModel : BakedModel {
@@ -43,11 +44,16 @@ abstract class AbstractModel : BakedModel {
         }
     }
 
+    fun _bake(spriteGetter: Function<Material, TextureAtlasSprite>): BakedModel {
+        bake { r: Material -> spriteGetter.apply(r) }
+        return this
+    }
+
     override fun getParticleIcon(): TextureAtlasSprite? {
         return atlas.apply(particle())
     }
 
-    abstract fun bake(atlas: Function<Material?, TextureAtlasSprite?>, state: ModelState): BakedModel
+    abstract fun bake(atlas: (Material) -> TextureAtlasSprite)
 
     abstract fun particle(): ResourceLocation
 
@@ -81,6 +87,8 @@ class SchizoConsumer {
         if (sprite == null || normal == null) {
             throw Error("quad not started")
         }
+
+//        NeoComputers.LOGGER.info("{} {} -> {} {} ", u, v, sprite!!.getU(u), sprite!!.getV(v))
         vertices.add(x.toBits())
         vertices.add(y.toBits())
         vertices.add(z.toBits())

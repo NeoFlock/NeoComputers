@@ -1,8 +1,10 @@
 package org.neoflock.neocomputers.platforms.fabric.client.model;
 
+import kotlin.jvm.functions.Function1;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.impl.renderer.VanillaModelEncoder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
@@ -49,7 +51,9 @@ public class FabricModelWrapper implements FabricBakedModel, UnbakedModel {
 
     @Override
     public @Nullable BakedModel bake(ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState state) {
-        model.bake(spriteGetter, state);
+//        NeoComputers.INSTANCE.getLOGGER().info("{}", spriteGetter.apply(new Material()));
+        model._bake(spriteGetter);
+//        model.bake((Function1<? super ResourceLocation, ? extends TextureAtlasSprite>) Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS));
         return model;
     }
 }

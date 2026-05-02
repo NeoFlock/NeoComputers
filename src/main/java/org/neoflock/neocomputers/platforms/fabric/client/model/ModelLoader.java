@@ -8,7 +8,7 @@ import org.neoflock.neocomputers.NeoComputers;
 import org.neoflock.neocomputers.block.model.RobotModel;
 
 public class ModelLoader implements ModelLoadingPlugin {
-    public static final ResourceLocation ROBOT = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "block/robot");
+    public static final ResourceLocation ROBOT = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "robot");
 
     @Override
     public void onInitializeModelLoader(Context pluginContext) {
