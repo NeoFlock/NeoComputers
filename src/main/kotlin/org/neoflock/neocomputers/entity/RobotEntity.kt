@@ -8,6 +8,7 @@ import org.neoflock.neocomputers.NeoComputers
 
 class RobotEntity(pos: BlockPos, state: BlockState) : BlockEntity(BlockEntities.ROBOT_ENTITY.get(), pos, state,) {
     val body: ModelPart? = null
+    val name = "Diddyx" //TODO: names
 
     init {
         NeoComputers.LOGGER.info("yooo")
