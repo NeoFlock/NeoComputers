@@ -1,29 +1,12 @@
 # Networking
 > All that is left is optimization
 
-## ERADICATE DIRECT
+## Copy the networking optimizations of OC
+> https://github.com/MightyPirates/OpenComputers/blob/master-MC1.7.10/src/main/scala/li/cil/oc/server/network/Network.scala
 
-We only need NONE, SOME and NETWORK.
-
-## Optimize compute and memory
-> OC does this too
-
-Optimize both *time* and *memory* using graph theory.
-
-### Requirements
-
-It obviously must be fast and memory-efficient, and respect the current semantics.
-
-The current idea is to make NETWORK style nodes the only ones with a cache,
-and to instead appoint a connection that is also a NETWORK node, if any, as
-the one source of truth, or steal the source. This means only one node
-in a local network gets to actually compute the graph layout.
-Complications can happen when merges happen, the idea is to pick one source of truth
-then as well.
-
-Also, `onNodeAdded` and `onNodeRemoved` should also be called when a reachable node is added/removed.
-This is for perf. We only care about nodes being added/removed then.
-This can be done by broadcasting to all of their *connections*, to circumvent the NONE/SOME/NETWORK asymmetric reachability sets.
+We should implement this, as it not only makes behavior match better, but also optimizes
+it a lot. We do need to replace the NEIGHBORS rule with implementing the SOME visibility.
+A direct port is not needed, just taking heavy inspiration from OC.
 
 ## Optimize power balancing
 
