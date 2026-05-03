@@ -22,10 +22,10 @@ class RackEntityRenderer(val context: BlockEntityRendererProvider.Context) : Blo
         poseStack.pushPose()
         poseStack.translate(1/16f, 11/16f, 1/16f)
 
-        val render_slot = 2 // this is purely temporary type shit like true alpha shit, anyway it go to 0-3, change and test it if you want
+        val render_slot = (ent.level!!.dayTime/40)%4 // this is purely temporary type shit like true alpha shit, anyway it go to 0-3, change and test it if you want
         poseStack.translate(0f, (render_slot)*-3/16f, 0f)
         val server = object : RackItem {}
-        server.render(source, poseStack, packedLight) // who knows atp
+        server.render(source, poseStack, packedLight, 2f+(3*render_slot)) // who knows atp
         poseStack.popPose()
     }
 }

@@ -22,8 +22,8 @@ public class NeoComputersFabricClient implements ClientModInitializer {
     public void onInitializeClient() {
         ModelLoadingPlugin.register(new ModelLoader());
         BlockEntityRenderers.register(BlockEntities.INSTANCE.getSCREEN_ENTITY().get(), ScreenEntityRenderer::new); // TODO: put this in common
-//        BlockEntityRenderers.register(BlockEntities.INSTANCE.getCASE_ENTITY().get(), CaseEntityRenderer::new);
-//        BlockEntityRenderers.register(BlockEntities.INSTANCE.getRELAY_ENTITY().get(), RelayEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntities.INSTANCE.getCASE_ENTITY().get(), CaseEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntities.INSTANCE.getRELAY_ENTITY().get(), RelayEntityRenderer::new);
         BlockEntityRenderers.register(BlockEntities.INSTANCE.getROBOT_ENTITY().get(), RobotEntityRenderer::new);
         BlockEntityRenderers.register(BlockEntities.INSTANCE.getRACK_ENTITY().get(), RackEntityRenderer::new);
 

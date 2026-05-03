@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 import net.minecraft.resources.ResourceLocation
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.RelayEntity
+import java.util.Timer
 import kotlin.math.min
 
 class RelayEntityRenderer(val context: BlockEntityRendererProvider.Context?): BlockEntityRenderer<RelayEntity> {

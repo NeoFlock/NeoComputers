@@ -1,6 +1,7 @@
 package org.neoflock.neocomputers.block
 
 import net.minecraft.core.BlockPos
+import net.minecraft.network.chat.Component
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.BlockGetter
@@ -13,6 +14,7 @@ import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.Shapes
 import net.minecraft.world.phys.shapes.VoxelShape
+import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.entity.RackEntity
 
@@ -38,12 +40,19 @@ class RackBlock : BaseBlock(Properties.of().noOcclusion()), EntityBlock {
 //    }
 
 
-//    override fun useWithoutItem(
-//        state: BlockState,
-//        level: Levesl,
-//        pos: BlockPos,
-//        player: Player,
-//        hitResult: BlockHitResult
-//    ): InteractionResult? {
-//        return super.useWithoutItem(state, level, pos, player, hitResult)
+    override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult? {
+        val res = hitResult.location
+        if(res.x == 18.0) { // TODO: handle rotation
+            NeoComputers.LOGGER.info("{} > {} > {}, {} > {} > {}", pos.z+15/16f, res.z, pos.z+1/16f, pos.y+14/16f, res.y, pos.y+2/16f)
+            if (pos.z + 15 / 16f > res.z && res.z > pos.z + 1 / 16f && pos.y + 14 / 16f > res.y && res.y > pos.y + 2 / 16f) {
+                var rack = 0
+                rack += if(res.y < pos.y+5/16f) 1 else 0
+                rack += if(res.y < pos.y+8/16f) 1 else 0
+                rack += if(res.y < pos.y+12/16f) 1 else 0
+
+                player.sendSystemMessage(Component.literal(String.format("Hit server #%d", rack))) // TODO: call some RackItem method
+            }
+        }
+        return super.useWithoutItem(state, level, pos, player, hitResult)
+    }
 }
