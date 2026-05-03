@@ -17,7 +17,6 @@ import org.neoflock.neocomputers.entity.RobotEntity
 class RobotBlock : BaseBlock(Properties.of().noOcclusion()), EntityBlock { // todo: node stuff
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {
         NeoComputers.LOGGER.info("block entity created..")
-        Blocks.CHEST
         return RobotEntity(pos, state)
     }
 

@@ -100,6 +100,12 @@ object BlockEntities {
         )
     }
 
+    val RACK_ENTITY: RegistrySupplier<BlockEntityType<RackEntity>> = BLOCKENTITIES.register("rack") {
+        BlockEntityType(
+            ::RackEntity, setOf(Blocks.RACK_BLOCK.get()), BullshitFix()
+        )
+    }
+
     fun registerPowerBlocks() {
         PowerManager.registerPowerDevice(CAPACITOR_ENTITY.get())
         PowerManager.registerPowerDevice(CAPACITOR2_ENTITY.get())

@@ -36,6 +36,7 @@ object Blocks {
     val CABLE_BLOCK: RegistrySupplier<Block> = BaseBlock.register("cable") { CableBlock() }
     val RELAY_BLOCK: RegistrySupplier<Block> = BaseBlock.register("relay") { RelayBlock() }
     val ROBOT_BLOCK: RegistrySupplier<Block> = BaseBlock.register("robot") { RobotBlock() }
+    val RACK_BLOCK: RegistrySupplier<Block> = BaseBlock.register("rack") { RackBlock() }
 
     fun registerBlockItems() {
         BLOCKS.forEach(Consumer { sup: RegistrySupplier<Block> ->
