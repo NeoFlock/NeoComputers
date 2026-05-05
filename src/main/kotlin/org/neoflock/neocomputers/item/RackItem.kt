@@ -28,6 +28,8 @@ interface RackItem {
     val FRONT_TEX: ResourceLocation
         get() = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/block/rack_server.png")
 
+    fun render_lights(source: MultiBufferSource, stack: PoseStack, light: Int)
+
     fun render(source: MultiBufferSource, stack: PoseStack, light: Int, v_offset: Float = 2f) {
         val pose = stack.last()
 
@@ -51,6 +53,10 @@ interface RackItem {
         buffer.addVertex(pose, 14/16f, 0/16f, 0/16f).setUv(15/16f, (v_offset+3)/16f).setColor(1f, 1f, 1f, 1f).setLight(light).setNormal(pose, 1f, 0f, 0f).setOverlay(OverlayTexture.NO_OVERLAY)
         buffer.addVertex(pose, 14/16f, 3/16f, 0/16f).setUv(15/16f, v_offset/16f).setColor(1f, 1f, 1f, 1f).setLight(light).setNormal(pose, 1f, 0f, 0f).setOverlay(OverlayTexture.NO_OVERLAY)
 
+        stack.pushPose()
+        stack.translate((14/16f)+0.001F, 0f, 0f)
+        render_lights(source, stack, light)
+        stack.popPose()
     }
 
 }

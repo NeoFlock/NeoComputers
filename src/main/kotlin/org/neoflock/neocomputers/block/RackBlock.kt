@@ -1,8 +1,11 @@
 package org.neoflock.neocomputers.block
 
+import dev.architectury.registry.menu.MenuRegistry
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionResult
+import net.minecraft.world.MenuProvider
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
@@ -42,6 +45,7 @@ class RackBlock : BaseBlock(Properties.of().noOcclusion()), EntityBlock {
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult? {
         val res = hitResult.location
+        val ent = level.getBlockEntity(pos, BlockEntities.RACK_ENTITY.get()).get()
         if(res.x == 18.0) { // TODO: handle rotation
             NeoComputers.LOGGER.info("{} > {} > {}, {} > {} > {}", pos.z+15/16f, res.z, pos.z+1/16f, pos.y+14/16f, res.y, pos.y+2/16f)
             if (pos.z + 15 / 16f > res.z && res.z > pos.z + 1 / 16f && pos.y + 14 / 16f > res.y && res.y > pos.y + 2 / 16f) {
@@ -51,8 +55,11 @@ class RackBlock : BaseBlock(Properties.of().noOcclusion()), EntityBlock {
                 rack += if(res.y < pos.y+12/16f) 1 else 0
 
                 player.sendSystemMessage(Component.literal(String.format("Hit server #%d", rack))) // TODO: call some RackItem method
+                return InteractionResult.SUCCESS
             }
         }
-        return super.useWithoutItem(state, level, pos, player, hitResult)
+
+        if (!level.isClientSide) MenuRegistry.openMenu(player as ServerPlayer, ent)
+        return InteractionResult.SUCCESS
     }
 }

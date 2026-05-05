@@ -24,7 +24,7 @@ class RackEntityRenderer(val context: BlockEntityRendererProvider.Context) : Blo
 
         val render_slot = (ent.level!!.dayTime/40)%4 // this is purely temporary type shit like true alpha shit, anyway it go to 0-3, change and test it if you want
         poseStack.translate(0f, (render_slot)*-3/16f, 0f)
-        val server = object : RackItem {}
+        val server = object : RackItem { override fun render_lights(source: MultiBufferSource, stack: PoseStack, light: Int) { } }
         server.render(source, poseStack, packedLight, 2f+(3*render_slot)) // who knows atp
         poseStack.popPose()
     }

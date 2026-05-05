@@ -55,14 +55,10 @@ class RelaySlot(container: Container, slot: Int, x: Int, y: Int, val role: Strin
     override fun getMaxStackSize() = 1
     override fun getMaxStackSize(stack: ItemStack) = 1
 
-    override fun draw(graphics: GuiGraphics, relX: Int, relY: Int, mouseX: Int, mouseY: Int) {
-        super.draw(graphics, relX, relY, mouseX, mouseY)
+    override fun draw(graphics: GuiGraphics,  mouseX: Int, mouseY: Int) {
+        super.draw(graphics,  mouseX, mouseY)
         if(!hasItem()) {
-            RenderSystem.enableBlend()
-            RenderSystem.setShaderTexture(0, ComponentRoles.getTextureFor(role))
-            RenderSystem.setShader { GameRenderer.getPositionTexShader() }
-            drawQuad(relX + x - 1, relY + y - 1, 18, 18, 0F, 0F, 15F, 15F)
-            RenderSystem.disableBlend()
+            drawQuad(graphics, ComponentRoles.getTextureFor(role), x-1, y-1, 18, 18, 0f, 0f, 15f, 15f)
         }
     }
 }

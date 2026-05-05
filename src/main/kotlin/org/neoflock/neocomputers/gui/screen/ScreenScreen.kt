@@ -46,6 +46,8 @@ class ScreenScreen : GenericContainerScreen<ScreenMenu>{
         }
     }
 
+    override fun renderLabels(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int) { }
+
 //    override fun onClose() {
 //        super.onClose()
 //        renderer.

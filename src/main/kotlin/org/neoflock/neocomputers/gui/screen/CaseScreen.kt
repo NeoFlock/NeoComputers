@@ -26,6 +26,7 @@ class CaseScreen : GenericContainerScreen<CaseMenu> {
 
     private var btn: ImagerButton? = null
     override fun shouldCenterTitle(): Boolean = false
+//    override fun findMenuTexture(): ResourceLocation = BG
 
     var isOn = false
     var lastError: String? = null
@@ -77,7 +78,7 @@ class CaseScreen : GenericContainerScreen<CaseMenu> {
 
     constructor(abstractContainerMenu: CaseMenu, inventory: Inventory, component: Component) : super(abstractContainerMenu, inventory, component) {
         btn = ImagerButton(
-            15, 15,
+            71, 33,
             18, 18,
             ButtonSprites(BTN, 18, 18, 36, 36)
         ) {
@@ -85,17 +86,11 @@ class CaseScreen : GenericContainerScreen<CaseMenu> {
             buf.writeByte(if(isOn) 0x02 else 0x01)
             NodeSynchronizer.sendScreenInteraction(buf)
         }
-//        addRenderableWidget(btn!!)
-    }
-    override fun renderBg(guiGraphics: GuiGraphics, f: Float, i: Int, j: Int) {
-        super.renderBg(guiGraphics, f, i ,j)
-        val relX = (this.width - this.imageWidth) / 2
-        val relY = (this.height - this.imageHeight) / 2
 
-        btn!!.x = relX+70
-        btn!!.y = relY+33
-        btn!!.render(guiGraphics, i, j, f) // minecraft SUCKSSS
-        guiGraphics.blit(PCB, relX, relY, 0, 0, this.imageWidth, this.imageHeight)
+        addWidget(btn!!)
+    }
+    override fun renderbg(guiGraphics: GuiGraphics, f: Float, i: Int, j: Int) {
+        guiGraphics.blit(PCB, 0, 0, 0, 0, this.imageWidth, this.imageHeight) // WE'RE FREE
     }
 
     override fun renderCustomOverlay(graphics: GuiGraphics, mouseX: Int, mouseY: Int, blend: Float) {
@@ -103,15 +98,6 @@ class CaseScreen : GenericContainerScreen<CaseMenu> {
         if(btn!!.isHovered) {
             graphics.renderTooltip(this.font, computeButtonTooltip(), Optional.empty<TooltipComponent>(), mouseX, mouseY)
         }
-    }
-
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean { // todo: make a better widget system than mojang, practically not even using the fact it's a widget atp
-        if (button == 0 && btn!!.isHovered) {
-            btn!!.playDownSound(Minecraft.getInstance().soundManager)
-            btn!!.onClick(mouseX, mouseY)
-            return true
-        }
-        return super.mouseClicked(mouseX, mouseY, button)
     }
 
 }

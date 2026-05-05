@@ -1,9 +1,15 @@
 package org.neoflock.neocomputers.utils
 
 // based off the ImplementedContainer of https://docs.fabricmc.net/develop/blocks/block-containers
+import com.mojang.blaze3d.vertex.DefaultVertexFormat
+import com.mojang.blaze3d.vertex.VertexFormat
 import dev.architectury.registry.menu.MenuRegistry
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
+import net.minecraft.client.renderer.RenderStateShard
+import net.minecraft.client.renderer.RenderStateShard.ShaderStateShard
+import net.minecraft.client.renderer.RenderType
 import net.minecraft.world.Container;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf
@@ -68,7 +74,7 @@ abstract class GenericContainerMenu(menuType: MenuType<*>, id: Int, var containe
         // Based off the code in ChestMenu
         for (i in 0..2) {
             for (j in 0..8) {
-                this.addSlot(Slot(inventory, j + i * 9 + 9, 8 + j * 18, 84 + i * 18))
+                this.addSlot(Slot(inventory, j + i * 9 + 9, 8 + j * 18, y + i * 18))
             }
         }
 
@@ -128,6 +134,15 @@ abstract class GenericContainerScreen<T: GenericContainerMenu>(menu: T, inventor
     val imageY: Int
         get() = (height - imageHeight) / 2
 
+    var widgets = mutableListOf<AbstractWidget>()
+
+    val RENDER_TYPE = { r: ResourceLocation ->
+        RenderType.create("nc_gui_bg", DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS, RenderType.TRANSIENT_BUFFER_SIZE, RenderType.CompositeState.builder()
+            .setShaderState(ShaderStateShard.POSITION_TEX_SHADER)
+            .setTextureState(RenderStateShard.TextureStateShard(r, false, false))
+            .createCompositeState(false))
+    }
+
     override fun init() {
         super.init()
 
@@ -138,24 +153,48 @@ abstract class GenericContainerScreen<T: GenericContainerMenu>(menu: T, inventor
         val menuTex = findMenuTexture()
         val cx = (width - imageWidth) / 2
         val cy = (height - imageHeight) / 2
+        guiGraphics.pose().pushPose()
+        guiGraphics.pose().translate(cx.toFloat(), cy.toFloat(), 0f)
 
-        guiGraphics.blit(menuTex, imageX, imageY, 0, 0, imageWidth, imageHeight)
+        guiGraphics.blit(menuTex, 0, 0, 0, 0, imageWidth, imageHeight)
+        renderbg(guiGraphics, f, i-cx, j-cy)
+
+        for (widget in widgets) {
+            widget.render(guiGraphics, i-cx, j-cy, f)
+        }
 
         for (slot in menu.slots) {
             if (slot is DynamicSlot) {
-                // NeoComputers.LOGGER.info("slot")
-                slot.draw(guiGraphics, cx, cy, i, j)
+                slot.draw(guiGraphics, i, j)
             }
         }
+
+        guiGraphics.pose().popPose()
     }
 
-    open fun renderCustomOverlay(graphics: GuiGraphics, mouseX: Int, mouseY: Int, blend: Float) {
+    open fun renderbg(guiGraphics: GuiGraphics, partialTick: Float, mouseX: Int, mouseY: Int) {}
 
-    }
+    open fun renderCustomOverlay(graphics: GuiGraphics, mouseX: Int, mouseY: Int, blend: Float) { }
 
     override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, something: Float) {
         super.render(graphics, mouseX, mouseY, something)
-        renderCustomOverlay(graphics, mouseX, mouseY, something)
+
+        graphics.pose().pushPose()
+        graphics.pose().translate(imageX.toFloat(), imageY.toFloat(), 0f)
+        renderCustomOverlay(graphics, mouseX-imageX, mouseY-imageY, something)
+        graphics.pose().popPose() // not even doing this because it's better anymore, im just doing this because i dont want to change it back
+
         if(shouldRenderTooltip()) super.renderTooltip(graphics, mouseX, mouseY)
+    }
+
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        for (widget in widgets) {
+            if (widget.mouseClicked(mouseX-imageX, mouseY-imageY, button)) return true
+        }
+        return false
+    }
+
+    fun addWidget(widget: AbstractWidget) {
+        widgets.add(widget)
     }
 }

@@ -12,6 +12,7 @@ import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.gui.menu.ScreenMenu
 import org.neoflock.neocomputers.gui.screen.CaseScreen
 import org.neoflock.neocomputers.gui.screen.CombustionGeneratorScreen
+import org.neoflock.neocomputers.gui.screen.RackScreen
 import org.neoflock.neocomputers.gui.screen.RelayScreen
 import org.neoflock.neocomputers.gui.screen.ScreenScreen
 
@@ -22,11 +23,13 @@ object Menus {
     val COMBUSTGEN_MENU: RegistrySupplier<MenuType<CombustionGeneratorMenu>> = MENUS.register("combustgen_menu") { MenuType(::CombustionGeneratorMenu, FeatureFlagSet.of() ) }
     val CASE_MENU: RegistrySupplier<MenuType<CaseMenu>> = MENUS.register("case_menu") { MenuType(::CaseMenu, FeatureFlagSet.of() )}
     val RELAY_MENU: RegistrySupplier<MenuType<RelayMenu>> = MENUS.register("relay_menu") { MenuType(::RelayMenu, FeatureFlagSet.of() )}
+    val RACK_MENU: RegistrySupplier<MenuType<RackMenu>> = MENUS.register("rack_menu") { MenuType(::RackMenu, FeatureFlagSet.of() )}
 
     fun registerScreens() {
         MenuScreens.register(Menus.COMBUSTGEN_MENU.get()) { m: CombustionGeneratorMenu, u, comp ->CombustionGeneratorScreen(m,u,comp)}
         MenuScreens.register(Menus.SCREEN_MENU.get(), ::ScreenScreen)
         MenuScreens.register(Menus.CASE_MENU.get(), ::CaseScreen)
         MenuScreens.register(Menus.RELAY_MENU.get(), ::RelayScreen)
+        MenuScreens.register(Menus.RACK_MENU.get(), ::RackScreen)
     }
 }

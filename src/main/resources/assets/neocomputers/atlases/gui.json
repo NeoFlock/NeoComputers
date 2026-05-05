@@ -1,0 +1,8 @@
+{
+  "sources": [
+    {
+      "type": "single",
+      "source": "neocomputers:block/relay_top"
+    }
+  ]
+}
