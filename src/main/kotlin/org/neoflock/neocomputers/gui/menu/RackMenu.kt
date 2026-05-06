@@ -6,11 +6,15 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.Tesselator
 import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.blaze3d.vertex.VertexFormat
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.events.GuiEventListener
 import net.minecraft.client.renderer.GameRenderer
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.RenderStateShard
 import net.minecraft.client.renderer.RenderType
+import net.minecraft.client.resources.sounds.SimpleSoundInstance
+import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.Container
 import net.minecraft.world.SimpleContainer
 import net.minecraft.world.entity.player.Inventory
@@ -19,21 +23,24 @@ import org.neoflock.neocomputers.gui.widget.ComponentRoles
 import org.neoflock.neocomputers.gui.widget.DynamicSlot
 import org.neoflock.neocomputers.utils.GenericContainerMenu
 
-class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(container, slot, x, y) {
+class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(container, slot, x, y), GuiEventListener {
     // i hate that i made this, my regret is immeasurable
     val MAIN_COLOURS = listOf(0xff8382d8.toInt(), 0xff75bdc1.toInt(), 0xffc8ca5f.toInt(), 0xffdb7d75.toInt(), 0xff7ec95f.toInt())
     val DARK_COLOURS = listOf(0xff6a6ab0.toInt(), 0xff60999d.toInt(), 0xffa2a44e.toInt(), 0xffb36660.toInt(), 0xff67a34e.toInt())
     val LIGHT_COLOURS = listOf(0xffdcdcf0.toInt(), 0xffdcdcf0.toInt(), 0xffececd4.toInt(), 0xfff0dbd9.toInt(), 0xffdbecd4.toInt())
 
+    val secondaries = 2
+    val selected = mutableListOf(-1, -1, -1)
+
     override fun draw(graphics: GuiGraphics, mouseX: Int, mouseY: Int) {
         super.draw(graphics, mouseX, mouseY)
         if (!hasItem()) { drawQuad(graphics, ComponentRoles.getTextureFor("rack"), x, y, 16, 16, 0f, 0f, 15f, 15f); return; }
             // TODO: make this do stuff based on the item inputted
-        drawConnection(graphics, item.count%5)
-        drawConnection(graphics, (item.count+1)%5, 0)
-        drawConnection(graphics, (item.count+2)%5, 1)
+        for (i in 0..<selected.size) {
+            if (selected[i] > -1) drawConnection(graphics, selected[i], i-1)
+        }
 
-        drawEndpoints(graphics, 2)
+        drawEndpoints(graphics, mouseX, mouseY,  secondaries)
     }
 
     fun drawConnection(guiGraphics: GuiGraphics, side: Int, sec: Int = -1) {
@@ -51,7 +58,7 @@ class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(co
     }
 
 
-    fun drawEndpoints(guiGraphics: GuiGraphics, sec: Int =0) {
+    fun drawEndpoints(guiGraphics: GuiGraphics, mx: Int, my: Int, sec: Int =0) {
         val bufferSource = guiGraphics.bufferSource()
         val buffer = bufferSource.getBuffer(RenderType.gui())
 
@@ -64,6 +71,11 @@ class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(co
             drawColor(guiGraphics, buffer, 24+(11*i), 1, 0xff333333.toInt(), 1, 3)
             drawColor(guiGraphics, buffer, 25+(11*i), 1, MAIN_COLOURS[i], 3, 3)
             drawColor(guiGraphics, buffer, 28+(11*i), 1, 0xffffffff.toInt(), 1, 3)
+
+            // highlight
+            if (mx >= x+25+(11*i) && mx <= x+27+(11*i) && my >= y+1 && my <= y+3) {
+                drawColor(guiGraphics, buffer, 25+(11*i), 1,  0x80FFFFFF.toInt(), 3, 3)
+            }
         }
 
         // secondary endpoints
@@ -77,6 +89,11 @@ class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(co
                 drawColor(guiGraphics, buffer, 24+(11*j), 6+(4*i), 0xff333333.toInt(), 1, 2)
                 drawColor(guiGraphics, buffer, 25+(11*j), 6+(4*i), MAIN_COLOURS[j], 3, 2)
                 drawColor(guiGraphics, buffer, 28+(11*j), 6+(4*i), 0xffffffff.toInt(), 1, 2)
+
+                // highlight
+                if (mx >= x+25+(11*j) && mx <= x+27+(11*j) && my >= y+6+(4*i) && my <= y+8+(4*i)) {
+                    drawColor(guiGraphics, buffer, 25+(11*j), 6+(4*i),  0x80FFFFFF.toInt(), 3, 2)
+                }
             }
         }
     }
@@ -90,6 +107,39 @@ class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(co
         buffer.addVertex(pose,  x+_x+width.toFloat(), y+_y.toFloat(), 2f).setColor(col)
         buffer.addVertex(pose, x+_x.toFloat(), y+_y.toFloat(), 2f).setColor(col)
         buffer.addVertex(pose, x+_x.toFloat(), y+_y+height.toFloat(), 2f).setColor(col)
+    }
+
+    fun clickynoise() {
+        val handler = Minecraft.getInstance().soundManager
+        handler.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+    }
+
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        for (i in 0..4) { // main line
+            if (mouseX >= x+25+(11*i) && mouseX <= x+28+(11*i) && mouseY >= y+1 && mouseY <= y+4 && button == 0) {
+                selected[0] = if (selected[0] != i) i else -1
+                clickynoise()
+                return true
+            }
+        }
+
+        for (i in 0..<secondaries) { // secondary lines
+            for (j in 0..4) {
+                if (mouseX >= x+25+(11*j) && mouseX <= x+28+(11*j) && mouseY >= y+6+(4*i) && mouseY <= y+8+(4*i) && button == 0) {
+                    selected[i+1] = if (selected[i+1] != j) j else -1
+                    clickynoise()
+                    return true
+                }
+            }
+        }
+        return super.mouseClicked(mouseX, mouseY, button)
+    }
+
+    override fun setFocused(focused: Boolean) {
+    }
+
+    override fun isFocused(): Boolean {
+        return false
     }
 }
 

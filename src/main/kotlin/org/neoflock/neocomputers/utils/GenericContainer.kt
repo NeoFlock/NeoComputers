@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexFormat
 import dev.architectury.registry.menu.MenuRegistry
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.AbstractWidget
+import net.minecraft.client.gui.components.events.GuiEventListener
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.client.renderer.RenderStateShard
 import net.minecraft.client.renderer.RenderStateShard.ShaderStateShard
@@ -165,7 +166,7 @@ abstract class GenericContainerScreen<T: GenericContainerMenu>(menu: T, inventor
 
         for (slot in menu.slots) {
             if (slot is DynamicSlot) {
-                slot.draw(guiGraphics, i, j)
+                slot.draw(guiGraphics, i-cx, j-cy)
             }
         }
 
@@ -188,9 +189,16 @@ abstract class GenericContainerScreen<T: GenericContainerMenu>(menu: T, inventor
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        super.mouseClicked(mouseX, mouseY, button)
         for (widget in widgets) {
             if (widget.mouseClicked(mouseX-imageX, mouseY-imageY, button)) return true
         }
+        for (slot in menu.slots) { // TODO: this solution sucks, make this less ass
+            if (slot is GuiEventListener) {
+                slot.mouseClicked(mouseX-imageX, mouseY-imageY, button)
+            }
+        }
+
         return false
     }
 
