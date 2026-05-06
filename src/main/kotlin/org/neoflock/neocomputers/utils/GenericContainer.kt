@@ -193,11 +193,6 @@ abstract class GenericContainerScreen<T: GenericContainerMenu>(menu: T, inventor
         for (widget in widgets) {
             if (widget.mouseClicked(mouseX-imageX, mouseY-imageY, button)) return true
         }
-        for (slot in menu.slots) { // TODO: this solution sucks, make this less ass
-            if (slot is GuiEventListener) {
-                slot.mouseClicked(mouseX-imageX, mouseY-imageY, button)
-            }
-        }
 
         return false
     }

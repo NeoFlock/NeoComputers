@@ -20,6 +20,7 @@ import net.minecraft.world.phys.shapes.VoxelShape
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.entity.RackEntity
+import org.neoflock.neocomputers.network.NodeSynchronizer
 
 class RackBlock : BaseBlock(Properties.of().noOcclusion()), EntityBlock {
     override fun newBlockEntity(
@@ -59,7 +60,10 @@ class RackBlock : BaseBlock(Properties.of().noOcclusion()), EntityBlock {
             }
         }
 
-        if (!level.isClientSide) MenuRegistry.openMenu(player as ServerPlayer, ent)
+        if (!level.isClientSide) {
+            MenuRegistry.openMenu(player as ServerPlayer, ent)
+            NodeSynchronizer.registerPlayerScreen(player as ServerPlayer, ent.node)
+        }
         return InteractionResult.SUCCESS
     }
 }

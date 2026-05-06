@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.Tesselator
 import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.blaze3d.vertex.VertexFormat
+import io.netty.buffer.Unpooled
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.events.GuiEventListener
@@ -14,6 +15,7 @@ import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.RenderStateShard
 import net.minecraft.client.renderer.RenderType
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
+import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.Container
 import net.minecraft.world.SimpleContainer
@@ -29,8 +31,8 @@ class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(co
     val DARK_COLOURS = listOf(0xff6a6ab0.toInt(), 0xff60999d.toInt(), 0xffa2a44e.toInt(), 0xffb36660.toInt(), 0xff67a34e.toInt())
     val LIGHT_COLOURS = listOf(0xffdcdcf0.toInt(), 0xffdcdcf0.toInt(), 0xffececd4.toInt(), 0xfff0dbd9.toInt(), 0xffdbecd4.toInt())
 
-    val secondaries = 2
-    val selected = mutableListOf(-1, -1, -1)
+    val secondaries = 3
+    val selected = mutableListOf(-1, -1, -1, -1)
 
     override fun draw(graphics: GuiGraphics, mouseX: Int, mouseY: Int) {
         super.draw(graphics, mouseX, mouseY)
@@ -96,6 +98,22 @@ class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(co
                 }
             }
         }
+    }
+    fun processStateScreenPacket(buf: FriendlyByteBuf) {
+        selected[0] = buf.readInt()
+        selected[1] = buf.readInt()
+        selected[2] = buf.readInt()
+        selected[3] = buf.readInt()
+    }
+
+    fun encode(buf: FriendlyByteBuf) {
+//        val buf = FriendlyByteBuf(Unpooled.buffer())
+        buf.writeInt(containerSlot)
+        buf.writeInt(selected[0])
+        buf.writeInt(selected[1])
+        buf.writeInt(selected[2])
+        buf.writeInt(selected[3])
+
     }
 
     // TODO: replace with graphics.fill (cant be assed atm)
