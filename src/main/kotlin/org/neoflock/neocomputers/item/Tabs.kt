@@ -55,6 +55,7 @@ object Tabs {
                 output.accept(ItemStack(Items.REDIO1.get()))
 
                 output.accept(ItemStack(Items.EE0.get()))
+                output.accept(ItemStack(Items.SERVER0.get()))
 
                 // Criminal black magic to put LuaBIOS EEPROM in the tabs
                 do {

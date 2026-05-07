@@ -22,7 +22,7 @@ import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.entity.RackEntity
 import org.neoflock.neocomputers.network.NodeSynchronizer
 
-class RackBlock : BaseBlock(Properties.of().noOcclusion()), EntityBlock {
+class RackBlock : DeviceBlock(Properties.of().noOcclusion()), EntityBlock {
     override fun newBlockEntity(
         pos: BlockPos,
         state: BlockState
@@ -61,7 +61,7 @@ class RackBlock : BaseBlock(Properties.of().noOcclusion()), EntityBlock {
         }
 
         if (!level.isClientSide) {
-            MenuRegistry.openMenu(player as ServerPlayer, ent)
+            MenuRegistry.openExtendedMenu(player as ServerPlayer, ent)
             NodeSynchronizer.registerPlayerScreen(player as ServerPlayer, ent.node)
         }
         return InteractionResult.SUCCESS

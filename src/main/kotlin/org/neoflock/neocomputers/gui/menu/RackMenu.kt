@@ -20,9 +20,13 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.Container
 import net.minecraft.world.SimpleContainer
 import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
 import org.neoflock.neocomputers.NeoComputers
+import org.neoflock.neocomputers.entity.RackEntity
 import org.neoflock.neocomputers.gui.widget.ComponentRoles
 import org.neoflock.neocomputers.gui.widget.DynamicSlot
+import org.neoflock.neocomputers.item.ComponentItem
 import org.neoflock.neocomputers.utils.GenericContainerMenu
 
 class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(container, slot, x, y), GuiEventListener {
@@ -31,18 +35,35 @@ class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(co
     val DARK_COLOURS = listOf(0xff6a6ab0.toInt(), 0xff60999d.toInt(), 0xffa2a44e.toInt(), 0xffb36660.toInt(), 0xff67a34e.toInt())
     val LIGHT_COLOURS = listOf(0xffdcdcf0.toInt(), 0xffdcdcf0.toInt(), 0xffececd4.toInt(), 0xfff0dbd9.toInt(), 0xffdbecd4.toInt())
 
-    val secondaries = 3
-    val selected = mutableListOf(-1, -1, -1, -1)
+    val secondaries = 2 // TODO: make this actually change depending on how many network cards
+
+    // todo: kotlin getters and setters
+    fun getSelected(i: Int): Int = (container as RackEntity).conns[containerSlot*4+i]
+    fun setSelected(i: Int, v: Int) { (container as RackEntity).conns[containerSlot*4+i] = v }
 
     override fun draw(graphics: GuiGraphics, mouseX: Int, mouseY: Int) {
         super.draw(graphics, mouseX, mouseY)
         if (!hasItem()) { drawQuad(graphics, ComponentRoles.getTextureFor("rack"), x, y, 16, 16, 0f, 0f, 15f, 15f); return; }
-            // TODO: make this do stuff based on the item inputted
-        for (i in 0..<selected.size) {
-            if (selected[i] > -1) drawConnection(graphics, selected[i], i-1)
+        for (i in 0..secondaries) {
+            if (getSelected(i) > -1) drawConnection(graphics, getSelected(i), i-1)
         }
 
         drawEndpoints(graphics, mouseX, mouseY,  secondaries)
+    }
+
+    override fun mayPlace(stack: ItemStack): Boolean {
+        if (stack.item !is ComponentItem) return false
+        return (stack.item as ComponentItem).getComponentRoles(stack).contains(ComponentRoles.RACK_MOUNTABLE)
+    }
+
+    override fun onTake(player: Player, stack: ItemStack) {
+        super.onTake(player, stack)
+        setSelected(0, -1)
+        setSelected(1, -1)
+        setSelected(2, -1)
+        setSelected(3, -1)
+        (container as RackEntity).setChanged()
+
     }
 
     fun drawConnection(guiGraphics: GuiGraphics, side: Int, sec: Int = -1) {
@@ -99,20 +120,13 @@ class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(co
             }
         }
     }
-    fun processStateScreenPacket(buf: FriendlyByteBuf) {
-        selected[0] = buf.readInt()
-        selected[1] = buf.readInt()
-        selected[2] = buf.readInt()
-        selected[3] = buf.readInt()
-    }
 
-    fun encode(buf: FriendlyByteBuf) {
-//        val buf = FriendlyByteBuf(Unpooled.buffer())
+    fun encode(buf: FriendlyByteBuf) { // client -> server
         buf.writeInt(containerSlot)
-        buf.writeInt(selected[0])
-        buf.writeInt(selected[1])
-        buf.writeInt(selected[2])
-        buf.writeInt(selected[3])
+        buf.writeInt(getSelected(0))
+        buf.writeInt(getSelected(1))
+        buf.writeInt(getSelected(2))
+        buf.writeInt(getSelected(3))
 
     }
 
@@ -135,7 +149,8 @@ class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(co
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         for (i in 0..4) { // main line
             if (mouseX >= x+25+(11*i) && mouseX <= x+28+(11*i) && mouseY >= y+1 && mouseY <= y+4 && button == 0) {
-                selected[0] = if (selected[0] != i) i else -1
+                setSelected(0, if (getSelected(0) != i) i else -1)
+                (container as RackEntity).setChanged()
                 clickynoise()
                 return true
             }
@@ -144,7 +159,8 @@ class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(co
         for (i in 0..<secondaries) { // secondary lines
             for (j in 0..4) {
                 if (mouseX >= x+25+(11*j) && mouseX <= x+28+(11*j) && mouseY >= y+6+(4*i) && mouseY <= y+8+(4*i) && button == 0) {
-                    selected[i+1] = if (selected[i+1] != j) j else -1
+                    setSelected(i+1, if (getSelected(i+1) != j) j else -1)
+                    (container as RackEntity).setChanged()
                     clickynoise()
                     return true
                 }
@@ -163,11 +179,12 @@ class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(co
 
 class RackMenu : GenericContainerMenu {
 
-    constructor(i: Int, inv: Inventory) : this(i, inv, SimpleContainer(4))
+    constructor(i: Int, inv: Inventory, buf: FriendlyByteBuf) : this(i, inv, (inv.player.level().getBlockEntity(buf.readBlockPos()) as RackEntity))
 
     constructor(i: Int, inv: Inventory, container: Container) : super(Menus.RACK_MENU.get(), i, container) {
         for(i in 0..3) {
-            this.addSlot(RackSlot(container,  i, 20, 23+i*20))
+            val slot = RackSlot(container,  i, 20, 23+i*20)
+            this.addSlot(slot)
         }
         this.addInventorySlots(inv, 8, 128)
     }

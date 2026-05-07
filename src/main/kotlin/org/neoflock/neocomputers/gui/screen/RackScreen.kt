@@ -12,6 +12,7 @@ import net.minecraft.network.chat.MutableComponent
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Inventory
 import org.neoflock.neocomputers.NeoComputers
+import org.neoflock.neocomputers.entity.RackEntity
 import org.neoflock.neocomputers.gui.menu.RackMenu
 import org.neoflock.neocomputers.gui.menu.RackSlot
 import org.neoflock.neocomputers.gui.widget.IconTextButton
@@ -23,9 +24,9 @@ class RackScreen(menu: RackMenu, inventory: Inventory, component: Component) : G
     override fun findMenuTexture(): ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/rack.png")
     val RELAY = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/relay.png")
 
-    var relay_mode = false // TODO: tie this to the menu or entity or whatever
+    var relay_mode = if (menu.container is RackEntity) (menu.container as RackEntity).relayMode else false
 
-    val relaybtn = IconTextButton(100, 96, "Disabled", RELAY, width = 64) {
+    val relaybtn = IconTextButton(100, 96, if(relay_mode) "Enabled" else "Disabled", RELAY, width = 64) {
         if (relay_mode){
             it.message = Component.literal("Disabled")
             relay_mode = false
@@ -38,7 +39,6 @@ class RackScreen(menu: RackMenu, inventory: Inventory, component: Component) : G
         buffer.writeBoolean(relay_mode)
         (menu.slots[0] as RackSlot).encode(buffer)
         NodeSynchronizer.sendScreenInteraction(buffer)
-        NeoComputers.LOGGER.info("sent")
     }
     init {
         this.imageWidth = 175
@@ -71,20 +71,20 @@ class RackScreen(menu: RackMenu, inventory: Inventory, component: Component) : G
         graphics.drawString(font, "Left", x, y+44, 0x404040, false)
     }
 
-    override fun processScreenStatePacket(buf: FriendlyByteBuf) {
-        super.processScreenStatePacket(buf)
-//        NeoComputers.LOGGER.info("porcessing screen state packet...")
-        relay_mode = buf.readBoolean()
-        if (relay_mode) relaybtn.message = Component.literal("Enabled")
-        else relaybtn.message = Component.literal("Disabled")
-
-        for (slot in menu.slots) {
-            if (slot is RackSlot) {
-                slot.processStateScreenPacket(buf)
-            }
-        }
-
-    }
+//    override fun processScreenStatePacket(buf: FriendlyByteBuf) {
+//        super.processScreenStatePacket(buf)
+////        NeoComputers.LOGGER.info("porcessing screen state packet...")
+////        relay_mode = buf.readBoolean()
+////        if (relay_mode) relaybtn.message = Component.literal("Enabled")
+////        else relaybtn.message = Component.literal("Disabled")
+////
+////        for (slot in menu.slots) {
+////            if (slot is RackSlot) {
+////                slot.processStateScreenPacket(buf)
+////            }
+////        }
+//
+//    }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (super.mouseClicked(mouseX, mouseY, button)) return true

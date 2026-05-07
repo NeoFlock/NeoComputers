@@ -56,6 +56,9 @@ object NeoComputers {
         EnvExecutor.runInEnv(Env.CLIENT) {{
             ClientLifecycleEvent.CLIENT_SETUP.register {
                 Menus.registerScreens()
+                Networking.allNodes.remove()
+                Networking.wirelessNodes.remove()
+                Networking.channels.remove()
             }
             ClientLifecycleEvent.CLIENT_STARTED.register {
                 FontProvider.load(ResourceLocation.fromNamespaceAndPath(MODID, "font/unscii.hex"))
@@ -76,12 +79,6 @@ object NeoComputers {
         }
 
         LifecycleEvent.SERVER_STARTING.register {
-            Networking.allNodes.remove()
-            Networking.wirelessNodes.remove()
-            Networking.channels.remove()
-        }
-
-        ClientLifecycleEvent.CLIENT_SETUP.register {
             Networking.allNodes.remove()
             Networking.wirelessNodes.remove()
             Networking.channels.remove()

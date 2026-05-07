@@ -23,7 +23,8 @@ object Menus {
     val COMBUSTGEN_MENU: RegistrySupplier<MenuType<CombustionGeneratorMenu>> = MENUS.register("combustgen_menu") { MenuType(::CombustionGeneratorMenu, FeatureFlagSet.of() ) }
     val CASE_MENU: RegistrySupplier<MenuType<CaseMenu>> = MENUS.register("case_menu") { MenuType(::CaseMenu, FeatureFlagSet.of() )}
     val RELAY_MENU: RegistrySupplier<MenuType<RelayMenu>> = MENUS.register("relay_menu") { MenuType(::RelayMenu, FeatureFlagSet.of() )}
-    val RACK_MENU: RegistrySupplier<MenuType<RackMenu>> = MENUS.register("rack_menu") { MenuType(::RackMenu, FeatureFlagSet.of() )}
+    val RACK_MENU: RegistrySupplier<MenuType<RackMenu>> = MENUS.register("rack_menu") { MenuRegistry.ofExtended(::RackMenu) }
+//    val RACK_MENU: RegistrySupplier<MenuType<RackMenu>> = MENUS.register("rack_menu") { MenuType(::RackMenu, FeatureFlagSet.of() )}
 
     fun registerScreens() {
         MenuScreens.register(Menus.COMBUSTGEN_MENU.get()) { m: CombustionGeneratorMenu, u, comp ->CombustionGeneratorScreen(m,u,comp)}

@@ -34,7 +34,7 @@ import org.neoflock.neocomputers.entity.MachineEntity
 import org.neoflock.neocomputers.network.NodeSynchronizer
 import org.neoflock.neocomputers.sounds.Sounds
 
-class CaseBlock() : DeviceBlock(Properties.of().sound(SoundType.METAL).lightLevel(CaseBlock::getLuminance)) { // placeholder stuff
+class CaseBlock() : DeviceBlock(Properties.of().sound(SoundType.METAL).lightLevel(CaseBlock::getLuminance).noOcclusion()) { // placeholder stuff
     companion object {
         val FACING: EnumProperty<Direction> = EnumProperty.create<Direction>("facing", Direction::class.java)
         val COMPUTER_RUNNING = BooleanProperty.create("running")!!

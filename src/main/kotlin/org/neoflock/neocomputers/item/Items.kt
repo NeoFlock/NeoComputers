@@ -46,4 +46,6 @@ object Items {
 
     val REDIO0 = ITEMS.register("redio0") { RedstoneCard0() }
     val REDIO1 = ITEMS.register("redio1") { RedstoneCard1() }
+
+    val SERVER0 = ITEMS.register("server0") { ServerItem() }
 }
