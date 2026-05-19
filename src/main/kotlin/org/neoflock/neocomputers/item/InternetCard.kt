@@ -10,7 +10,7 @@ import org.neoflock.neocomputers.gui.widget.ComponentRoles
 class InternetCard: Item(Item.Properties()), ComponentItem {
     override fun getComponentRoles(itemStack: ItemStack): Set<String> = setOf(ComponentRoles.CARD, ComponentRoles.INET)
 
-    override fun getComponentTier(itemStack: ItemStack): Int = 1
+    override fun getComponentTier(itemStack: ItemStack): Int = 2
 
     override fun whenComponentPlaced(itemStack: ItemStack, machine: ComponentUser?, newRole: String) {
         if(machine != null) ensureHasAddress(itemStack)
