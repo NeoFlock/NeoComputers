@@ -1,6 +1,10 @@
 # Networking
 > All that is left is optimization
 
+## Mergeable device nodes
+
+For optimization of screen grouping and cables, we should add a system that allows merging nodes
+
 ## Copy the networking optimizations of OC
 > https://github.com/MightyPirates/OpenComputers/blob/master-MC1.7.10/src/main/scala/li/cil/oc/server/network/Network.scala
 
