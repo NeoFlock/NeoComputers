@@ -13,8 +13,10 @@ import org.neoflock.neocomputers.gui.menu.Menus
 import dev.architectury.utils.Env
 import dev.architectury.utils.EnvExecutor
 import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers
 import net.minecraft.server.level.ServerPlayer
 import org.neoflock.neocomputers.block.DeviceBlockEntity
+import org.neoflock.neocomputers.entity.render.EntityRenderers
 import org.neoflock.neocomputers.gui.render.ScreenRenderer
 import org.neoflock.neocomputers.gui.widget.ComponentRoles
 import org.neoflock.neocomputers.item.Items
@@ -59,6 +61,7 @@ object NeoComputers {
                 Networking.allNodes.remove()
                 Networking.wirelessNodes.remove()
                 Networking.channels.remove()
+                EntityRenderers.registerBlockEntityRenderers()
             }
             ClientLifecycleEvent.CLIENT_STARTED.register {
                 FontProvider.load(ResourceLocation.fromNamespaceAndPath(MODID, "font/unscii.hex"))

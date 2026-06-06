@@ -31,6 +31,7 @@ import org.neoflock.neocomputers.utils.GenericContainerMenu
 
 class RackSlot(container: Container, slot: Int, x: Int, y: Int) : DynamicSlot(container, slot, x, y), GuiEventListener {
     // i hate that i made this, my regret is immeasurable
+    // i genuinely cant help myself
     val MAIN_COLOURS = listOf(0xff8382d8.toInt(), 0xff75bdc1.toInt(), 0xffc8ca5f.toInt(), 0xffdb7d75.toInt(), 0xff7ec95f.toInt())
     val DARK_COLOURS = listOf(0xff6a6ab0.toInt(), 0xff60999d.toInt(), 0xffa2a44e.toInt(), 0xffb36660.toInt(), 0xff67a34e.toInt())
     val LIGHT_COLOURS = listOf(0xffdcdcf0.toInt(), 0xffdcdcf0.toInt(), 0xffececd4.toInt(), 0xfff0dbd9.toInt(), 0xffdbecd4.toInt())

@@ -20,6 +20,8 @@ import net.minecraft.client.renderer.block.ModelBlockRenderer
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
+import net.minecraft.client.renderer.blockentity.ChestRenderer
+import net.minecraft.client.renderer.entity.EntityRenderer
 import net.minecraft.client.renderer.entity.LivingEntityRenderer
 import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.client.renderer.texture.TextureAtlas
@@ -33,6 +35,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.RandomSource
 import net.minecraft.world.item.DyeColor
+import net.minecraft.world.level.block.entity.ChestBlockEntity
 import net.minecraft.world.phys.Vec3
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.block.model.RobotModel
@@ -51,6 +54,7 @@ class RobotEntityRenderer(val context: BlockEntityRendererProvider.Context) : Bl
         CompositeState.builder()
             .setShaderState(RenderStateShard.ShaderStateShard { GameRenderer.getPositionTexColorShader() })
             .setTransparencyState(RenderStateShard.ADDITIVE_TRANSPARENCY)
+            .setCullState(RenderStateShard.CullStateShard.NO_CULL)
             .setTextureState(RenderStateShard.TextureStateShard(ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/block/robot.png"), false, false))
             .createCompositeState(false))
 
@@ -70,9 +74,10 @@ class RobotEntityRenderer(val context: BlockEntityRendererProvider.Context) : Bl
 
 
         // TODO: crafting table and chest little models
+//        EntityRenderer
 
-        poseStack.popPose()
         renderTag(ent, Component.literal(ent.name), poseStack, bufferSource, packedLight, partialTick)
+        poseStack.popPose()
     }
 
     // offset is 0-15
@@ -106,16 +111,18 @@ class RobotEntityRenderer(val context: BlockEntityRendererProvider.Context) : Bl
 
         stack.pushPose()
         stack.translate(vec.x, vec.y, vec.z)
-//        stack.mulPose(context.entityRenderer.cameraOrientation())
+        stack.mulPose(context.entityRenderer.cameraOrientation())
         stack.scale(0.025F, -0.025F, 0.025F)
         val opacity = Minecraft.getInstance().options.getBackgroundOpacity(0.25F)
         val alpha: Int = (opacity * 255.0f).toInt() shl 24
 //        val alpha = 255
         val halfwidth = (-context.font.width(name)) / 2;
-        RenderSystem.disableDepthTest()
-        context.font.drawInBatch(name, halfwidth.toFloat(), 2f, 0xFFFFFF, false, stack.last().pose(), source, Font.DisplayMode.SEE_THROUGH, alpha, light)
+//        RenderSystem.enableDepthTest()
+//        RenderSystem.enableBlend()
+//        RenderSystem.depthMask(true)
 
-        RenderSystem.enableDepthTest()
+        context.font.drawInBatch(name, halfwidth.toFloat(), 2f, 0xFFFFFF, false, stack.last().pose(), source, Font.DisplayMode.SEE_THROUGH, alpha, light)
+        (source as MultiBufferSource.BufferSource).endBatch()
         stack.popPose()
     }
 

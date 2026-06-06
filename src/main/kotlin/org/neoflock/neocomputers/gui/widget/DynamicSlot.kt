@@ -17,7 +17,7 @@ import net.minecraft.world.Container
 import net.minecraft.world.inventory.Slot
 import org.neoflock.neocomputers.NeoComputers
 
-open class DynamicSlot(container: Container, slot: Int, x: Int, y: Int) : Slot(container, slot, x, y) {
+open class DynamicSlot(container: Container, slot: Int, x: Int, y: Int, var active: Boolean = true) : Slot(container, slot, x, y) {
 
     val BACKGROUND: ResourceLocation = ResourceLocation.fromNamespaceAndPath(NeoComputers.MODID, "textures/gui/slots/slot.png")
     val RENDER_TYPE = { r: ResourceLocation ->
@@ -41,5 +41,7 @@ open class DynamicSlot(container: Container, slot: Int, x: Int, y: Int) : Slot(c
         builder.addVertex(pose, (x+width).toFloat(), y.toFloat(), 1f).setUv(u2/15F, v1/15F)
         builder.addVertex(pose, x.toFloat(), y.toFloat(), 1f).setUv(u1/15F,v1/15F)
     }
+
+    override fun isActive() = active
 
 }

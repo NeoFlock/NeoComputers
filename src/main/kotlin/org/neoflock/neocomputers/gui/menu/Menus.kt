@@ -10,6 +10,7 @@ import net.minecraft.world.flag.FeatureFlags
 import net.minecraft.world.inventory.MenuType
 import org.neoflock.neocomputers.NeoComputers
 import org.neoflock.neocomputers.gui.menu.ScreenMenu
+import org.neoflock.neocomputers.gui.screen.AssemblerScreen
 import org.neoflock.neocomputers.gui.screen.CaseScreen
 import org.neoflock.neocomputers.gui.screen.CombustionGeneratorScreen
 import org.neoflock.neocomputers.gui.screen.RackScreen
@@ -24,6 +25,7 @@ object Menus {
     val CASE_MENU: RegistrySupplier<MenuType<CaseMenu>> = MENUS.register("case_menu") { MenuType(::CaseMenu, FeatureFlagSet.of() )}
     val RELAY_MENU: RegistrySupplier<MenuType<RelayMenu>> = MENUS.register("relay_menu") { MenuType(::RelayMenu, FeatureFlagSet.of() )}
     val RACK_MENU: RegistrySupplier<MenuType<RackMenu>> = MENUS.register("rack_menu") { MenuRegistry.ofExtended(::RackMenu) }
+    val ASSEMBLER_MENU: RegistrySupplier<MenuType<AssemblerMenu>> = MENUS.register("assembler_menu") { MenuType(::AssemblerMenu, FeatureFlagSet.of() )}
 //    val RACK_MENU: RegistrySupplier<MenuType<RackMenu>> = MENUS.register("rack_menu") { MenuType(::RackMenu, FeatureFlagSet.of() )}
 
     fun registerScreens() {
@@ -32,5 +34,6 @@ object Menus {
         MenuScreens.register(Menus.CASE_MENU.get(), ::CaseScreen)
         MenuScreens.register(Menus.RELAY_MENU.get(), ::RelayScreen)
         MenuScreens.register(Menus.RACK_MENU.get(), ::RackScreen)
+        MenuScreens.register(Menus.ASSEMBLER_MENU.get(), ::AssemblerScreen)
     }
 }

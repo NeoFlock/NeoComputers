@@ -3,36 +3,23 @@ package org.neoflock.neocomputers.block;
 import dev.architectury.registry.menu.MenuRegistry
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.sounds.SoundEvent
-import net.minecraft.sounds.SoundEvents
-import net.minecraft.sounds.SoundSource
-import net.minecraft.util.RandomSource
 import net.minecraft.world.Containers
 import net.minecraft.world.InteractionResult
-import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
-import net.minecraft.world.level.block.EntityBlock
-import net.minecraft.world.level.block.FurnaceBlock
 import net.minecraft.world.level.block.SoundType
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.StateDefinition
 import net.minecraft.world.level.block.state.properties.BooleanProperty
 import net.minecraft.world.level.block.state.properties.EnumProperty
 import net.minecraft.world.phys.BlockHitResult
-import org.neoflock.neocomputers.NeoComputers
-import org.neoflock.neocomputers.block.CombustionGeneratorBlock.Companion.COMBUSTGEN_ACTIVE
 import org.neoflock.neocomputers.entity.BlockEntities
 import org.neoflock.neocomputers.entity.CaseBlockEntity
-import org.neoflock.neocomputers.entity.MachineEntity
 import org.neoflock.neocomputers.network.NodeSynchronizer
-import org.neoflock.neocomputers.sounds.Sounds
 
 class CaseBlock() : DeviceBlock(Properties.of().sound(SoundType.METAL).lightLevel(CaseBlock::getLuminance).noOcclusion()) { // placeholder stuff
     companion object {
@@ -71,7 +58,7 @@ class CaseBlock() : DeviceBlock(Properties.of().sound(SoundType.METAL).lightLeve
     }
 
     override fun onPlace(
-        blockState: BlockState,
+        state: BlockState,
         level: Level,
         blockPos: BlockPos,
         blockState2: BlockState,
@@ -81,7 +68,7 @@ class CaseBlock() : DeviceBlock(Properties.of().sound(SoundType.METAL).lightLeve
             level.updateNeighborsAt(blockPos, this)
             getMachine(level, blockPos).refetchAllRedstone()
         }
-        super.onPlace(blockState, level, blockPos, blockState2, bl)
+        super.onPlace(state, level, blockPos, blockState2, bl)
     }
 
     override fun getStateForPlacement(context: BlockPlaceContext): BlockState? {

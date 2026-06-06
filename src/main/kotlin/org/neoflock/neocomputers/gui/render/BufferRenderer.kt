@@ -13,7 +13,7 @@ import java.io.File
 import kotlin.experimental.and
 import kotlin.experimental.xor
 
-class BufferRenderer(private var id: ResourceLocation, private var buffer: TextBuffer) { // TODO: NN buffer
+class BufferRenderer(private var id: ResourceLocation, var buffer: TextBuffer) { // TODO: NN buffer
     val CHARW = 8
     val CHARH = 16
 

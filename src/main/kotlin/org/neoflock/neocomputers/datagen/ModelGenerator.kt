@@ -16,7 +16,7 @@ class ModelGenerator(output: FabricDataOutput) : FabricModelProvider(output) {
     }
 
     override fun generateItemModels(itemModelGenerator: ItemModelGenerators) {
-        itemModelGenerator.generateFlatItem(Items.SERVER0.get(), ModelTemplates.FLAT_ITEM)
+//        itemModelGenerator.generateFlatItem(Items.SERVER0.get(), ModelTemplates.FLAT_ITEM)
     }
 
 }

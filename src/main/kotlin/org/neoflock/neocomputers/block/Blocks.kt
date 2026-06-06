@@ -5,6 +5,7 @@ import dev.architectury.registry.registries.DeferredRegister
 import dev.architectury.registry.registries.Registrar
 import dev.architectury.registry.registries.RegistrarManager
 import dev.architectury.registry.registries.RegistrySupplier
+import net.minecraft.client.renderer.RenderType
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.resources.ResourceKey
@@ -37,6 +38,7 @@ object Blocks {
     val RELAY_BLOCK: RegistrySupplier<Block> = BaseBlock.register("relay") { RelayBlock() }
     val ROBOT_BLOCK: RegistrySupplier<Block> = BaseBlock.register("robot") { RobotBlock() }
     val RACK_BLOCK: RegistrySupplier<Block> = BaseBlock.register("rack") { RackBlock() }
+    val ASSEMBLER_BLOCK: RegistrySupplier<Block> = BaseBlock.register("assembler") { AssemblerBlock() }
 
     fun registerBlockItems() {
         BLOCKS.forEach(Consumer { sup: RegistrySupplier<Block> ->

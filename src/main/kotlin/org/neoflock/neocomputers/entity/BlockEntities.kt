@@ -106,6 +106,12 @@ object BlockEntities {
         )
     }
 
+    val ASSEMBLER_ENTITY: RegistrySupplier<BlockEntityType<AssemblerEntity>> = BLOCKENTITIES.register("assembler") {
+        BlockEntityType(
+            ::AssemblerEntity, setOf(Blocks.ASSEMBLER_BLOCK.get()), BullshitFix()
+        )
+    }
+
     fun registerPowerBlocks() {
         PowerManager.registerPowerDevice(CAPACITOR_ENTITY.get())
         PowerManager.registerPowerDevice(CAPACITOR2_ENTITY.get())

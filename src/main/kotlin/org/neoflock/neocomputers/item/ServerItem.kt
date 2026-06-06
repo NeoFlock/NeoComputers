@@ -2,6 +2,7 @@ package org.neoflock.neocomputers.item
 
 import com.mojang.blaze3d.vertex.PoseStack
 import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.client.renderer.entity.ItemRenderer
 import net.minecraft.client.renderer.item.ItemProperties
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack

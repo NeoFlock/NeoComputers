@@ -83,13 +83,10 @@ data class ComponentSlotRequirement(val tier: Int, val role: String) {
 
 // Tier 0 allows ALL tiers, making it completely untiered.
 // Role determines what the role is.
-class ComponentSlot(container: Container, slot: Int, x: Int, y: Int, val machine: ComponentUser?, val requirement: ComponentSlotRequirement): DynamicSlot(container, slot, x, y) {
+class ComponentSlot(container: Container, slot: Int, x: Int, y: Int, val machine: ComponentUser?, var requirement: ComponentSlotRequirement): DynamicSlot(container, slot, x, y) {
     override fun draw(graphics: GuiGraphics, mouseX: Int, mouseY: Int) {
         super.draw(graphics, mouseX, mouseY)
         if(!hasItem()) {
-//            RenderSystem.enableBlend()
-//            RenderSystem.setShaderTexture(0, ComponentRoles.getTextureFor(requirement.role))
-//            RenderSystem.setShader { GameRenderer.getPositionTexShader() }
             drawQuad(graphics, ComponentRoles.getTextureFor(requirement.role), x - 1, y - 1, 18, 18, 0F, 0F, 15F, 15F)
             if (requirement.tier > 0) {
                 RenderSystem.setShaderTexture(
