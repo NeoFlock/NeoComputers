@@ -26,9 +26,16 @@ base {
     archivesName.set("${mod.id}-$loader")
 }
 
+//val foid = ["forge", "fabric", "neoforge"]
+//architectury.common(foid)
+//architectury.common(["forge", "fabric"])
+//println(stonecutter.current.project.split('-').subList(1, 2))
+//architectury.common(stonecutter.current.project.split('-').subList(1, 2))
+//architectury.common(stonecutter.current.version)
 architectury.common(stonecutter.tree.branches.mapNotNull {
-    if (stonecutter.current.project !in it) null
-    else it.prop("loom.platform")
+//    println(stonecutter.current.project !in it)
+    if (stonecutter.current.project !in it) return null
+    else return it.prop("loom.platform")
 })
 
 repositories {
