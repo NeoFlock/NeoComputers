@@ -118,8 +118,8 @@ dependencies {
 //            }
 //        })
 
-        if (minecraft=="1.21.9" || minecraft=="1.21.11") modApi("dev.architectury:architectury-neoforge:${archversion}")
-        else modApi("dev.architectury:architectury-forge:${archversion}") // NOTE: this could be wrong
+        if (minecraft=="1.21.1" || minecraft=="1.21.9" || minecraft=="1.21.11") modApi("dev.architectury:architectury-neoforge:${archversion}")
+        else modApi("dev.architectury:architectury-neoforge:${archversion}") // NOTE: this could be wrong
         implementation("thedarkcolour:kotlinforforge-neoforge:6.0.0")
 
     }
