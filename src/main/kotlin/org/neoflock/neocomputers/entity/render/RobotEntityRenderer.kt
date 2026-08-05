@@ -111,18 +111,12 @@ class RobotEntityRenderer(val context: BlockEntityRendererProvider.Context) : Bl
 
         stack.pushPose()
         stack.translate(vec.x, vec.y, vec.z)
-        stack.mulPose(context.entityRenderer.cameraOrientation())
-        stack.scale(0.025F, -0.025F, 0.025F)
+        stack.mulPose(context.entityRenderer.cameraOrientation().rotateY(Math.PI.toFloat()))
+        stack.scale(-0.025F, -0.025F, 0.025F) // WHY DOES IT ONLY WORK WHEN I DO THIS
         val opacity = Minecraft.getInstance().options.getBackgroundOpacity(0.25F)
         val alpha: Int = (opacity * 255.0f).toInt() shl 24
-//        val alpha = 255
         val halfwidth = (-context.font.width(name)) / 2;
-//        RenderSystem.enableDepthTest()
-//        RenderSystem.enableBlend()
-//        RenderSystem.depthMask(true)
-
-        context.font.drawInBatch(name, halfwidth.toFloat(), 2f, 0xFFFFFF, false, stack.last().pose(), source, Font.DisplayMode.SEE_THROUGH, alpha, light)
-        (source as MultiBufferSource.BufferSource).endBatch()
+        context.font.drawInBatch(name, halfwidth.toFloat(), 2.5f, -1, false, stack.last().pose(), source, Font.DisplayMode.POLYGON_OFFSET, alpha, light)
         stack.popPose()
     }
 

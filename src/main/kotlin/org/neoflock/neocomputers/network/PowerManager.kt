@@ -3,10 +3,10 @@ package org.neoflock.neocomputers.network
 import net.minecraft.world.level.block.entity.BlockEntityType
 import org.neoflock.neocomputers.block.DeviceBlockEntity
 //? if fabric {
-/*import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext
 import net.minecraft.core.Direction
 import team.reborn.energy.api.EnergyStorage;
-*///?}
+//?}
 
 // our soul purpose is to fuse bullshit power APIs together
 // the NodeBlockEntity and Node given us a way to get power from a block, we just
@@ -14,7 +14,7 @@ import team.reborn.energy.api.EnergyStorage;
 object PowerManager {
     fun<T: DeviceBlockEntity> registerPowerDevice(blockEntityType: BlockEntityType<T>) {
         //? if fabric {
-        /*EnergyStorage.SIDED.registerForBlockEntity({
+        EnergyStorage.SIDED.registerForBlockEntity({
                 // TODO: as this is currently written, if the node instance changes and the mod cached the conversion, we're boned. Consider fixing it.
                 entity, dir ->
                 val node = entity.getNodeFromSide(dir ?: Direction.UP)
@@ -41,6 +41,6 @@ object PowerManager {
                     }
                 }
         }, blockEntityType);
-        *///?}
+        //?}
     }
 }
